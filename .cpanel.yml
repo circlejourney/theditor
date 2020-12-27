@@ -1,6 +1,5 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/circlejo/repositories/theditor/
+    - export DEPLOYPATH=/home/circlejo/repositories/theditor2/
     - index.php $DEPLOYPATH
-    - style.css $DEPLOYPATH
