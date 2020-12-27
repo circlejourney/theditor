@@ -2,4 +2,4 @@
 deployment:
   tasks:
     - export DEPLOYPATH=/home/circlejo/repositories/theditor2/
-    - index.php $DEPLOYPATH
+    - /bin/cp index.php $DEPLOYPATH
