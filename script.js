@@ -7,6 +7,8 @@ var htmlChanged = false;
 var cssChanged = false;
 var editor, css_editor;
 
+console.log("Test");
+
 styles = {
     "Default": "src/site_bootstrap.css?cachebust=46",
     "Night": "src/site_night.css?cachebust=46",
