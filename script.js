@@ -2,34 +2,6 @@ var showval = "\<!-- Enter HTML here... --\>";
 var activemode = "profile";
 var activetheme = "Default";
 var showcss = "\/* Enter CSS here... *\/";
-<<<<<<< Updated upstream
-var codeheight = "45";
-var htmlChanged = false;
-var cssChanged = false;
-var editor, css_editor;
-
-console.log("Test");
-
-styles = {
-    "Default": "src/site_bootstrap.css?cachebust=46",
-    "Night": "src/site_night.css?cachebust=46",
-    "Pink": "src/site_black-forest.css?cachebust=46",
-    "Teal": "src/site_abyssal-plain.css?cachebust=46",
-    "Bee": "src/site_apis-mellifera.css?cachebust=46",
-    "Pink Velvet": "src/site_pink-velvet-cake.css?cachebust=46"
-}
-
-
-$(window).keypress(function(e){
-    if(e.keyCode == 10 && e.ctrlKey) updateCode();
-});
-
-$(window).resize(function(){
-    editor.resize();
-})
-
-
-=======
 var showtext = "Paste drafts and snippets here...";
 var htmlChanged = true;
 var cssChanged = true;
@@ -37,7 +9,6 @@ var textChanged = true;
 var cssPanel, textPanel, editor, css_editor, text_editor, frame, importedmeta, importedcode;
 const loremipsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sollicitudin elit sed tellus blandit viverra sed eget odio. Donec accumsan tempor lacus, et venenatis elit feugiat non. Duis porta eros et velit blandit dapibus. Curabitur ac finibus eros. Duis placerat velit vitae massa sodales, eget mattis nibh pellentesque.";
     
->>>>>>> Stashed changes
 $(window).on("load", function(){
     
     frame = document.getElementById("frame");
