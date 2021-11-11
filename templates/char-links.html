@@ -1,0 +1,364 @@
+<!-- LIGHTBOX -->
+
+<div class="mfp-bg mfp-ready hide" onclick="toggleLightbox()"></div>
+<div class="mfp-wrap mfp-gallery mfp-close-btn-in mfp-auto-cursor mfp-ready hide" tabindex="-1" style="overflow: hidden auto;">
+    <div class="mfp-container mfp-s-ready mfp-image-holder" onclick="toggleLightbox()">
+        
+        <div class="mfp-content" onclick="event.stopPropagation();">
+        
+        <div class="mfp-figure">
+        
+        <button title="Close (Esc)" type="button" class="mfp-close" onclick="toggleLightbox()">×</button>
+        
+        <figure><img class="mfp-img" src="https://f2.toyhou.se/file/f2-toyhou-se/users/admin" style="max-height: 722px;">
+    <figcaption><div class="mfp-bottom-bar">
+        <div class="mfp-title">
+            <div class="row image-bottom-bar">
+                <div class="col-12 image-collapsed image-left-bar">
+                    <div class="row">
+                        <div class="image-details col-lg-4 text-left">
+                            <h2>
+                            Details
+                            <div class="image-controls pull-right">
+                            <a href="#" class="btn btn-default btn-sm"><i class="fa fa-link"></i></a>
+                            </div>
+                            </h2>
+                            <div class="image-description user-content mb-1">
+                            Description here
+                            </div>
+                            <div class="mb-1">
+                            Viewing full image.
+                            <br>
+                            <a href="#">Get watermarked version.</a>
+                            </div>
+                            </div>
+                            <div class="image-credits col-lg-4 text-left">
+                            <h2>
+                            Credits
+                            </h2>
+                            <div class="mb-1">01 Jan 1900, 00:00:00 am</div>
+                            <div class="mb-1">
+                            <div class="artist-credit">
+                            <a href="#">User</a>
+                            </div>
+                            </div>
+                            </div>
+                            <div class="image-characters col-lg-4 text-left">
+                            <h2>
+                            Characters
+                            <div class="image-character-controls pull-right mr-1">
+                            <a href="#" th-toggle-character-select="" th-target=".character-select-10288630" class="btn btn-sm btn-secondary"><i class="fa fa-plus"></i></a>
+                            </div>
+                            </h2>
+                            <div class="mb-1">
+                            <a href="#" class="btn btn-sm btn-primary character-name-badge">Character Name (<i class="far fa-bookmark mr-1"></i>Tab Name)</a> </div>
+                            <form accept-charset="UTF-8"><input name="_token" type="hidden">
+                            <div class="character-select-10288630 hide mt-2"></div>
+                            </form>
+                            </div>
+                            </div> </div>
+                            </div> </div><div class="mfp-counter"></div></div></figcaption>
+                            </figure>
+                            </div>
+</div>
+
+<div class="mfp-preloader">Loading...</div><button title="Previous (Left arrow key)" type="button" class="mfp-arrow mfp-arrow-left mfp-prevent-close"></button><button title="Next (Right arrow key)" type="button" class="mfp-arrow mfp-arrow-right mfp-prevent-close" style="right: 0px;"></button></div></div>
+
+<!-- /LIGHTBOX -->
+
+<div id="main" class="clearfix container-fluid main-container full-sidebar">
+<div class="row row-offcanvas row-offcanvas-left" data-sticky-wrap="" style="min-height: 100%;">
+    <div class="col-md-3 col-lg-2 sidebar sidebar-offcanvas" id="sidebar">
+    <ul class="side-nav list-unstyled">
+    <li class="header"><i class="fa fa-heart mr-2"></i> Character</li>
+    <li class="user-name"><span class="display-user"><a href="#"><img src="https://f2.toyhou.se/file/f2-toyhou-se/users/admin?6?0" class="display-user-avatar"><span class="display-user-username">User</span></a></span></li>
+    <li class="character-folder subheader">
+    <a href="#"><i class="mr-1 fa fa-folder"></i>Folder</a>
+    </li>
+    <li class="character-name">
+    <span class="display-character"><a href="#"><img src="https://f2.toyhou.se/file/f2-toyhou-se/users/admin?6" class="mr-2">Character Name</a></span>
+    </li>
+    
+    <li class="divider sidebar-divider-collections"></li>
+    <li class="sidebar-li-gallery">
+    <a href="#">
+    <i class="far fa-image fa-fw sidebar-icon"></i>Gallery
+    <span class="pull-right sidebar-stat sidebar-stat-gallery">0</span>
+    </a>
+    </li>
+    <li class="active sidebar-li-library">
+    <a href="#">
+    <i class="fa fa-book fa-fw sidebar-icon"></i>Library
+    </a>
+    </li>
+    <li class=" sidebar-li-worlds">
+    <a href="#">
+    <i class="fa fa-globe fa-fw sidebar-icon"></i>Worlds
+    </a>
+    </li>
+    <li class=" sidebar-li-links">
+    <a href="#">
+    <i class="fa fa-link fa-fw sidebar-icon"></i>Links
+    </a>
+    </li>
+    <li class="divider sidebar-divider-interactions"></li>
+    <li class="  sidebar-li-comments">
+    <a href="#">
+    <i class="fa fa-comment fa-fw sidebar-icon"></i>Comments
+    </a>
+    </li>
+    <li class="sidebar-li-favorites" data-url="#" th-favorite="1">
+    <a href="#">
+    <i class="far fa-star fa-fw sidebar-icon"></i>Favorite
+    <span class="pull-right sidebar-stat sidebar-stat-favorites th-favorite-count">0</span>
+    </a>
+    </li>
+    <li class="divider sidebar-divider-ownership"></li>
+    <li class=" sidebar-li-ownership">
+    <a href="#">
+    <i class="far fa-check-square fa-fw sidebar-icon"></i>Ownership
+    </a>
+    </li>
+    <li class="divider sidebar-divider-mod"></li>
+    <li class="sidebar-li-report">
+    <a href="#">
+    <i class="fa fa-exclamation-triangle fa-fw sidebar-icon"></i>Report
+    </a>
+    </li>
+    <li class="sidebar-li-block">
+    <a href="#" th-modal-trigger="">
+    <i class="fa fa-ban fa-fw sidebar-icon"></i>Block
+    </a>
+    </li>
+    </ul>
+    </div>
+    
+    <div class="col-sm-12 col-md-9 col-lg-10 content-main" id="content">
+        <div class="character-literatures">
+        <div class="literatures-header">
+        <h1 class="literatures-title"><a href="#">Character Name</a>'s Literatures</h1>
+        <hr>
+        </div>
+        <div class="literatures">
+            <div class="literatures-pagination">
+            </div>
+            
+            <div class="literature">
+            <div class="card mb-2">
+            <div class="card-block bg-faded">
+            <div class="literature-header-title row">
+            <div class="col-12">
+            <h2>
+            <span class="display-literature"><a href="#"><i class="fa fa-book mr-1"></i>Literature Title</a></span>
+            </h2>
+            <hr>
+            </div>
+            </div>
+            
+            <div class="row">
+            <div class="literature-header-avatar col-xl-2 hidden-lg-down">
+            <div class="img-thumbnail">
+            <img src="https://f2.toyhou.se/file/f2-toyhou-se/users/admin" class="profile-name-icon">
+            </div>
+             </div>
+            <div class="literature-header-content col-xl-10 col-12">
+            <div class="literature-header-info col-xl-4 col-lg-6 col-12">
+            <div class="literature-header-rows">
+            <div class="hidden-xl-up mb-3 text-center literature-header-row">
+            <div class="img-thumbnail">
+            <img src="https://f2.toyhou.se/file/f2-toyhou-se/users/admin" class="profile-name-icon">
+            </div>
+            </div>
+            <div class="row literature-header-row literature-header-authors">
+            <dt class="literature-header-row-title col-sm-4">
+            Authors
+            </dt>
+            <dd class="literature-header-row-value col-sm-8">
+            <a href="https://toyhou.se/circlejourney" class="btn btn-sm btn-primary user-name-badge"><i class="fi-torso user-name-icon"></i>User</a>
+            </dd>
+            </div>
+            <div class="row literature-header-row literature-header-cast">
+            <dt class="literature-header-row-title col-sm-4">
+            Cast
+            </dt>
+            <dd class="literature-header-row-value col-sm-8">
+            <a href="#" class="btn btn-sm btn-primary  cast-badge user-name-badge mb-1">Character Name</a>
+                <a href="#" class="btn btn-sm btn-default  cast-badge user-name-badge mb-1">Character Name</a>
+            <a href="#" class="btn btn-sm btn-default hide cast-badge user-name-badge mb-1">Character Name</a>
+            <a href="#" class="toggle-cast btn btn-link btn-sm mb-1"><small>Show More</small></a>
+            </dd>
+            </div>
+            
+            <div class="row literature-header-row literature-header-published">
+            <dt class="literature-header-row-title col-sm-4">
+            Published
+            </dt>
+            <dd class="literature-header-row-value col-sm-8">
+            <abbr class="tooltipster datetime" title="" data-original-title="01 Jan 1900, 00:00:00 am">0 years, 0 months ago</abbr>
+            </dd>
+            </div>
+            <div class="row literature-header-row literature-header-published">
+            <dt class="literature-header-row-title col-sm-4">
+            Updated
+            </dt>
+            <dd class="literature-header-row-value col-sm-8">
+            <abbr class="tooltipster datetime" title="" data-original-title="01 Jan 1900, 00:00:00 am">0 years, 0 months ago</abbr>
+            </dd>
+            </div>
+            <div class="row literature-header-row literature-header-stats">
+            <dt class="literature-header-row-title col-sm-4">
+            Stats
+            </dt>
+            <dd class="literature-header-row-value col-sm-8">
+            <span class="literature-header-row-chapters btn btn-sm btn-secondary tooltipster" title="" data-original-title="Multi-chapter">
+            <i class="fa fa-book"></i>
+            </span>
+            <span class="literature-header-row-chapters btn btn-sm btn-secondary tooltipster" title="" data-original-title="In Progress">
+            <i class="fa fa-wrench"></i>
+            </span>
+            <span class="literature-header-row-chapters btn btn-sm btn-secondary tooltipster" title="" data-original-title="0 Chapters">
+            <i class="fa fa-book-open mr-1"></i>0
+            </span>
+            <span class="literature-header-row-words btn btn-sm btn-secondary tooltipster" title="" data-original-title="19589 Words">
+            <i class="fa fa-ellipsis-h mr-1"></i>12345
+            </span>
+            <a href="#" class="btn btn-sm btn-secondary literature-header-row-subscribers tooltipster" th-modal-trigger="" title="" data-original-title="0 Subscribers">
+            <i class="fa fa-binoculars mr-1"></i>0
+            </a>
+            <a href="#" class="btn btn-sm btn-secondary literature-header-row-favorites tooltipster" th-modal-trigger="" title="" data-original-title="0 Favorites">
+            <i class="fa fa-star mr-1"></i>0</a>
+            
+            <a class="literature-header-row-comments btn btn-sm btn-secondary tooltipster" title="" href="#" data-original-title="0 Comments">
+            <i class="fa fa-comment mr-1"></i>0
+            </a>
+            </dd>
+            </div>
+            </div>
+            </div>
+            <div class="literature-header-subinfo col-xl-8 col-lg-6 col-12">
+            <div class="literature-header-rows">
+            <hr class="hidden-lg-up">
+            <div class="literature-header-blurb">
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sollicitudin elit sed tellus blandit viverra sed eget odio. Donec accumsan tempor lacus, et venenatis elit feugiat non. Duis porta eros et velit blandit dapibus. Curabitur ac finibus eros. Duis placerat velit vitae massa sodales, eget mattis nibh pellentesque.</p>
+            </div>
+            </div>
+            </div> </div>
+            </div>
+            </div>
+            </div>
+            </div>
+            
+            <div class="literature">
+            <div class="card mb-2">
+            <div class="card-block bg-faded">
+            <div class="literature-header-title row">
+            <div class="col-12">
+            <h2>
+            <span class="display-literature"><a href="#"><i class="fa fa-book mr-1"></i>Literature Title</a></span>
+            </h2>
+            <hr>
+            </div>
+            </div>
+            
+            <div class="row">
+            <div class="literature-header-avatar col-xl-2 hidden-lg-down">
+            <div class="img-thumbnail">
+            <img src="https://f2.toyhou.se/file/f2-toyhou-se/users/admin" class="profile-name-icon">
+            </div>
+             </div>
+            <div class="literature-header-content col-xl-10 col-12">
+            <div class="literature-header-info col-xl-4 col-lg-6 col-12">
+            <div class="literature-header-rows">
+            <div class="hidden-xl-up mb-3 text-center literature-header-row">
+            <div class="img-thumbnail">
+            <img src="https://f2.toyhou.se/file/f2-toyhou-se/users/admin" class="profile-name-icon">
+            </div>
+            </div>
+            <div class="row literature-header-row literature-header-authors">
+            <dt class="literature-header-row-title col-sm-4">
+            Authors
+            </dt>
+            <dd class="literature-header-row-value col-sm-8">
+            <a href="https://toyhou.se/circlejourney" class="btn btn-sm btn-primary user-name-badge"><i class="fi-torso user-name-icon"></i>User</a>
+            </dd>
+            </div>
+            <div class="row literature-header-row literature-header-cast">
+            <dt class="literature-header-row-title col-sm-4">
+            Cast
+            </dt>
+            <dd class="literature-header-row-value col-sm-8">
+            <a href="#" class="btn btn-sm btn-primary  cast-badge user-name-badge mb-1">Character Name</a>
+                <a href="#" class="btn btn-sm btn-default  cast-badge user-name-badge mb-1">Character Name</a>
+            <a href="#" class="btn btn-sm btn-default hide cast-badge user-name-badge mb-1">Character Name</a>
+            <a href="#" class="toggle-cast btn btn-link btn-sm mb-1"><small>Show More</small></a>
+            </dd>
+            </div>
+            
+            <div class="row literature-header-row literature-header-published">
+            <dt class="literature-header-row-title col-sm-4">
+            Published
+            </dt>
+            <dd class="literature-header-row-value col-sm-8">
+            <abbr class="tooltipster datetime" title="" data-original-title="01 Jan 1900, 00:00:00 am">0 years, 0 months ago</abbr>
+            </dd>
+            </div>
+            <div class="row literature-header-row literature-header-published">
+            <dt class="literature-header-row-title col-sm-4">
+            Updated
+            </dt>
+            <dd class="literature-header-row-value col-sm-8">
+            <abbr class="tooltipster datetime" title="" data-original-title="01 Jan 1900, 00:00:00 am">0 years, 0 months ago</abbr>
+            </dd>
+            </div>
+            <div class="row literature-header-row literature-header-stats">
+            <dt class="literature-header-row-title col-sm-4">
+            Stats
+            </dt>
+            <dd class="literature-header-row-value col-sm-8">
+            <span class="literature-header-row-chapters btn btn-sm btn-secondary tooltipster" title="" data-original-title="Multi-chapter">
+            <i class="fa fa-book"></i>
+            </span>
+            <span class="literature-header-row-chapters btn btn-sm btn-secondary tooltipster" title="" data-original-title="In Progress">
+            <i class="fa fa-wrench"></i>
+            </span>
+            <span class="literature-header-row-chapters btn btn-sm btn-secondary tooltipster" title="" data-original-title="0 Chapters">
+            <i class="fa fa-book-open mr-1"></i>0
+            </span>
+            <span class="literature-header-row-words btn btn-sm btn-secondary tooltipster" title="" data-original-title="19589 Words">
+            <i class="fa fa-ellipsis-h mr-1"></i>12345
+            </span>
+            <a href="#" class="btn btn-sm btn-secondary literature-header-row-subscribers tooltipster" th-modal-trigger="" title="" data-original-title="0 Subscribers">
+            <i class="fa fa-binoculars mr-1"></i>0
+            </a>
+            <a href="#" class="btn btn-sm btn-secondary literature-header-row-favorites tooltipster" th-modal-trigger="" title="" data-original-title="0 Favorites">
+            <i class="fa fa-star mr-1"></i>0</a>
+            
+            <a class="literature-header-row-comments btn btn-sm btn-secondary tooltipster" title="" href="#" data-original-title="0 Comments">
+            <i class="fa fa-comment mr-1"></i>0
+            </a>
+            </dd>
+            </div>
+            </div>
+            </div>
+            <div class="literature-header-subinfo col-xl-8 col-lg-6 col-12">
+            <div class="literature-header-rows">
+            <hr class="hidden-lg-up">
+            <div class="literature-header-blurb">
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sollicitudin elit sed tellus blandit viverra sed eget odio. Donec accumsan tempor lacus, et venenatis elit feugiat non. Duis porta eros et velit blandit dapibus. Curabitur ac finibus eros. Duis placerat velit vitae massa sodales, eget mattis nibh pellentesque.</p>
+            </div>
+            </div>
+            </div> </div>
+            </div>
+            </div>
+            </div>
+            </div>
+        
+            <div class="literatures-pagination">
+            </div>
+        </div>
+        </div>
+        </div>
+    </div>
+</div>
+
+<span class="ace-code-container hide"></span>

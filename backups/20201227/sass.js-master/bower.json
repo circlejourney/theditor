@@ -1,0 +1,39 @@
+{
+  "name": "sass.js",
+  "version": "0.9.10",
+  "main": [
+    "./dist/sass.js",
+    "./dist/sass.worker.js"
+  ],
+  "ignore": [
+    "**/.*",
+    "*.html",
+    "*.md",
+    "*.js",
+    "*.json",
+    "bin",
+    "scss",
+    "libsass",
+    "grunt-tasks",
+    "bin",
+    "src",
+    "test"
+  ],
+  "keywords": [
+    "libsass",
+    "sass",
+    "scss",
+    "css"
+  ],
+  "authors": [
+    "Rodney Rehm <mail+github@rodneyrehm.de> (http://rodneyrehm.de)",
+    "Sebastian Golasch (http://asciidisco.com)",
+    "Christian Kruse (http://http://wwwtech.de)"
+  ],
+  "moduleType": [
+    "amd",
+    "globals",
+    "node"
+  ],
+  "license": "MIT"
+}

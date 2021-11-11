@@ -1,0 +1,5 @@
+---
+deployment:
+ tasks:
+ - export DEPLOYPATH=/home/circlejo/public_html/
+ - /bin/cp -R * $DEPLOYPATH

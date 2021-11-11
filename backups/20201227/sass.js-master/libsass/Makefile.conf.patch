@@ -1,0 +1,11 @@
+--- Makefile.conf.orig	2016-10-28 09:46:53.000000000 +0200
++++ Makefile.conf.edited	2016-10-28 09:50:38.000000000 +0200
+@@ -46,6 +46,7 @@
+ 	error_handling.cpp \
+ 	memory_manager.cpp \
+ 	utf8_string.cpp \
+-	base64vlq.cpp
++	base64vlq.cpp \
++	emscripten_wrapper.cpp
+ 
+ CSOURCES = cencode.c

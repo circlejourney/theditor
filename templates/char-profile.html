@@ -1,3 +1,71 @@
+<!-- LIGHTBOX -->
+
+<div class="mfp-bg mfp-ready hide" onclick="toggleLightbox()"></div>
+<div class="mfp-wrap mfp-gallery mfp-close-btn-in mfp-auto-cursor mfp-ready hide" tabindex="-1" style="overflow: hidden auto;">
+    <div class="mfp-container mfp-s-ready mfp-image-holder" onclick="toggleLightbox()">
+        
+        <div class="mfp-content" onclick="event.stopPropagation();">
+        
+        <div class="mfp-figure">
+        
+        <button title="Close (Esc)" type="button" class="mfp-close" onclick="toggleLightbox()">×</button>
+        
+        <figure><img class="mfp-img" src="https://f2.toyhou.se/file/f2-toyhou-se/users/admin" style="max-height: 722px;">
+    <figcaption><div class="mfp-bottom-bar">
+        <div class="mfp-title">
+            <div class="row image-bottom-bar">
+                <div class="col-12 image-collapsed image-left-bar">
+                    <div class="row">
+                        <div class="image-details col-lg-4 text-left">
+                            <h2>
+                            Details
+                            <div class="image-controls pull-right">
+                            <a href="#" class="btn btn-default btn-sm"><i class="fa fa-link"></i></a>
+                            </div>
+                            </h2>
+                            <div class="image-description user-content mb-1">
+                            Description here
+                            </div>
+                            <div class="mb-1">
+                            Viewing full image.
+                            <br>
+                            <a href="#">Get watermarked version.</a>
+                            </div>
+                            </div>
+                            <div class="image-credits col-lg-4 text-left">
+                            <h2>
+                            Credits
+                            </h2>
+                            <div class="mb-1">01 Jan 1900, 00:00:00 am</div>
+                            <div class="mb-1">
+                            <div class="artist-credit">
+                            <a href="#">User</a>
+                            </div>
+                            </div>
+                            </div>
+                            <div class="image-characters col-lg-4 text-left">
+                            <h2>
+                            Characters
+                            <div class="image-character-controls pull-right mr-1">
+                            <a href="#" th-toggle-character-select="" th-target=".character-select-10288630" class="btn btn-sm btn-secondary"><i class="fa fa-plus"></i></a>
+                            </div>
+                            </h2>
+                            <div class="mb-1">
+                            <a href="#" class="btn btn-sm btn-primary character-name-badge">Character Name (<i class="far fa-bookmark mr-1"></i>Tab Name)</a> </div>
+                            <form accept-charset="UTF-8"><input name="_token" type="hidden">
+                            </form>
+                            </div>
+                            </div> </div>
+                            </div> </div><div class="mfp-counter"></div></div></figcaption>
+                            </figure>
+                            </div>
+</div>
+
+<div class="mfp-preloader">Loading...</div><button title="Previous (Left arrow key)" type="button" class="mfp-arrow mfp-arrow-left mfp-prevent-close"></button><button title="Next (Right arrow key)" type="button" class="mfp-arrow mfp-arrow-right mfp-prevent-close" style="right: 0px;"></button></div></div>
+
+<!-- /LIGHTBOX -->
+
+
 <div id="main" class="clearfix container-fluid main-container full-sidebar">
 <div class="row row-offcanvas row-offcanvas-left" data-sticky-wrap="" style="min-height: 100%;"><div class="col-md-3 col-lg-2 sidebar sidebar-offcanvas" id="sidebar">
     <ul class="side-nav list-unstyled">
@@ -67,65 +135,120 @@
             <div class="character-profile">
                 <div class="row profile-header">
 
-            <div class="col-lg-6 col-12 profile-section profile-name-section">
-            <div class="img-thumbnail"> 
-            <img src="https://f2.toyhou.se/file/f2-toyhou-se/users/admin?6?0" class="profile-name-icon">
-            </div>
-            <div class="profile-name-info">
-            <h1 class="display-4">Character Name</h1>
-            <h2><span class="display-user"><a href="#"><i class="fi-torso user-name-icon"></i>User</a></span></h2>
-            </div>
-            </div>
+                    <div class="col-lg-6 col-12 profile-section profile-name-section">
+                    <div class="img-thumbnail"> 
+                    <img src="https://f2.toyhou.se/file/f2-toyhou-se/users/admin?6?0" class="profile-name-icon">
+                    </div>
+                    <div class="profile-name-info">
+                    <h1 class="display-4">Character Name</h1>
+                    <h2><span class="display-user"><a href="#"><i class="fi-torso user-name-icon"></i>User</a></span></h2>
+                    </div>
+                    </div>
+                    
+                    
+                    <div class="col-lg-6 col-12 profile-section profile-info-section">
+                    <div class="card">
+                    <div class="card-block bg-faded">
+                    <div class="profile-info-title hidden-lg-up"><h2>Info</h2><hr></div>
+                    <div class="profile-info-content row">
+                    <div class="profile-stats-content col-lg-8 col-md-6 col-12">
+                    <dl class="fields">
+                    <div class="row fields-field">
+                    <dt class="field-title col-sm-4">
+                    Created
+                    </dt>
+                    <dd class="field-value col-sm-8">
+                    <abbr class="tooltipster datetime" title="" data-original-title="1 Jan 1900, 0:00:00 am">0 years, 0 months ago</abbr>
+                    </dd>
+                    </div>
+                    <div class="row fields-field">
+                    <dt class="field-title col-sm-4">
+                    Creator
+                    </dt>
+                    <dd class="field-value col-sm-8">
+                    <span class="display-user"><a href="#"><i class="fi-torso user-name-icon"></i>User</a></span>
+                    </dd>
+                    </div>
+                    <div class="row fields-field">
+                    <dt class="field-title col-sm-4">
+                    Favorites
+                    </dt>
+                    <dd class="field-value col-sm-8">
+                    <a href="#" th-modal-trigger="">0</a>
+                    </dd>
+                    </div>
+                    </dl>
+                    </div>
+                    <div class="col-lg-4 col-md-6 col-12 profile-tags-content">
+                        <a href="#" class="badge badge-primary badge-pill">tag 1</a>
+                        <a href="#" class="badge badge-primary badge-pill">tag 2</a>
+                    
+                    </div>
+                    </div>
+                    </div>
+                    </div>
+                    </div>
             
-            
-            <div class="col-lg-6 col-12 profile-section profile-info-section">
-            <div class="card">
-            <div class="card-block bg-faded">
-            <div class="profile-info-title hidden-lg-up"><h2>Info</h2><hr></div>
-            <div class="profile-info-content row">
-            <div class="profile-stats-content col-lg-8 col-md-6 col-12">
-            <dl class="fields">
-            <div class="row fields-field">
-            <dt class="field-title col-sm-4">
-            Created
-            </dt>
-            <dd class="field-value col-sm-8">
-            <abbr class="tooltipster datetime" title="" data-original-title="1 Jan 1900, 0:00:00 am">0 years, 0 months ago</abbr>
-            </dd>
-            </div>
-            <div class="row fields-field">
-            <dt class="field-title col-sm-4">
-            Creator
-            </dt>
-            <dd class="field-value col-sm-8">
-            <span class="display-user"><a href="#"><i class="fi-torso user-name-icon"></i>User</a></span>
-            </dd>
-            </div>
-            <div class="row fields-field">
-            <dt class="field-title col-sm-4">
-            Favorites
-            </dt>
-            <dd class="field-value col-sm-8">
-            <a href="#" th-modal-trigger="">0</a>
-            </dd>
-            </div>
-            </dl>
-            </div>
-            <div class="col-lg-4 col-md-6 col-12 profile-tags-content">
-                <a href="#" class="badge badge-primary badge-pill">tag 1</a>
-                <a href="#" class="badge badge-primary badge-pill">tag 2</a>
-            
-            </div>
-            </div>
-            </div>
-            </div>
-            </div>
-            
-            </div>
-                <div class="row">
-                    <div class="col-lg-12">
-                        <div class="profile-section profile-content-section user-content fr-view ace-code-container">
-                        </div>
+                </div>
+                
+                <div class="profile-section profile-content-section">
+                    <div class="profile-content-title">
+                        <h2>Profile</h2>
+                        <hr>
+                    </div>
+                    <div class="profile-section profile-content-section user-content fr-view ace-code-container">
+                    </div>
+                </div>
+                
+                <div class="profile-section profile-gallery-section">
+                    <div class="profile-gallery-title">
+                        <h2>Images<hr></h2>
+                    </div>
+                    
+                    <div class="profile-gallery-content">
+                    <ul class="magnific-gallery image-gallery auto-clear gallery-row large-block-grid-6">
+                        
+                        <li class="gallery-item">
+                            <div class="gallery-thumb thumb">
+                            <div class="thumb-image">
+                            <a href="#" class="th img-thumbnail" onclick="toggleLightbox()">
+                            <img src="https://f2.toyhou.se/file/f2-toyhou-se/users/admin" class="">
+                            </a>
+                            <span class="gallery-edit">
+                            <input type="hidden" class="gallery_image_id">
+                            </span>
+                            </div>
+                            </div>
+                        </li>
+                        
+                        <li class="gallery-item">
+                            <div class="gallery-thumb thumb">
+                            <div class="thumb-image">
+                            <a href="#" class="th img-thumbnail" onclick="toggleLightbox()">
+                            <img src="https://f2.toyhou.se/file/f2-toyhou-se/users/admin" class="">
+                            </a>
+                            <span class="gallery-edit">
+                            <input type="hidden" class="gallery_image_id">
+                            </span>
+                            </div>
+                            </div>
+                        </li>
+                        
+                        <li class="gallery-item">
+                            <div class="gallery-thumb thumb">
+                            <div class="thumb-image">
+                            <a href="#" class="th img-thumbnail" onclick="toggleLightbox()">
+                            <img src="https://f2.toyhou.se/file/f2-toyhou-se/users/admin" class="">
+                            </a>
+                            <span class="gallery-edit">
+                            <input type="hidden" class="gallery_image_id">
+                            </span>
+                            </div>
+                            </div>
+                        </li>
+                        
+                    </ul>
+                    
                     </div>
                 </div>
             </div>
