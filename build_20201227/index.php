@@ -7,10 +7,10 @@
     <meta name="description" content="An editor for live previewing Toyhouse code.">
     <title>Circlejourney's Toyhouse editor</title>
     <link rel="icon" href="https://circlejourney.net/resources/images/favicon.png">
-	<link href="src/main.css" rel="stylesheet">
-	<link id="theme-css" href="src/site_black-forest.css" rel="stylesheet">
+	<link href="../src/main.css" rel="stylesheet">
+	<link id="theme-css" href="../src/site_black-forest.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/ace.js" type="text/javascript" charset="utf-8"></script>
-    <script src="src/site.js" type="text/javascript"></script>
+    <script src="../src/site.js" type="text/javascript"></script>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css" integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
      
      

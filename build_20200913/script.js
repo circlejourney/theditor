@@ -8,12 +8,12 @@ var cssChanged = false;
 var editor, css_editor;
 
 styles = {
-    "Default": "src/site_bootstrap.css?cachebust=46",
-    "Night": "src/site_night.css?cachebust=46",
-    "Pink": "src/site_black-forest.css?cachebust=46",
-    "Teal": "src/site_abyssal-plain.css?cachebust=46",
-    "Bee": "src/site_apis-mellifera.css?cachebust=46",
-    "Pink Velvet": "src/site_pink-velvet-cake.css?cachebust=46"
+    "Default": "../src/site_bootstrap.css?cachebust=46",
+    "Night": "../src/site_night.css?cachebust=46",
+    "Pink": "../src/site_black-forest.css?cachebust=46",
+    "Teal": "../src/site_abyssal-plain.css?cachebust=46",
+    "Bee": "../src/site_apis-mellifera.css?cachebust=46",
+    "Pink Velvet": "../src/site_pink-velvet-cake.css?cachebust=46"
 }
 
 
@@ -160,7 +160,7 @@ function updateCode(){
     var val = editor.getValue();
     var content = $.parseHTML(val);
     $(".ace-code-container").empty();
-    $(".ace-code-container").append(content);
+    $("#"+activemode).find(".ace-code-container").append(content);
     localStorage.th_cj = val;
     
     var sass = new Sass();
@@ -176,7 +176,7 @@ function updateHTML(){
 var val = editor.getValue();
     var content = $.parseHTML(val);
     $(".ace-code-container").empty();
-    $(".ace-code-container").append(content);
+    $("#"+activemode).find(".ace-code-container").append(content);
     localStorage.th_cj = val;
 };
 
@@ -192,12 +192,10 @@ var sass = new Sass();
 
 function switchTo(mode) {
     activemode = mode;
-    $.get("templates/"+mode+".html", function(data) {
-        console.log(data);
-        $("#display-area").html(data);
-        localStorage.th_cj_mode = mode;
-        updateCode();
-    });
+    $(".mode").addClass("d-none");
+    $("#"+mode).removeClass("d-none");
+    localStorage.th_cj_mode = mode;
+    updateCode();
 }
 
 function toggleTheme(theme) {

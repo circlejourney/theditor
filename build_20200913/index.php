@@ -12,15 +12,15 @@
      
      
     
-    <script src="sass.js-master/dist/sass.js">
+    <script src="../src/sass.js-master/dist/sass.js">
     </script>
     
-    <script src="script.js<?php echo '?'.rand();?>">
+    <script src="./script.js<?php echo '?'.rand();?>">
     </script>
 	
 	<style id="custom-css" type="text/css"></style>
 	
-    <link rel="stylesheet" href="style.css<?php echo '?'.rand();?>">
+    <link rel="stylesheet" href="./style.css<?php echo '?'.rand();?>">
 </head>
 <body>
     <div id="loader">
