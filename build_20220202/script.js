@@ -8,6 +8,7 @@ var cssChanged = true;
 var textChanged = true;
 var cssPanel, textPanel, editor, css_editor, text_editor, frame, importedmeta, importedcode;
 const loremipsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sollicitudin elit sed tellus blandit viverra sed eget odio. Donec accumsan tempor lacus, et venenatis elit feugiat non. Duis porta eros et velit blandit dapibus. Curabitur ac finibus eros. Duis placerat velit vitae massa sodales, eget mattis nibh pellentesque.";
+const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 $(window).on("load", function(){
     
@@ -139,7 +140,10 @@ function loadNotes() {
     });
     
     $.get("../notes.html?"+lastUpdate, function(data) {
-        $("#notes").html(data);
+		let year = Math.floor(lastUpdate / 10000);
+		let month = months[Math.floor( (lastUpdate % 10000) / 100 ) - 1];
+		let day = lastUpdate % 100;
+        $("#notes").html(data).find("#latest").text("Latest update: "+day+" "+month+" "+year);
     });
     
     $.get("../versions.html?"+lastUpdate, function(data) {
