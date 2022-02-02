@@ -35,7 +35,7 @@
     <body>
     
     <div id="loader" style="text-align: center; display: flex; flex-direction: column; justify-content: center;">
-        <div class="loader-inner">
+        <div style="padding: 10px;">
             <img src="https://media0.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif" style="margin: -50px 0;">
             <p style="font-size: 20pt;">Stuck on the loading screen? <a href="https://toyhou.se/~messages/create/circlejourney">Send me a bug report</a>.</p>
             <p style="font-size: 20pt;">If you suspect your code has crashed the editor, <a href="#">click here</a> to download your code as text files and hard reset the editor.</p>
