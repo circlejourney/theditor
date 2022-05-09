@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <?php $lastUpdate = "20220202"; ?>
+        <?php $lastUpdate = "20220509"; ?>
         
         <script>
             const lastUpdate = <?php echo $lastUpdate ?>;
@@ -42,8 +42,8 @@
             <p>Fun fact! You can also hard reset by typing <code>Please reset!</code> in the HTML panel.</p>
         </div>
     </div>
-    
     <div id="info" class="d-none">
+        <div id="info-back" onclick="showInfo();"></div>
         <div class="card">
             <div class="card-header d-flex justify-content-between">
                 <h2 class="m-0 w-75 d-inline-block p-2">Welcome to Circlejourney's Code Editor!</h2>
@@ -53,7 +53,7 @@
             <div id="info-main" class="card-block text-center">
                 <div id="notes"></div>
                 
-                <a class="btn btn-primary" onclick="showInfo()">Got it!</a>
+                <a class="btn btn-primary text-white" onclick="showInfo()">Got it!</a>
                 <a class="btn btn-secondary" data-toggle="collapse" data-target="#changelog">Changelog</a>
                 <a class="btn btn-secondary" data-toggle="collapse" data-target="#issues">Known issues</a>
                 <a class="btn btn-secondary" data-toggle="collapse" data-target="#versions">Versions</a>
@@ -101,11 +101,8 @@
                     HTML
                     <span class="panel-options" id="html-options">
                         <a class="edit-button" onclick="insertLorem('html')" data-toggle="tooltip" title="Insert lorem ipsum"><i class="fas fa-text"></i></a>
-                        
-                        <a class="edit-button" onclick="uploadFileDialogue('html')" data-toggle="tooltip" title="Upload file"><i class="fa fa-file-upload"></i></a>
-                        
+                        <a class="edit-button" onclick="uploadFileDialogue('html')" data-toggle="tooltip" title="Upload file"><i class="fa fa-file-upload"></i></a>                        
                         <a class="edit-button" onclick="downloadFile('html')" data-toggle="tooltip" title="Save as file"><i class="fa fa-save"></i></a>
-                        
                         <a class="edit-button clear-button" id="clear-html" onclick="clearEditor(this, 'html')" data-toggle="tooltip" title="Clear"><i class="fa fa-trash"></i></a>
                     </span>
                 </div>
@@ -131,9 +128,9 @@
             </div>
             
             <div id="fields">
-                <div id="html-editor" class="html-visible"></div>
-                <div class="css-visible" id="css-editor"></div>
-                <div class="text-visible" id="text-editor"></div>
+                <div class="html-visible editor-panel" id="html-editor"></div>
+                <div class="css-visible editor-panel" id="css-editor"></div>
+                <div class="text-visible editor-panel" id="text-editor"></div>
             </div>
         </div>
             
@@ -228,22 +225,28 @@
             </div>
             
             <div id="footer-right">
-                <span>
-                    <input type="checkbox" class="hide-small" id="vertical" onchange="setVerticalLayout();"> <label for="vertical" class="hide-small">Vertical layout</label>
+                <span class="checkbox-container">
+                    <input type="checkbox" class="hide-small" id="vertical" onchange="setVerticalLayout();">&nbsp;<label for="vertical" class="hide-small">Vertical</label>
                 </span>
                 
-                <span>
-                    <input type="checkbox" id="auto" onchange="setAutoUpdate();" checked="true"> <label for="auto">Auto-update</label>
+                <span class="checkbox-container">
+                    <input type="checkbox" id="auto" onchange="setAutoUpdate();" checked="true">&nbsp;<label for="auto">Auto-update</label>
                 </span>
                 
-                <span>
-                    <input type="checkbox" id="css-panel" onclick="setCSSPanel();" checked="true"> <label for="css-panel">CSS</label>
+                <span class="checkbox-container">
+                    <input type="checkbox" id="html-panel" onclick="setHTMLPanel();" checked="true">&nbsp;<label for="html-panel">HTML</label>
                 </span>
                 
-                <span class="show-small"><br></span>
+                <span class="checkbox-container">
+                    <input type="checkbox" id="css-panel" onclick="setCSSPanel();" checked="true">&nbsp;<label for="css-panel">CSS</label>
+                </span>
                 
-                <span>
-                    <input type="checkbox" id="text-panel" onclick="setTextPanel();" checked="true"> <label for="text-panel">Scratch pad</label>
+                <span class="checkbox-container">
+                    <input type="checkbox" id="text-panel" onclick="setTextPanel();" checked="true">&nbsp;<label for="text-panel">Scratchpad</label>
+                </span>
+                
+                <span class="checkbox-container">
+                    <input type="checkbox" id="big-text" onclick="toggleBigFont();"> <label for="big-text">Big text</label>
                 </span>
                 <a class="btn btn-primary update-btn d-inline-block" id="update-preview" onclick="updateCode()">Update preview</a>
             </div>

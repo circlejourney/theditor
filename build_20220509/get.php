@@ -11,7 +11,7 @@
         
             echo "<div><div class='user-content thcj-warn'>Private or invalid profile.</div></div>";
             
-        } else if(strpos($page, "allow-thcj-import") === false) {
+        } else if(strpos($page, "allow-thcj-import") === false && $getMeta == "false") {
         
             echo "<div><div class='user-content thcj-warn'>Security alert: You are attempting to import a profile that has not been set to allow code import. To allow code import, paste the line <code>&lt;span id='allow-thcj-import'>&lt;/span></code> anywhere in your code.</div></div>";
             

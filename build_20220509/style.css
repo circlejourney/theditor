@@ -8,6 +8,14 @@ body.vertical {
     flex-direction: column;
 }
 
+.checkbox-container {
+    white-space: nowrap;
+}
+
+.big-text {
+    font-size: 1.2rem;
+}
+
 a {
     cursor: pointer;
 }
@@ -31,13 +39,25 @@ a {
     background-color: white;
 }
 
+.loader-inner {
+    padding: 10vw;
+}
+
+#info-back {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: grey;
+    background: rgba(0,0,0,0.5);
+}
+
 #info {
     position: fixed;
     width: 100%;
     height: 100%;
     z-index: 6;
-    background: grey;
-    background: rgba(0,0,0,0.5);
 }
 
 #info > .card {
@@ -56,6 +76,17 @@ a {
 
 #changelog, #issues {
     text-align: left;
+}
+
+.changelog-item {
+    list-style-type: none;
+    border-bottom: 1px solid #eee;
+    margin: 0;
+    padding: 1rem;
+}
+
+.changelog-item ul {
+    margin: 0;
 }
 
 #changelog p:last-child, #issues p:last-child {
@@ -298,12 +329,17 @@ a {
     align-items: center;
 }
 
+#footer-left, #footer-right {
+    line-height: 2.1rem;
+}
+
 #footer span {
     margin-right: 1em;
 }
 
 .dropdown-menu {
     z-index: 1000;
+    line-height: 1.6rem;
 }
 
 #footer-left {

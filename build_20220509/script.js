@@ -8,11 +8,13 @@ var cssChanged = true;
 var textChanged = true;
 var cssPanel, textPanel, editor, css_editor, text_editor, frame, importedmeta, importedcode;
 const loremipsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sollicitudin elit sed tellus blandit viverra sed eget odio. Donec accumsan tempor lacus, et venenatis elit feugiat non. Duis porta eros et velit blandit dapibus. Curabitur ac finibus eros. Duis placerat velit vitae massa sodales, eget mattis nibh pellentesque.";
-    
+const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
 $(window).on("load", function(){
     
     frame = document.getElementById("frame");
-    
+    frame.contentWindow.lastUpdate = lastUpdate;
+
     var showChar = location.hash.substr(1);
     if(showChar) {
         frame.contentWindow.importProfile(showChar);
@@ -59,6 +61,7 @@ $(window).on("load", function(){
     switchTo(activemode);
     toggleTheme(activetheme);
     resizeElements();
+    setHTMLPanel();
     setCSSPanel();
     setTextPanel();
     
@@ -138,7 +141,10 @@ function loadNotes() {
     });
     
     $.get("../notes.html?"+lastUpdate, function(data) {
-        $("#notes").html(data);
+		let year = Math.floor(lastUpdate / 10000);
+		let month = months[Math.floor( (lastUpdate % 10000) / 100 ) - 1];
+		let day = lastUpdate % 100;
+        $("#notes").html(data).find("#latest").text("Latest update: "+day+" "+month+" "+year);
     });
     
     $.get("../versions.html?"+lastUpdate, function(data) {
@@ -182,12 +188,21 @@ function loadLocal() {
         setVerticalLayout();
     }
     
+    if(localStorage.th_cj_htmlpanel) {
+        $("#html-panel").prop("checked", localStorage.th_cj_htmlpanel == "true");
+    }
+    
     if(localStorage.th_cj_csspanel) {
         $("#css-panel").prop("checked", localStorage.th_cj_csspanel == "true");
     }
     
     if(localStorage.th_cj_textpanel) {
         $("#text-panel").prop("checked", localStorage.th_cj_textpanel == "true");
+    }
+    
+    if(localStorage.th_cj_bigtext) {
+        if(localStorage.th_cj_bigtext == "true") $(".editor-panel").addClass("big-text");
+        $("#big-text").prop("checked", localStorage.th_cj_bigtext == "true");
     }
     
     if(localStorage.th_cj_auto) {
@@ -264,7 +279,7 @@ function updateCode(){
 function updateHTML(){
     var val = editor.getValue();
     localStorage.th_cj = val;
-    val = val.replace(/(<)(script|style|head)(.*>)/g, "$1div$3");
+    val = val.replace(/(<\/*)(script|style|head)(.*>)/g, "$1div$3");
     if(frame) frame.contentWindow.updateHTML(val);
 };
 
@@ -292,7 +307,6 @@ function updateText() {
 function showInfo() {
     localStorage.th_cj_hidenotif2 = "true";
     $("#info").toggleClass("d-none");
-    $("#info-back").toggleClass("d-none");
 }
  
 function setAutoUpdate() {
@@ -346,6 +360,15 @@ function setVerticalLayout() {
     initHeight(codeheight, codewidth);
 }
 
+function setHTMLPanel() {
+    htmlPanel = $("#html-panel").prop("checked");
+    if(htmlPanel){
+        $(".html-visible").removeClass("d-none");
+    } else $(".html-visible").addClass("d-none");
+    localStorage.th_cj_htmlpanel = htmlPanel;
+    resizeEditors();
+}
+
 function setCSSPanel() {
     cssPanel = $("#css-panel").prop("checked");
     if(cssPanel){
@@ -364,6 +387,11 @@ function setTextPanel() {
     }
     localStorage.th_cj_textpanel = textPanel;
     resizeEditors();
+}
+
+function toggleBigFont() {
+    $(".ace_editor").toggleClass("big-text");
+    localStorage.th_cj_bigtext = $("#big-text").prop("checked");
 }
 
 function resizeElements() {
@@ -448,15 +476,10 @@ function cancelDrag(e) {
 
 function downloadFile(panel) {
     var thedate = new Date();
-    if(panel == "html") {
-        var file = new Blob([editor.getValue()], {type: "text/plain"});
-        var filetitle = "THeditor_HTML_"+thedate.toLocaleDateString('en-GB')+"_"+thedate.toLocaleTimeString('en-GB')+".txt"
-            .replace(/\:|\//g, "-");
-    } else if(panel == "css") {
-        var file = new Blob([css.getValue()], {type: "text/plain"});
-        var filetitle = "THeditor_CSS_"+thedate.toLocaleDateString('en-GB')+"_"+thedate.toLocaleTimeString('en-GB')+".txt"
-            .replace(/\:|\//g, "-");
-    }
+    panel == "html" ? storageName = "" : storageName = "_"+panel;
+    var file = new Blob([ localStorage["th_cj"+storageName] ], {type: "text/plain"});
+    var filetitle = "THeditor_"+panel.toUpperCase()+"_"+thedate.toLocaleDateString('en-GB')+"_"+thedate.toLocaleTimeString('en-GB')+".txt"
+        .replace(/\:|\//g, "-");
     
     if (window.navigator.msSaveOrOpenBlob)
         window.navigator.msSaveOrOpenBlob(file, filetitle);
@@ -565,12 +588,19 @@ function startImport(importType){
 }
 
 function hardReset() {
+    if(!confirm("Download all code as text files and reset?")) return false;
+    
+    ["html", "css", "text"].forEach(function(i){
+        downloadFile(i);
+    });
+
     localStorage.removeItem("th_cj");
     localStorage.removeItem("th_cj_mode");
     localStorage.removeItem("th_cj_theme");
     localStorage.removeItem("th_cj_css");
     localStorage.removeItem("th_cj_text");
     localStorage.removeItem("th_cj_vertical");
+    localStorage.removeItem("th_cj_htmlpanel");
     localStorage.removeItem("th_cj_csspanel");
     localStorage.removeItem("th_cj_textpanel");
     localStorage.removeItem("th_cj_auto");

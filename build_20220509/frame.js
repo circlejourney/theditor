@@ -10,14 +10,13 @@ styles = {
 function switchTo(mode) {
     var currentHTML = $(".ace-code-container").html();
     var currentCSS = $("#custom-css").html();
-    $.get("../templates/"+mode+".html", function(data) {
+    $.get("../templates/"+mode+".html?"+lastUpdate, function(data) {
         $("#display-area").html(data);
         updateHTML(currentHTML);
         updateCSS(currentCSS);
         if(parent.importedmeta) {
             importProfileMeta(parent.importedmeta);
         }
-        console.log(mode);
         if(mode == "world" || mode.indexOf("profile") != -1 || mode == "warning") {
             parent.$("#import-meta").prop("disabled", false);
         } else {
