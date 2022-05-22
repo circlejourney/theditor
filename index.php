@@ -1,3 +1,7 @@
+<?php
+    header("Cache-Control: no-cache, must-revalidate");
+    header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
+?>
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -37,8 +41,8 @@
     <div id="loader" style="text-align: center; display: flex; flex-direction: column; justify-content: center;">
         <div class="loader-inner">
             <img src="https://media0.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif" style="margin: -50px 0;">
-            <p style="font-size: 20pt;">Stuck on the loading screen? <a href="https://toyhou.se/~messages/create/circlejourney">Send me a bug report</a>.</p>
-            <p style="font-size: 20pt;">If you suspect your code has crashed the editor, <a href="#">click here</a> to download your code as text files and hard reset the editor.</p>
+            <p style="font-size: 20pt;">Stuck on the loading screen? <a href="https://toyhou.se/~forums/26275.feedback-bugs-suggestions/298364.stuck-on-the-loading-screen-error">Post a bug report on our Toyhouse world</a>.</p>
+            <p style="font-size: 20pt;">If you suspect your code has crashed the editor, <a href="#" onclick="hardReset()">click here</a> to download your code as text files and hard reset the editor.</p>
             <p>Fun fact! You can also hard reset by typing <code>Please reset!</code> in the HTML panel.</p>
         </div>
     </div>
