@@ -1,35 +1,13 @@
 #canvas {
     max-width: 100%;
     border: 1px dashed black;
-    margin: 10px;
-}
-
-.settings-col {
-    height: 100vh;
-}
-
-.image-col {
-    position: relative;
-    width: 60%;
 }
 
 .main-col {
+    max-height: 100vh;
     overflow-y: auto;
 }
 
 label {
-    margin-right: 1rem;
-    margin-bottom: 0;
-}
-
-label.file-label {
-    border: 1px solid grey;
-    padding: 5px;
-    border-radius: 2px;
-}
-
-@media only screen and (max-width: 992px) {
-    .settings-col {
-        height: auto;
-    }
+    margin-right: 10px;
 }
