@@ -1,4 +1,4 @@
-<?php
+ <?php
     header("Cache-Control: no-cache, must-revalidate");
     header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 ?>
@@ -25,14 +25,14 @@
         </script>
         
         <!-- TH source -->
-    	<link href="../src/main.css" rel="stylesheet">
-    	<script src="../src/site.js"></script>
-    	<link id="theme-css" href="../src/site_black-forest.css" rel="stylesheet">
+    	<link href="../src/main.css?cachebust=2" rel="stylesheet">
+    	<script src="../src/site.js?cachebust=2"></script>
+    	<link id="theme-css" href="../src/site_black-forest.css?cachebust=2" rel="stylesheet">
     	
     	<!-- Font Awesome -->
         <script src="https://kit.fontawesome.com/0ddae54ad8.js" crossorigin="anonymous"></script>
         
-        <script src="/build_<?php echo $lastUpdate ?>/script.js" type="text/javascript"></script>
+        <script src="/build_<?php echo $lastUpdate ?>/script.js?cachebust=2" type="text/javascript"></script>
         <link rel="stylesheet" href="/build_<?php echo $lastUpdate ?>/style.css">
             
     </head>
