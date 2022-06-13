@@ -1,11 +1,11 @@
-<?php
+ <?php
     header("Cache-Control: no-cache, must-revalidate");
     header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 ?>
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <?php $lastUpdate = "20220522"; ?>
+        <?php $lastUpdate = "20220613"; ?>
         
         <script>
             const lastUpdate = <?php echo $lastUpdate ?>;
@@ -25,14 +25,14 @@
         </script>
         
         <!-- TH source -->
-    	<link href="../src/main.css" rel="stylesheet">
-    	<script src="../src/site.js"></script>
-    	<link id="theme-css" href="../src/site_black-forest.css" rel="stylesheet">
+    	<link href="../src/main.css?cachebust=2" rel="stylesheet">
+    	<script src="../src/site.js?cachebust=2"></script>
+    	<link id="theme-css" href="../src/site_black-forest.css?cachebust=2" rel="stylesheet">
     	
     	<!-- Font Awesome -->
         <script src="https://kit.fontawesome.com/0ddae54ad8.js" crossorigin="anonymous"></script>
         
-        <script src="/build_<?php echo $lastUpdate ?>/script.js" type="text/javascript"></script>
+        <script src="/build_<?php echo $lastUpdate ?>/script.js?cachebust=2" type="text/javascript"></script>
         <link rel="stylesheet" href="/build_<?php echo $lastUpdate ?>/style.css">
             
     </head>
@@ -156,6 +156,7 @@
                     <a class="dropdown-item" onclick="toggleTheme('Pink Velvet')">Pink Velvet Snake</a>
                   </div>
                 </div>
+
                 <div id="modes" class="dropdown d-sm-inline">
                   <a class="btn btn-secondary dropdown-toggle" id="dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Layout
@@ -229,30 +230,44 @@
             </div>
             
             <div id="footer-right">
-                <span class="checkbox-container">
-                    <input type="checkbox" class="hide-small" id="vertical" onchange="setVerticalLayout();">&nbsp;<label for="vertical" class="hide-small">Vertical</label>
-                </span>
                 
-                <span class="checkbox-container">
-                    <input type="checkbox" id="auto" onchange="setAutoUpdate();" checked="true">&nbsp;<label for="auto">Auto-update</label>
-                </span>
-                
-                <span class="checkbox-container">
-                    <input type="checkbox" id="html-panel" onclick="setHTMLPanel();" checked="true">&nbsp;<label for="html-panel">HTML</label>
-                </span>
-                
-                <span class="checkbox-container">
-                    <input type="checkbox" id="css-panel" onclick="setCSSPanel();" checked="true">&nbsp;<label for="css-panel">CSS</label>
-                </span>
-                
-                <span class="checkbox-container">
-                    <input type="checkbox" id="text-panel" onclick="setTextPanel();" checked="true">&nbsp;<label for="text-panel">Scratchpad</label>
-                </span>
-                
-                <span class="checkbox-container">
-                    <input type="checkbox" id="big-text" onclick="toggleBigFont();"> <label for="big-text">Big text</label>
-                </span>
-                <a class="btn btn-primary update-btn d-inline-block" id="update-preview" onclick="updateCode()">Update preview</a>
+                <div id="ui-options" class="dropdown d-sm-inline">
+                    <a class="btn btn-secondary dropdown-toggle" id="dropdownbutton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        UI options 
+                    </a>
+                    
+                    <div class="dropdown-menu ui-options px-2" aria-labelledby="dropdownbutton">
+
+                        <span class="checkbox-container">
+                            <input type="checkbox" class="hide-small" id="low-contrast" onchange="toggleUITheme();">&nbsp;<label for="low-contrast" class="hide-small">Low contrast</label>
+                        </span>
+
+                        <span class="checkbox-container">
+                            <input type="checkbox" class="hide-small" id="vertical" onchange="setVerticalLayout();">&nbsp;<label for="vertical" class="hide-small">Vertical</label>
+                        </span>
+
+                        <span class="checkbox-container">
+                            <input type="checkbox" id="auto" onchange="setAutoUpdate();" checked="true">&nbsp;<label for="auto">Auto-update</label>
+                        </span>
+
+                        <span class="checkbox-container">
+                            <input type="checkbox" id="html-panel" onclick="setHTMLPanel();" checked="true">&nbsp;<label for="html-panel">HTML</label>
+                        </span>
+
+                        <span class="checkbox-container">
+                            <input type="checkbox" id="css-panel" onclick="setCSSPanel();" checked="true">&nbsp;<label for="css-panel">CSS</label>
+                        </span>
+
+                        <span class="checkbox-container">
+                            <input type="checkbox" id="text-panel" onclick="setTextPanel();" checked="true">&nbsp;<label for="text-panel">Scratchpad</label>
+                        </span>
+
+                        <span class="checkbox-container">
+                            <input type="checkbox" id="big-text" onclick="toggleBigFont();"> <label for="big-text">Big text</label>
+                        </span>
+                    </div>
+                </div>
+                <a class="btn btn-primary update-btn d-inline-block" id="update-preview" onclick="updateCode()" href="#">Update preview</a>
             </div>
             
             <input type="file" class="d-none" id="fileupload" onclick="uploadFile(this)">
