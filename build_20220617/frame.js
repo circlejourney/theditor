@@ -8,15 +8,18 @@ styles = {
 }
  
 function switchTo(mode) {
-    var currentHTML = $(".ace-code-container").html();
-    var currentCSS = $("#custom-css").html();
+
     $.get("../templates/"+mode+".html?"+lastUpdate, function(data) {
         $("#display-area").html(data);
-        updateHTML(currentHTML);
-        updateCSS(currentCSS);
+
+        updateHTML(localStorage.th_cj_blurb, "ace-code-container-2");
+        updateHTML(localStorage.th_cj, "ace-code-container");
+        updateCSS(localStorage.th_cj_css);
+
         if(parent.importedmeta) {
             importProfileMeta(parent.importedmeta);
         }
+        
         if(mode == "world" || mode.indexOf("profile") != -1 || mode == "warning") {
             parent.$("#import-meta").prop("disabled", false);
         } else {
@@ -27,6 +30,7 @@ function switchTo(mode) {
             $("#main").addClass("collapsed-sidebar").removeClass("full-sidebar");
         }
     });
+    
 }
 
 function toggleTheme(theme){
@@ -38,10 +42,10 @@ function updateCSS(newCSS) {
     $("#custom-css").append(newCSS);
 }
 
-function updateHTML(newHTML) {
+function updateHTML(newHTML, div) {
     var content = $.parseHTML(newHTML);
-    $(".ace-code-container").empty();
-    $(".ace-code-container").append(content);
+    $("."+div).empty();
+    $("."+div).append(content);
 }
 
 function importProfile(profilePath, importType){

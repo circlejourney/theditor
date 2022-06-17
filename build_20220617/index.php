@@ -15,7 +15,7 @@
         <meta name="description" content="An editor for live previewing Toyhouse code.">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
-        <title>Circlejourney's Toyhouse editor</title>
+        <title>Circlejourney's Toyhouse Live Code Editor</title>
         <link rel="icon" href="https://circlejourney.net/resources/images/favicon.png">
         
         <!-- Misc libraries -->
@@ -50,7 +50,7 @@
         <div id="info-back" onclick="showInfo();"></div>
         <div class="card">
             <div class="card-header d-flex justify-content-between">
-                <h2 class="m-0 w-75 d-inline-block p-2">Welcome to Circlejourney's Code Editor!</h2>
+                <h2 class="m-0 w-75 d-inline-block p-2">Welcome to the Toyhouse Live Code Editor!</h2>
                 <a title="You can view this again by clicking the info button in the bottom left corner." data-toggle="tooltip" class="close" onclick="showInfo()"><i class="fa fa-times"></i></a>
             </div>
             
@@ -62,6 +62,7 @@
                 <a class="btn btn-secondary" data-toggle="collapse" data-target="#issues">Known issues</a>
                 <a class="btn btn-secondary" data-toggle="collapse" data-target="#versions">Versions</a>
                 <p></p>
+
                 <div id="accordion">
                     <div class="collapse" id="changelog" data-parent="#accordion">
                         <div class="card mt-2">
@@ -102,7 +103,9 @@
             
             <div id="titles">
                 <div class="field-title html-visible">
-                    HTML
+                    <div>
+                        <a class="nav-tab" id="html-tab" onclick="toggleBlurb('html')">HTML</a> &ensp; <a class="nav-tab text-dark" id="blurb-tab" onclick="toggleBlurb('blurb')">Blurb</a>
+                    </div>
                     <span class="panel-options" id="html-options">
                         <a class="edit-button" onclick="insertLorem('html')" data-toggle="tooltip" title="Insert lorem ipsum"><i class="fas fa-text"></i></a>
                         <a class="edit-button" onclick="uploadFileDialogue('html')" data-toggle="tooltip" title="Upload file"><i class="fa fa-file-upload"></i></a>                        
@@ -133,12 +136,13 @@
             
             <div id="fields">
                 <div class="html-visible editor-panel" id="html-editor"></div>
+                <div class="d-none blurb-visible editor-panel" id="blurb-editor"></div>
                 <div class="css-visible editor-panel" id="css-editor"></div>
                 <div class="text-visible editor-panel" id="text-editor"></div>
             </div>
         </div>
             
-        <div id="footer" class="bg-light text-dark d-flex justify-content-between ">
+        <div id="footer" class="bg-light d-flex justify-content-between ">
             <div id="footer-left">
                 <a class="btn btn-secondary" onclick="showInfo()"><i class="fa fa-info"></i></a>
     
@@ -185,6 +189,7 @@
                     <a class="dropdown-item" onclick="switchTo('world')">
                         World
                     </a>
+
                     <a class="dropdown-item" onclick="switchTo('warning')">
                         Warning
                     </a>
@@ -231,6 +236,11 @@
             
             <div id="footer-right">
                 
+
+                <span class="checkbox-container">
+                    <input type="checkbox" id="auto" onchange="setAutoUpdate();" checked="true">&nbsp;<label for="auto">Auto-update</label>
+                </span>
+
                 <div id="ui-options" class="dropdown d-sm-inline">
                     <a class="btn btn-secondary dropdown-toggle" id="dropdownbutton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         UI options 
@@ -239,15 +249,11 @@
                     <div class="dropdown-menu ui-options px-2" aria-labelledby="dropdownbutton">
 
                         <span class="checkbox-container">
-                            <input type="checkbox" class="hide-small" id="low-contrast" onchange="toggleUITheme();">&nbsp;<label for="low-contrast" class="hide-small">Low contrast</label>
+                            <input type="checkbox" id="low-contrast" onchange="toggleUITheme();">&nbsp;<label for="low-contrast">Low contrast</label>
                         </span>
 
                         <span class="checkbox-container">
                             <input type="checkbox" class="hide-small" id="vertical" onchange="setVerticalLayout();">&nbsp;<label for="vertical" class="hide-small">Vertical</label>
-                        </span>
-
-                        <span class="checkbox-container">
-                            <input type="checkbox" id="auto" onchange="setAutoUpdate();" checked="true">&nbsp;<label for="auto">Auto-update</label>
                         </span>
 
                         <span class="checkbox-container">

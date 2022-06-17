@@ -4,6 +4,9 @@ var activemode = "profile";
 var activetheme = "Default";
 var showcss = "\/* Enter CSS here... *\/";
 var showtext = "Paste drafts and snippets here...";
+var isBlurb = false;
+const isSafari = navigator.userAgent.indexOf("Safari") > -1;
+const isMobile = typeof screen.orientation !== 'undefined';
 var htmlChanged = true;
 var cssChanged = true;
 var textChanged = true;
@@ -55,17 +58,6 @@ $(window).on("load", function(){
 
 
     // Set blank ACE text field behaviour
-    editor.on("focus", function() {
-        if(editor.getValue()=="<!-- Enter HTML here... -->") editor.setValue("");
-    });
-
-    css_editor.on("focus", function() {
-        if(css_editor.getValue()=="\/* Enter CSS here... *\/") css_editor.setValue("");
-    })
-
-    text_editor.on("focus", function() {
-        if(text_editor.getValue()=="Paste drafts and snippets here...") text_editor.setValue("");
-    })
     
     updateCode();
     switchTo(activemode);
@@ -195,7 +187,6 @@ function loadLocal() {
     }
     
     if(localStorage.th_cj_vertical) {
-    
         $("#vertical").prop("checked", localStorage.th_cj_vertical == "true");
         setVerticalLayout();
     }
@@ -242,20 +233,22 @@ function initEditors() {
     editor.session.on("change", function(){
         htmlChanged=true;
     });
+    editor.on("focus", function() {
+        if(editor.getValue()=="<!-- Enter HTML here... -->") editor.setValue("");
+    });
     
     css_editor = ace.edit("css-editor");
-    css_editor.setTheme("ace/theme/monokai");
-    css_editor.session.setMode("ace/mode/sass");
     css_editor.setShowPrintMargin(false);
     css_editor.setValue(showcss);
     css_editor.session.setUseWrapMode(true);
     css_editor.session.on("change", function(){
         cssChanged = true;
     });
-    
+    css_editor.on("focus", function() {
+        if(css_editor.getValue()=="\/* Enter CSS here... *\/") css_editor.setValue("");
+    })
+
     text_editor = ace.edit("text-editor");
-    text_editor.setTheme("ace/theme/monokai");
-    text_editor.session.setMode("ace/mode/plain_text");
     text_editor.setShowPrintMargin(false);
     text_editor.renderer.setShowGutter(false);
     text_editor.setValue(showtext);
@@ -263,6 +256,9 @@ function initEditors() {
     text_editor.session.on("change", function(){
         textChanged = true;
     });
+    text_editor.on("focus", function() {
+        if(text_editor.getValue()=="Paste drafts and snippets here...") text_editor.setValue("");
+    })
 
 }
 
@@ -277,7 +273,7 @@ function toggleTheme(theme) {
 function switchTo(mode) {
     activemode = mode;
     localStorage.th_cj_mode = mode;
-    if(frame) frame.contentWindow.switchTo(mode);
+    frame.contentWindow.switchTo(mode);
 }
 
 function updateCode(){
@@ -287,9 +283,16 @@ function updateCode(){
 
 function updateHTML(){
     var val = editor.getValue();
-    localStorage.th_cj = val;
+    let updateDiv;
+    if(isBlurb) {
+        localStorage.th_cj_blurb = val;
+        updateDiv = "ace-code-container-2";
+    } else {
+        localStorage.th_cj = val;
+        updateDiv = "ace-code-container";
+    }
     val = val.replace(/(<\/*)(script|style|head)(.*>)/g, "$1div$3");
-    if(frame) frame.contentWindow.updateHTML(val);
+    frame.contentWindow.updateHTML(val, updateDiv);
 };
 
 function updateCSS() {
@@ -414,7 +417,7 @@ function resizeElements() {
 }
 
 function resizeEditors() {
-    /*
+
     if(isSafari && !isMobile) {
         if(! $("#vertical").prop("checked")) {
             $(".ace_editor").css("height", window.innerHeight - $("#frame").height() - $("#adjustbar").height() - $("#footer").height() - $("#titles").height());
@@ -422,7 +425,7 @@ function resizeEditors() {
             $(".ace_editor").css("width", window.innerWidth - $("#frame").width() - $("#adjustbar").width() - $("#footer").width() - $("#titles").width());
         }
     }
-    */
+
     editor.resize();
     css_editor.resize();
     text_editor.resize();
@@ -635,7 +638,6 @@ function toggleUITheme(){
 
     if($("#low-contrast").prop("checked")) { 
 
-        $("body").addClass("low-contrast");
         $("#theme-css").attr("href", "../src/site_night-forest.css");
         $(".bg-light").removeClass("bg-light").addClass("bg-dark");
 
@@ -645,7 +647,6 @@ function toggleUITheme(){
 
     } else {
         
-        $("body").removeClass("low-contrast");
         $("#theme-css").attr("href", "../src/site_black-forest.css")
         $(".bg-dark").removeClass("bg-dark").addClass("bg-light");
 
@@ -654,4 +655,18 @@ function toggleUITheme(){
         text_editor.setTheme("ace/theme/monokai");
     }
 
+}
+
+function toggleBlurb() {
+    if(isBlurb) {
+        isBlurb = false;
+        $("#html-tab").removeClass("text-dark");
+        $("#blurb-tab").addClass("text-dark");
+        editor.setValue(localStorage.th_cj);
+    } else {
+        isBlurb = true;
+        $("#blurb-tab").removeClass("text-dark");
+        $("#html-tab").addClass("text-dark");
+        editor.setValue(localStorage.th_cj_blurb);
+    }
 }

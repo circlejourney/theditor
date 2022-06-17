@@ -383,10 +383,6 @@ a {
     opacity: 0;
 }
 
-.hide-small {
-    display: initial;
-}
-
 .show-small {
     display: none;
 }

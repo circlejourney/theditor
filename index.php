@@ -1,11 +1,11 @@
-<?php
+ <?php
     header("Cache-Control: no-cache, must-revalidate");
     header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
 ?>
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <?php $lastUpdate = "20220522"; ?>
+        <?php $lastUpdate = "20220617"; ?>
         
         <script>
             const lastUpdate = <?php echo $lastUpdate ?>;
@@ -15,7 +15,7 @@
         <meta name="description" content="An editor for live previewing Toyhouse code.">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         
-        <title>Circlejourney's Toyhouse editor</title>
+        <title>Circlejourney's Toyhouse Live Code Editor</title>
         <link rel="icon" href="https://circlejourney.net/resources/images/favicon.png">
         
         <!-- Misc libraries -->
@@ -25,14 +25,14 @@
         </script>
         
         <!-- TH source -->
-    	<link href="../src/main.css" rel="stylesheet">
-    	<script src="../src/site.js"></script>
-    	<link id="theme-css" href="../src/site_black-forest.css" rel="stylesheet">
+    	<link href="../src/main.css?cachebust=2" rel="stylesheet">
+    	<script src="../src/site.js?cachebust=2"></script>
+    	<link id="theme-css" href="../src/site_black-forest.css?cachebust=2" rel="stylesheet">
     	
     	<!-- Font Awesome -->
         <script src="https://kit.fontawesome.com/0ddae54ad8.js" crossorigin="anonymous"></script>
         
-        <script src="/build_<?php echo $lastUpdate ?>/script.js" type="text/javascript"></script>
+        <script src="/build_<?php echo $lastUpdate ?>/script.js?cachebust=2" type="text/javascript"></script>
         <link rel="stylesheet" href="/build_<?php echo $lastUpdate ?>/style.css">
             
     </head>
@@ -50,18 +50,19 @@
         <div id="info-back" onclick="showInfo();"></div>
         <div class="card">
             <div class="card-header d-flex justify-content-between">
-                <h2 class="m-0 w-75 d-inline-block p-2">Welcome to Circlejourney's Code Editor!</h2>
+                <h2 class="m-0 w-75 d-inline-block p-2">Welcome to the Toyhouse Live Code Editor!</h2>
                 <a title="You can view this again by clicking the info button in the bottom left corner." data-toggle="tooltip" class="close" onclick="showInfo()"><i class="fa fa-times"></i></a>
             </div>
             
             <div id="info-main" class="card-block text-center">
                 <div id="notes"></div>
                 
-                <a class="btn btn-primary text-white" onclick="showInfo()">Got it!</a>
+                <a class="btn btn-primary" onclick="showInfo()">Got it!</a>
                 <a class="btn btn-secondary" data-toggle="collapse" data-target="#changelog">Changelog</a>
                 <a class="btn btn-secondary" data-toggle="collapse" data-target="#issues">Known issues</a>
                 <a class="btn btn-secondary" data-toggle="collapse" data-target="#versions">Versions</a>
                 <p></p>
+
                 <div id="accordion">
                     <div class="collapse" id="changelog" data-parent="#accordion">
                         <div class="card mt-2">
@@ -102,7 +103,9 @@
             
             <div id="titles">
                 <div class="field-title html-visible">
-                    HTML
+                    <div>
+                        <a class="nav-tab" id="html-tab" onclick="toggleBlurb('html')">HTML</a> &ensp; <a class="nav-tab text-dark" id="blurb-tab" onclick="toggleBlurb('blurb')">Blurb</a>
+                    </div>
                     <span class="panel-options" id="html-options">
                         <a class="edit-button" onclick="insertLorem('html')" data-toggle="tooltip" title="Insert lorem ipsum"><i class="fas fa-text"></i></a>
                         <a class="edit-button" onclick="uploadFileDialogue('html')" data-toggle="tooltip" title="Upload file"><i class="fa fa-file-upload"></i></a>                        
@@ -133,12 +136,13 @@
             
             <div id="fields">
                 <div class="html-visible editor-panel" id="html-editor"></div>
+                <div class="d-none blurb-visible editor-panel" id="blurb-editor"></div>
                 <div class="css-visible editor-panel" id="css-editor"></div>
                 <div class="text-visible editor-panel" id="text-editor"></div>
             </div>
         </div>
             
-        <div id="footer" class="bg-light text-dark d-flex justify-content-between ">
+        <div id="footer" class="bg-light d-flex justify-content-between ">
             <div id="footer-left">
                 <a class="btn btn-secondary" onclick="showInfo()"><i class="fa fa-info"></i></a>
     
@@ -156,6 +160,7 @@
                     <a class="dropdown-item" onclick="toggleTheme('Pink Velvet')">Pink Velvet Snake</a>
                   </div>
                 </div>
+
                 <div id="modes" class="dropdown d-sm-inline">
                   <a class="btn btn-secondary dropdown-toggle" id="dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Layout
@@ -184,6 +189,7 @@
                     <a class="dropdown-item" onclick="switchTo('world')">
                         World
                     </a>
+
                     <a class="dropdown-item" onclick="switchTo('warning')">
                         Warning
                     </a>
@@ -229,30 +235,45 @@
             </div>
             
             <div id="footer-right">
-                <span class="checkbox-container">
-                    <input type="checkbox" class="hide-small" id="vertical" onchange="setVerticalLayout();">&nbsp;<label for="vertical" class="hide-small">Vertical</label>
-                </span>
                 
+
                 <span class="checkbox-container">
                     <input type="checkbox" id="auto" onchange="setAutoUpdate();" checked="true">&nbsp;<label for="auto">Auto-update</label>
                 </span>
-                
-                <span class="checkbox-container">
-                    <input type="checkbox" id="html-panel" onclick="setHTMLPanel();" checked="true">&nbsp;<label for="html-panel">HTML</label>
-                </span>
-                
-                <span class="checkbox-container">
-                    <input type="checkbox" id="css-panel" onclick="setCSSPanel();" checked="true">&nbsp;<label for="css-panel">CSS</label>
-                </span>
-                
-                <span class="checkbox-container">
-                    <input type="checkbox" id="text-panel" onclick="setTextPanel();" checked="true">&nbsp;<label for="text-panel">Scratchpad</label>
-                </span>
-                
-                <span class="checkbox-container">
-                    <input type="checkbox" id="big-text" onclick="toggleBigFont();"> <label for="big-text">Big text</label>
-                </span>
-                <a class="btn btn-primary update-btn d-inline-block" id="update-preview" onclick="updateCode()">Update preview</a>
+
+                <div id="ui-options" class="dropdown d-sm-inline">
+                    <a class="btn btn-secondary dropdown-toggle" id="dropdownbutton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        UI options 
+                    </a>
+                    
+                    <div class="dropdown-menu ui-options px-2" aria-labelledby="dropdownbutton">
+
+                        <span class="checkbox-container">
+                            <input type="checkbox" id="low-contrast" onchange="toggleUITheme();">&nbsp;<label for="low-contrast">Low contrast</label>
+                        </span>
+
+                        <span class="checkbox-container">
+                            <input type="checkbox" class="hide-small" id="vertical" onchange="setVerticalLayout();">&nbsp;<label for="vertical" class="hide-small">Vertical</label>
+                        </span>
+
+                        <span class="checkbox-container">
+                            <input type="checkbox" id="html-panel" onclick="setHTMLPanel();" checked="true">&nbsp;<label for="html-panel">HTML</label>
+                        </span>
+
+                        <span class="checkbox-container">
+                            <input type="checkbox" id="css-panel" onclick="setCSSPanel();" checked="true">&nbsp;<label for="css-panel">CSS</label>
+                        </span>
+
+                        <span class="checkbox-container">
+                            <input type="checkbox" id="text-panel" onclick="setTextPanel();" checked="true">&nbsp;<label for="text-panel">Scratchpad</label>
+                        </span>
+
+                        <span class="checkbox-container">
+                            <input type="checkbox" id="big-text" onclick="toggleBigFont();"> <label for="big-text">Big text</label>
+                        </span>
+                    </div>
+                </div>
+                <a class="btn btn-primary update-btn d-inline-block" id="update-preview" onclick="updateCode()" href="#">Update preview</a>
             </div>
             
             <input type="file" class="d-none" id="fileupload" onclick="uploadFile(this)">
