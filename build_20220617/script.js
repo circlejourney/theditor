@@ -238,6 +238,7 @@ function initEditors() {
     });
     
     css_editor = ace.edit("css-editor");
+    css_editor.session.setMode("ace/mode/css");
     css_editor.setShowPrintMargin(false);
     css_editor.setValue(showcss);
     css_editor.session.setUseWrapMode(true);
