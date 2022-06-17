@@ -392,17 +392,6 @@ a {
 }
 
 
-/* LOW CONTRAST */
-
-.low-contrast .btn-secondary {
-    color: white !important;
-}
-
-.low-contrast .btn-primary, .low-contrast .badge-primary, .low-contrast #loader {
-    color: black !important;
-} 
-
-
 @media only screen and (max-width: 576px) {
     .hide-small {
         display: none;

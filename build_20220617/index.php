@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <?php $lastUpdate = "20220613"; ?>
+        <?php $lastUpdate = "20220617"; ?>
         
         <script>
             const lastUpdate = <?php echo $lastUpdate ?>;
