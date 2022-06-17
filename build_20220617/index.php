@@ -27,12 +27,12 @@
         <!-- TH source -->
     	<link href="../src/main.css?cachebust=2" rel="stylesheet">
     	<script src="../src/site.js?cachebust=2"></script>
-    	<link id="theme-css" href="../src/site_black-forest.css?cachebust=3" rel="stylesheet">
+    	<link id="theme-css" href="../src/site_black-forest.css?cachebust=2" rel="stylesheet">
     	
     	<!-- Font Awesome -->
         <script src="https://kit.fontawesome.com/0ddae54ad8.js" crossorigin="anonymous"></script>
         
-        <script src="/build_<?php echo $lastUpdate ?>/script.js?cachebust=3" type="text/javascript"></script>
+        <script src="/build_<?php echo $lastUpdate ?>/script.js?cachebust=2" type="text/javascript"></script>
         <link rel="stylesheet" href="/build_<?php echo $lastUpdate ?>/style.css">
             
     </head>
