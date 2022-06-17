@@ -74,6 +74,11 @@ a {
     overflow: auto;
 }
 
+.mascot {
+    width: 200px;
+    float: left;
+}
+
 #changelog, #issues {
     text-align: left;
 }
@@ -403,6 +408,10 @@ a {
     
     #info-main {
         padding: 20px;
+    }
+
+    .mascot {
+        float: none;
     }
     
     #editor {
