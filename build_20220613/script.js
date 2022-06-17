@@ -30,6 +30,7 @@ $(window).on("load", function(){
     loadNotes();
     loadLocal();
     initEditors();
+    toggleUITheme();
     
     // Init click/touch events. Needs tidying and Safari compatibility
     $("#adjustbar").mousedown(function(){
@@ -59,11 +60,11 @@ $(window).on("load", function(){
     });
 
     css_editor.on("focus", function() {
-        if(css_editor.getValue()=="\/* Enter CSS here... *\/") css_editor.setValue();
+        if(css_editor.getValue()=="\/* Enter CSS here... *\/") css_editor.setValue("");
     })
 
     text_editor.on("focus", function() {
-        if(text_editor.getValue()=="Paste drafts and snippets here...") text_editor.setValue();
+        if(text_editor.getValue()=="Paste drafts and snippets here...") text_editor.setValue("");
     })
     
     updateCode();
@@ -228,13 +229,12 @@ function loadLocal() {
     
     if(localStorage.th_cj_lowContrast) {
         $("#low-contrast").prop("checked", localStorage.th_cj_lowContrast == "true");
-        toggleUITheme();
     }
 }
 
 function initEditors() {
+
     editor = ace.edit("html-editor");
-    editor.setTheme("ace/theme/monokai");
     editor.session.setMode("ace/mode/html");
     editor.setShowPrintMargin(false);
     editor.setValue(showval);
@@ -263,6 +263,7 @@ function initEditors() {
     text_editor.session.on("change", function(){
         textChanged = true;
     });
+
 }
 
 function toggleTheme(theme) {
@@ -633,15 +634,24 @@ function toggleUITheme(){
     localStorage.th_cj_lowContrast = $("#low-contrast").prop("checked");
 
     if($("#low-contrast").prop("checked")) { 
-        $("#theme-css").attr("href", "../src/site_night.css");
+
+        $("body").addClass("low-contrast");
+        $("#theme-css").attr("href", "../src/site_night-forest.css");
         $(".bg-light").removeClass("bg-light").addClass("bg-dark");
-        $(".btn-secondary").addClass("text-light");
-        $("#loader").addClass("text-dark");
+
+        editor.setTheme("ace/theme/tomorrow_night");
+        css_editor.setTheme("ace/theme/tomorrow_night");
+        text_editor.setTheme("ace/theme/tomorrow_night");
+
     } else {
+        
+        $("body").removeClass("low-contrast");
         $("#theme-css").attr("href", "../src/site_black-forest.css")
         $(".bg-dark").removeClass("bg-dark").addClass("bg-light");
-        $(".btn-secondary").removeClass("text-light");
-        $("#loader").removeClass("text-dark");
+
+        editor.setTheme("ace/theme/monokai");
+        css_editor.setTheme("ace/theme/monokai");
+        text_editor.setTheme("ace/theme/monokai");
     }
 
 }

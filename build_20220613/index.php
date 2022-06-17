@@ -57,7 +57,7 @@
             <div id="info-main" class="card-block text-center">
                 <div id="notes"></div>
                 
-                <a class="btn btn-primary text-white" onclick="showInfo()">Got it!</a>
+                <a class="btn btn-primary" onclick="showInfo()">Got it!</a>
                 <a class="btn btn-secondary" data-toggle="collapse" data-target="#changelog">Changelog</a>
                 <a class="btn btn-secondary" data-toggle="collapse" data-target="#issues">Known issues</a>
                 <a class="btn btn-secondary" data-toggle="collapse" data-target="#versions">Versions</a>
