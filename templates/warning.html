@@ -1,101 +1,204 @@
-<div id="main" class="clearfix container-fluid main-container full-sidebar">
-    <div class="row row-offcanvas row-offcanvas-left" data-sticky-wrap="" style="min-height: 100%;">
-        <div class="col-md-3 col-lg-2 sidebar sidebar-offcanvas" id="sidebar">
-            <ul class="side-nav list-unstyled">
-            <li class="header"><i class="fa fa-heart mr-2"></i> Character</li>
-            <li class="user-name">
-                <span class="display-user">
-                    <a href="#"><img src="https://f2.toyhou.se/file/f2-toyhou-se/users/admin?6?0" class="display-user-avatar"><span class="display-user-username">User</span></a></span></li>
-            <li class="character-folder subheader">
-            <a href="#"><i class="mr-1 fa fa-folder"></i>Folder</a>
-            </li>
-            <li class="character-name">
-            <span class="display-character"><a href="#"><img src="https://f2.toyhou.se/file/f2-toyhou-se/users/admin?6" class="mr-2">Character Name</a></span>
-            </li>
-            
-            <li class="divider sidebar-divider-collections"></li>
-            <li class=" sidebar-li-gallery">
-            <a href="#">
-            <i class="far fa-image fa-fw sidebar-icon"></i>Gallery
-            <span class="pull-right sidebar-stat sidebar-stat-gallery">0</span>
-            </a>
-            </li>
-            <li class=" sidebar-li-library">
-            <a href="#">
-            <i class="fa fa-book fa-fw sidebar-icon"></i>Library
-            </a>
-            </li>
-            <li class=" sidebar-li-worlds">
-            <a href="#">
-            <i class="fa fa-globe fa-fw sidebar-icon"></i>Worlds
-            </a>
-            </li>
-            <li class=" sidebar-li-links">
-            <a href="#">
-            <i class="fa fa-link fa-fw sidebar-icon"></i>Links
-            </a>
-            </li>
-            <li class="divider sidebar-divider-interactions"></li>
-            <li class="  sidebar-li-comments">
-            <a href="#">
-            <i class="fa fa-comment fa-fw sidebar-icon"></i>Comments
-            </a>
-            </li>
-            <li class="sidebar-li-favorites" data-url="#" th-favorite="1">
-            <a href="#">
-            <i class="far fa-star fa-fw sidebar-icon"></i>Favorite
-            <span class="pull-right sidebar-stat sidebar-stat-favorites th-favorite-count">0</span>
-            </a>
-            </li>
-            <li class="divider sidebar-divider-ownership"></li>
-            <li class=" sidebar-li-ownership">
-            <a href="#">
-            <i class="far fa-check-square fa-fw sidebar-icon"></i>Ownership
-            </a>
-            </li>
-            <li class="divider sidebar-divider-mod"></li>
-            <li class="sidebar-li-report">
-            <a href="#">
-            <i class="fa fa-exclamation-triangle fa-fw sidebar-icon"></i>Report
-            </a>
-            </li>
-            <li class="sidebar-li-block">
-            <a href="#" th-modal-trigger="">
-            <i class="fa fa-ban fa-fw sidebar-icon"></i>Block
-            </a>
-            </li>
-            </ul>
-        </div>
-        <div class="col-sm-12 col-md-9 col-lg-10 content-main" id="content">
-            <div class="content-warning">
-            
-                <h1>Content Warning</h1>
-                <hr>
-                <div class="alert alert-danger">
-                <h4>
-                <i class="fa fa-exclamation-triangle mr-1"></i>
-                User Content Warning
-                </h4>
-                <hr>
-                <p>
-                This user profile has been marked with a content warning:
-                </p>
-                <blockquote class="ace-code-container">
-                    
-                </blockquote>
-                </div>
-                <div class="text-center">
-                <p class="alert alert-info">
-                Please note your consent will be stored in cookies until your session is closed.
-                </p>
-                <div>
-                <input name="character" type="hidden" value="">
-                <input name="user" type="hidden" value="">
-                <input class="btn btn-success" type="submit" value="Okay! I have read and understand the above warnings.">
-                </div>
-                <a href="#" class="btn btn-link">No thanks!</a>
-                </div>
-            </div>    
-        </div>
-    </div>
+<div id="main" class="clearfix container-fluid main-container full-sidebar">
+
+    <div class="row row-offcanvas row-offcanvas-left" data-sticky-wrap="" style="min-height: 100%;">
+
+        <div class="col-md-3 col-lg-2 sidebar sidebar-offcanvas" id="sidebar">
+
+            <ul class="side-nav list-unstyled">
+
+            <li class="header"><i class="fa fa-heart mr-2"></i> Character</li>
+
+            <li class="user-name">
+
+                <span class="display-user">
+
+                    <a href="#"><img src="https://f2.toyhou.se/file/f2-toyhou-se/users/admin?6?0" class="display-user-avatar"><span class="display-user-username">User</span></a></span></li>
+
+            <li class="character-folder subheader">
+
+            <a href="#"><i class="mr-1 fa fa-folder"></i>Folder</a>
+
+            </li>
+
+            <li class="character-name">
+
+            <span class="display-character"><a href="#"><img src="https://f2.toyhou.se/file/f2-toyhou-se/users/admin?6" class="mr-2">Character Name</a></span>
+
+            </li>
+            
+            <li class="blurb user-content fr-view ace-code-container-2">
+            </li>
+
+            
+
+            <li class="divider sidebar-divider-collections"></li>
+
+            <li class=" sidebar-li-gallery">
+
+            <a href="#">
+
+            <i class="far fa-image fa-fw sidebar-icon"></i>Gallery
+
+            <span class="pull-right sidebar-stat sidebar-stat-gallery">0</span>
+
+            </a>
+
+            </li>
+
+            <li class=" sidebar-li-library">
+
+            <a href="#">
+
+            <i class="fa fa-book fa-fw sidebar-icon"></i>Library
+
+            </a>
+
+            </li>
+
+            <li class=" sidebar-li-worlds">
+
+            <a href="#">
+
+            <i class="fa fa-globe fa-fw sidebar-icon"></i>Worlds
+
+            </a>
+
+            </li>
+
+            <li class=" sidebar-li-links">
+
+            <a href="#">
+
+            <i class="fa fa-link fa-fw sidebar-icon"></i>Links
+
+            </a>
+
+            </li>
+
+            <li class="divider sidebar-divider-interactions"></li>
+
+            <li class="  sidebar-li-comments">
+
+            <a href="#">
+
+            <i class="fa fa-comment fa-fw sidebar-icon"></i>Comments
+
+            </a>
+
+            </li>
+
+            <li class="sidebar-li-favorites" data-url="#" th-favorite="1">
+
+            <a href="#">
+
+            <i class="far fa-star fa-fw sidebar-icon"></i>Favorite
+
+            <span class="pull-right sidebar-stat sidebar-stat-favorites th-favorite-count">0</span>
+
+            </a>
+
+            </li>
+
+            <li class="divider sidebar-divider-ownership"></li>
+
+            <li class=" sidebar-li-ownership">
+
+            <a href="#">
+
+            <i class="far fa-check-square fa-fw sidebar-icon"></i>Ownership
+
+            </a>
+
+            </li>
+
+            <li class="divider sidebar-divider-mod"></li>
+
+            <li class="sidebar-li-report">
+
+            <a href="#">
+
+            <i class="fa fa-exclamation-triangle fa-fw sidebar-icon"></i>Report
+
+            </a>
+
+            </li>
+
+            <li class="sidebar-li-block">
+
+            <a href="#" th-modal-trigger="">
+
+            <i class="fa fa-ban fa-fw sidebar-icon"></i>Block
+
+            </a>
+
+            </li>
+
+            </ul>
+
+        </div>
+
+        <div class="col-sm-12 col-md-9 col-lg-10 content-main" id="content">
+
+            <div class="content-warning">
+
+            
+
+                <h1>Content Warning</h1>
+
+                <hr>
+
+                <div class="alert alert-danger">
+
+                <h4>
+
+                <i class="fa fa-exclamation-triangle mr-1"></i>
+
+                User Content Warning
+
+                </h4>
+
+                <hr>
+
+                <p>
+
+                This user profile has been marked with a content warning:
+
+                </p>
+
+                <blockquote class="ace-code-container">
+
+                    
+
+                </blockquote>
+
+                </div>
+
+                <div class="text-center">
+
+                <p class="alert alert-info">
+
+                Please note your consent will be stored in cookies until your session is closed.
+
+                </p>
+
+                <div>
+
+                <input name="character" type="hidden" value="">
+
+                <input name="user" type="hidden" value="">
+
+                <input class="btn btn-success" type="submit" value="Okay! I have read and understand the above warnings.">
+
+                </div>
+
+                <a href="#" class="btn btn-link">No thanks!</a>
+
+                </div>
+
+            </div>    
+
+        </div>
+
+    </div>
+
 </div>
