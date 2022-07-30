@@ -1,39 +1,32 @@
- <?php
-    header("Cache-Control: no-cache, must-revalidate");
-    header("Expires: Sat, 26 Jul 1997 05:00:00 GMT"); // Date in the past
-?>
 <!DOCTYPE html>
 <html lang="en">
     <head>
         <?php $lastUpdate = "20220703"; ?>
-        
         <script>
             const lastUpdate = <?php echo $lastUpdate ?>;
         </script>
         
+        <title>Circlejourney's Toyhouse Live Code Editor</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <meta name="description" content="An editor for live previewing Toyhouse code.">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        
-        <title>Circlejourney's Toyhouse Live Code Editor</title>
         <link rel="icon" href="https://circlejourney.net/resources/images/favicon.png">
         
         <!-- Misc libraries -->
-    	<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/ace.js" type="text/javascript" charset="utf-8"></script>
+    	<script src="../src/jquery-3.6.0/jquery-3.6.0.min.js" type="text/javascript"></script>
+        <script src="../src/ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
         <script src="../src/sass.js-master/dist/sass.js">
         </script>
         
         <!-- TH source -->
-    	<link href="../src/main.css?cachebust=2" rel="stylesheet">
-    	<script src="../src/site.js?cachebust=2"></script>
+        <link href="../src/main.css" rel="stylesheet">
     	<link id="theme-css" href="../src/site_black-forest.css?cachebust=2" rel="stylesheet">
     	
     	<!-- Font Awesome -->
         <script src="https://kit.fontawesome.com/0ddae54ad8.js" crossorigin="anonymous"></script>
         
-        <script src="/build_<?php echo $lastUpdate ?>/script.js?cachebust=3" type="text/javascript"></script>
-        <link rel="stylesheet" href="/build_<?php echo $lastUpdate ?>/style.css?cachebust=3">
+        <script src="./script.js?cachebust=0" type="text/javascript"></script>
+        <link rel="stylesheet" href="./style.css?cachebust=0">
             
     </head>
     <body>
@@ -90,7 +83,7 @@
     </div>
     
     <div id="main">
-        <iframe src="/build_<?php echo $lastUpdate ?>/frame.html" id="frame" class="d-flex">
+        <iframe src="frame.html" id="frame" class="d-flex">
         </iframe>
         
         <div id="adjustbar" class="progress-bar progress-bar-striped bg-secondary">
@@ -241,6 +234,10 @@
                     <input type="checkbox" id="auto" onchange="setAutoUpdate();" checked="true">&nbsp;<label for="auto">Auto-update</label>
                 </span>
 
+                <span class="checkbox-container">
+                    <input type="checkbox" class="hide-small" id="vertical" onchange="setVerticalLayout();">&nbsp;<label for="vertical" class="hide-small">Vertical</label>
+                </span>
+
                 <div id="ui-options" class="dropdown d-sm-inline">
                     <a class="btn btn-secondary dropdown-toggle" id="dropdownbutton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         UI options 
@@ -250,10 +247,6 @@
 
                         <span class="checkbox-container">
                             <input type="checkbox" id="low-contrast" onchange="toggleUITheme();">&nbsp;<label for="low-contrast">Low contrast</label>
-                        </span>
-
-                        <span class="checkbox-container">
-                            <input type="checkbox" class="hide-small" id="vertical" onchange="setVerticalLayout();">&nbsp;<label for="vertical" class="hide-small">Vertical</label>
                         </span>
 
                         <span class="checkbox-container">
@@ -298,5 +291,6 @@
         src="https://c.statcounter.com/12027999/0/eafd79f2/1/"
         alt="web stats"></a></div></noscript>
         <!-- End of Statcounter Code -->
+        <script src="../src/site.js"></script>
     </body>
 </html>
