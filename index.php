@@ -87,7 +87,7 @@
     </div>
     
     <div id="main">
-        <iframe src="/build_<?php echo $lastUpdate ?>/frame.html" id="frame" class="d-flex">
+        <iframe src="/build_<?php echo $lastUpdate ?>/frame.html?2" id="frame" class="d-flex">
         </iframe>
         
         <div id="adjustbar" class="progress-bar progress-bar-striped bg-secondary">
