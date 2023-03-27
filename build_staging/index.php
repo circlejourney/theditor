@@ -277,8 +277,8 @@
                             <input type="checkbox" id="text-panel" onclick="setTextPanel();" checked="true">&nbsp;<label for="text-panel">Scratchpad</label>
                         </span>
 
-                        <span class="checkbox-container">
-                            <input type="checkbox" class="hide-small" id="vertical" onchange="toggleVertical()">&nbsp;<label for="vertical" class="hide-small">Vertical</label>
+                        <span class="checkbox-container hide-small">
+                            <input type="checkbox" id="vertical" onchange="toggleVertical()">&nbsp;<label for="vertical" class="hide-small">Vertical</label>
                         </span>
 
                         <span class="checkbox-container">
