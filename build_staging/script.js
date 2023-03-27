@@ -514,19 +514,18 @@ function startImport(importType){
 }
 
 function renderProfileCode(data) {
-        let customCSS = data.split("<style>")[1].split("</style>")[0].replace("<![CDATA[", "").replace("]]>", "").trim();
+        let customCSS;
 
-        const changeHTML = confirm("Import HTML and CSS? This will overwrite anything that's currently inside your HTML and CSS fields.");
-        
-        if(changeHTML) {
-            if(sessionSettings.isBlurb) toggleBlurb();
-            editor.setValue(
-                $(data).find(".user-content:not(.blurb)").html()
-            );
-            css_editor.setValue(
-                customCSS
-            )
+        if(data.indexOf("<style>") > -1) {
+            customCSS = data.split("<style>")[1].split("</style>")[0].replace("<![CDATA[", "").replace("]]>", "").trim();
         }
+
+        if(sessionSettings.isBlurb) toggleBlurb();
+        editor.setValue(
+            $(data).find(".user-content:not(.blurb)").html()
+        );
+        
+        if(customCSS) css_editor.setValue(customCSS);
 }
 
 function renderProfileMeta(data) {
@@ -546,21 +545,6 @@ function renderProfileMeta(data) {
         frame.contentWindow.$(".blurb").addClass("ace-code-container-2");
         localStorage.th_cj_blurb = $(data).find(".blurb").html();
         if(sessionSettings.isBlurb) editor.setValue(localStorage.th_cj_blurb);
-}
-
-function renderProfileCode(data) {
-        let customCSS = data.split("<style>")[1].split("</style>")[0].replace("<![CDATA[", "").replace("]]>", "").trim();
-
-        const changeHTML = confirm("Import HTML and CSS? This will overwrite anything that's currently inside your HTML and CSS fields.");
-        
-        if(changeHTML) {
-            editor.setValue(
-                $(data).find(".user-content:not(.blurb)").html()
-            );
-            css_editor.setValue(
-                customCSS
-            )
-        }
 }
 
 function hardReset() {

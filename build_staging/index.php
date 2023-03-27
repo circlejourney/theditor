@@ -30,8 +30,8 @@
         <link rel="stylesheet" href="/src/fontawesome-pro-6.0.0-beta3-web/css/all.min.css">
         <script src="/src/fontawesome-pro-6.0.0-beta3-web/js/all.min.js" crossorigin="anonymous"></script>
         
-        <script src="/build_<?php echo $lastUpdate ?>/script.js?cachebust=2" type="text/javascript"></script>
-        <link rel="stylesheet" href="/build_<?php echo $lastUpdate ?>/style.css?cachebust=1">
+        <script src="/build_<?php echo $lastUpdate ?>/script.js?cachebust=3" type="text/javascript"></script>
+        <link rel="stylesheet" href="/build_<?php echo $lastUpdate ?>/style.css?cachebust=2">
             
     </head>
     <body>

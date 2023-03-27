@@ -53,15 +53,17 @@ function updateHTML(newHTML, div) {
 }
 
 function importProfile(profilePath, importType){
-    $.post("get.php", { "profilePath": profilePath, "getMeta": importType=="meta" }, function(data){ 
-        switchTo(parent.activemode);
-        
-        parent["imported"+importType] = data;
-        localStorage["th_cj_imported"+importType] = data;
-        
-        if(importType=="meta") parent.renderProfileMeta(data);
-        else if (importType=="code") parent.renderProfileCode(data);
-    });
+    if(confirm("Import from Toyhouse? This will overwrite existing "+importType+".")) {
+        $.post("get.php", { "profilePath": profilePath, "getMeta": importType=="meta" }, function(data){ 
+            switchTo(parent.activemode);
+            
+            parent["imported"+importType] = data;
+            localStorage["th_cj_imported"+importType] = data;
+            
+            if(importType=="meta") parent.renderProfileMeta(data);
+            else if (importType=="code") parent.renderProfileCode(data);
+        });
+    }
 }
 
 // Page interactivity functions
