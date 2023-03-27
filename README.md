@@ -2,17 +2,14 @@
 An editor with live preview for [Toyhouse](https://toyhou.se) themes. Created by Circlejourney, licenced under a CC-BY-SA-4.0 licence. Thank you so much for your help, I'm a busy person and I would love all the help I can get with updating the editor!
 
 ## Previewing on local server
-To preview a local copy of the code, you will need to Install [XAMPP](https://www.apachefriends.org/) from Apache Friends. Once added to your PATH variable, navigate to  the theditor root directory on the command line and start a local server:
+To preview a local copy of the code, you will need to Install [XAMPP](https://www.apachefriends.org/) from Apache Friends. Once you add XAMPP's programme directory to your PATH variable, navigate to the theditor root directory in the command line and start a local server:
 
 > `php -S localhost:8000`
 
-Once you've started up the server, to actually see the code editor, you will have to navigate to the url `localhost:8000/build_staging`.
-
-## On Font Awesome
-The Toyhouse Editor has Font Awesome Pro courtesy of [Min](https://github.com/liwoyadan) who very kindly shared their subscription with us 💙 This gives us access to premium FA icons. Font Awesome icons should load normally on a local server, but will not work on other public domains.
+Once you've started up the server, you can view a local preview of the code editor by navigating to the url `localhost:8000` in your web browser.
 
 ## Directory tree
-- **root**: Every file in the root is meant update across all versions of the editor, so for example clicking the changelog button on an older version of the code editor still brings up the latest changelog. Changelog, known issues, notes and versions are placed in the root folder. There is also a dummy index.php that simply pulls the contents from the build_staging folder's index.php.
+- **root**: Every file in the root is meant update across all versions of the editor, so for example clicking the changelog button on an older version of the code editor still brings up the latest changelog. Other files do live here in the production version, but only changelog.html is included as this is the only file I expect will need to be edited during development. There is also a dummy index.php that simply pulls the contents from the build_staging folder's index.php.
 - **build_staging**: contains all files related to the direct functioning of the editor. Overwhelmingly, this is where you'll be making changes. script.js contains the functionality of the code editor UI, and frame.js contains the functionality of the preview frame. The frame DOM element can be accessed with `frame`; you can get `frame`'s window object with `frame.contentWindow`. Conversely, frame.js can interact with the UI window with the `parent` object.
 - **src**: contains all project dependencies and source files from Toyhouse. Includes various Toyhouse theme CSS files. Files in this folder should generally not change unless the external sources change (such as if Toyhouse updates their code).
 - **templates**: HTML templates for layouts. These file names are referenced by frame.js > `switchTo()` and any new layouts should also be added to the layout menu in index.php.
@@ -21,7 +18,6 @@ The Toyhouse Editor has Font Awesome Pro courtesy of [Min](https://github.com/li
 
 ## General
 - After making your changes, do add a line to the changelog to record the new version number!
-- 
 
 ## Edit code editor functionality
 - If you're editing the UI functionality (anything related to buttons on the UI and frame appearance), almost everything you need to edit will be found in /index.php and build_staging/script.js.
@@ -33,3 +29,8 @@ The Toyhouse Editor has Font Awesome Pro courtesy of [Min](https://github.com/li
 - The `user-content` element should also have the additional class name `ace-code-container`, and the blurb section should have the class name `ace-code-container-2`. This tells the editor where to put the code.
 - Create an HTML file with a suitable filename in the templates folder and paste the processed code inside.
 - Add a new item to the dropdown menu in index.php. Its onclick property should be `switchTo( <HTML filename without extension> )`
+
+## Thank yous
+Huge thank you [Min](https://github.com/liwoyadan) for very kindly shared their Font Awesome Pro courtesy of subscription with us 💙 This gives us access to premium FA icons.
+
+And thank you [venfaanik](https://github.com/venfaaniik) for collaborating with me on the colour picker extension for Ace—your time and help are much appreciated!
