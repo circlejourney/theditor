@@ -33,4 +33,4 @@ Once you've started up the server, you can view a local preview of the code edit
 ## Thank yous
 Huge thank you [Min](https://github.com/liwoyadan) for very kindly shared their Font Awesome Pro courtesy of subscription with us 💙 This gives us access to premium FA icons.
 
-And thank you [venfaanik](https://github.com/venfaaniik) for collaborating with me on the colour picker extension for Ace—your time and help are much appreciated!
+And thank you [venfaaniik](https://github.com/venfaaniik) for collaborating with me on the colour picker extension for Ace—your time and help are much appreciated!
