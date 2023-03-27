@@ -1,0 +1,314 @@
+<div id="main" class="clearfix container-fluid main-container full-sidebar">
+    <div class="row row-offcanvas row-offcanvas-left" data-sticky-wrap>
+        <div class="col-md-3 col-lg-2 sidebar sidebar-offcanvas" id="sidebar">
+            <ul class="side-nav list-unstyled">
+                <li class="header"><i class="fa fa-book mr-2"></i> Literature</li>
+                <li class="user-name literature-user-name"><span class="display-user"><a href="#"><img
+                                src="https://f2.toyhou.se/file/f2-toyhou-se/users/admin?6"
+                                class="display-user-avatar" /><span
+                                class="display-user-username">User</span></a></span></li>
+                <li class="divider sidebar-divider-username"></li>
+                <li class="literature-name">
+                    <a href="#">
+                        <i class="fa fa-book mr-2"></i> Title
+                    </a>
+                </li>
+                <li class="active sidebar-chapter pl-2">
+                    <a href="#">
+                        <span class="badge badge-pill badge-info mr-1">
+                            1
+                        </span>
+                        Chapter title
+                    </a>
+                </li>
+                <li class="sidebar-chapter pl-2">
+                    <a href="#">
+                        <span class="badge badge-pill badge-info mr-1">
+                            2
+                        </span>
+                        Chapter title
+                    </a>
+                </li>
+                <li class="sidebar-chapter pl-2">
+                    <a href="#">
+                        <span class="badge badge-pill badge-info mr-1">
+                            3
+                        </span>
+                        Chapter title
+                    </a>
+                </li>
+                <li class="sidebar-chapter pl-2">
+                    <a href="#">
+                        <span class="badge badge-pill badge-info mr-1">
+                            4
+                        </span>
+                        Chapter title
+                    </a>
+                </li>
+
+                <li class="divider sidebar-divider-toc"></li>
+                <li class=" sidebar-li-comments">
+                    <a href="#">
+                        <i class="fa fa-comment fa-fw sidebar-icon"></i>Comments
+                    </a>
+                </li>
+                <li class="sidebar-li-favorites hide" data-id="#" data-url="#" th-favorite="0">
+                    <a href="#" class="favorited">
+                        <i class="fa fa-star fa-fw sidebar-icon"></i><span class="th-favorite-count">0</span> Favorites
+                    </a>
+                </li>
+                <li class="sidebar-li-favorites " data-id="#" data-url="#" th-favorite="1">
+                    <a href="#">
+                        <i class="far fa-star fa-fw sidebar-icon"></i><span class="th-favorite-count">0</span> Favorites
+                    </a>
+                </li>
+                <li class="sidebar-li-subscribe hide" data-url="#" th-favorite="0">
+                    <a href="#" class="favorited">
+                        <i class="fa fa-plus-square fa-fw sidebar-icon"></i>Unsubscribe
+                    </a>
+                </li>
+                <li class="sidebar-li-subscribe" data-url="#" th-favorite="1">
+                    <a href="#">
+                        <i class="far fa-plus-square fa-fw sidebar-icon"></i>Subscribe
+                    </a>
+                </li>
+                <li class="divider sidebar-divider-interactions"></li>
+                <li class="sidebar-li-report">
+                    <a href="#">
+                        <i class="fa fa-exclamation-triangle fa-fw sidebar-icon"></i>Report
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="col-sm-12 col-md-9 col-lg-10 content-main" id="content">
+            <div class="literature chapter-1">
+
+                <div class="col-12 literature-title">
+                    <h1><i class="fa fa-book mr-2"></i> Title</h1>
+                    <hr />
+                </div>
+
+
+                <div class="literature-header">
+                    <div class="card">
+                        <div class="card-block bg-faded">
+                            <div class="row">
+                                <div class="literature-header-avatar col-xl-2 hidden-lg-down">
+                                    <div class="img-thumbnail">
+                                        <img src="https://f2.toyhou.se/file/f2-toyhou-se/users/admin?6"
+                                            class="profile-name-icon">
+                                    </div>
+                                </div>
+                                <div class="literature-header-content col-xl-10 col-12">
+                                    <div class="literature-header-info col-xl-4 col-lg-6 col-12">
+                                        <div class="literature-header-rows">
+                                            <div class="hidden-xl-up mb-3 text-center literature-header-row">
+                                                <div class="img-thumbnail">
+                                                    <img src="https://f2.toyhou.se/file/f2-toyhou-se/users/admin?6"
+                                                        class="profile-name-icon">
+                                                </div>
+                                            </div>
+                                            <div class="row literature-header-row literature-header-authors">
+                                                <dt class="literature-header-row-title col-sm-4">
+                                                    Authors
+                                                </dt>
+                                                <dd class="literature-header-row-value col-sm-8">
+                                                    <a href="#"
+                                                        class="btn btn-sm btn-primary user-name-badge"><i
+                                                            class="fi-star user-name-icon"></i>User</a>
+                                                </dd>
+                                            </div>
+                                            <div class="row literature-header-row literature-header-cast">
+                                                <dt class="literature-header-row-title col-sm-4">
+                                                    Cast
+                                                </dt>
+                                                <dd class="literature-header-row-value col-sm-8">
+                                                    <a href="#"
+                                                        class="btn btn-sm btn-primary  cast-badge user-name-badge mb-1">Char 1</a>
+                                                    <a href="#"
+                                                        class="btn btn-sm btn-primary  cast-badge user-name-badge mb-1">Char 2</a>
+                                                    <a href="#"
+                                                        class="btn btn-sm btn-default hide cast-badge user-name-badge mb-1">Side char 1</a>
+                                                    <a href="#"
+                                                        class="btn btn-sm btn-default hide cast-badge user-name-badge mb-1">Side char 2</a>
+                                                    <a href="#" class="toggle-cast btn btn-link btn-sm mb-1" onclick="$('.cast-badge').removeClass('hide')"><small>Show
+                                                            More</small></a>
+                                                </dd>
+                                            </div>
+                                            <div class="row literature-header-row literature-header-published">
+                                                <dt class="literature-header-row-title col-sm-4">
+                                                    Published
+                                                </dt>
+                                                <dd class="literature-header-row-value col-sm-8">
+                                                    <abbr class="tooltipster datetime" title="1 Jan 1900, 0:00:00 am" data-toggle="tooltip">0 years, 0 months
+                                                        ago</abbr>
+                                                </dd>
+                                            </div>
+                                            <div class="row literature-header-row literature-header-published">
+                                                <dt class="literature-header-row-title col-sm-4">
+                                                    Updated
+                                                </dt>
+                                                <dd class="literature-header-row-value col-sm-8">
+                                                    <abbr class="tooltipster datetime" title="1 Jan 1900, 0:00:00 am" data-toggle="tooltip">0 years, 0 months
+                                                        ago</abbr>
+                                                </dd>
+                                            </div>
+                                            <div class="row literature-header-row literature-header-stats">
+                                                <dt class="literature-header-row-title col-sm-4">
+                                                    Stats
+                                                </dt>
+                                                <dd class="literature-header-row-value col-sm-8">
+                                                    <span
+                                                        class="literature-header-row-chapters btn btn-sm btn-secondary tooltipster"
+                                                        title="Multi-chapter"  data-toggle="tooltip">
+                                                        <i class="fa fa-book"></i>
+                                                    </span>
+                                                    <span
+                                                        class="literature-header-row-chapters btn btn-sm btn-secondary tooltipster"
+                                                        title="In Progress" data-original-title="In Progress">
+                                                        <i class="fa fa-wrench"></i>
+                                                    </span>
+                                                    <span
+                                                        class="literature-header-row-chapters btn btn-sm btn-secondary tooltipster"
+                                                        title="0 Chapters" data-original-title="0 Chapters">
+                                                        <i class="fa fa-book-open mr-1"></i>0
+                                                    </span>
+                                                    <span
+                                                        class="literature-header-row-words btn btn-sm btn-secondary tooltipster"
+                                                        title="12345 Words">
+                                                        <i class="fa fa-ellipsis-h mr-1"></i>12345
+                                                    </span>
+                                                    <a href="#"
+                                                        class="btn btn-sm btn-secondary literature-header-row-subscribers tooltipster"
+                                                        th-modal-trigger="" title=""
+                                                        data-original-title="0 Subscribers">
+                                                        <i class="fa fa-binoculars mr-1"></i>0
+                                                    </a>
+                                                    <a href="#"
+                                                        class="btn btn-sm btn-secondary literature-header-row-favorites tooltipster"
+                                                        th-modal-trigger="" title="0 Favorites">
+                                                        <i class="fa fa-star mr-1"></i>0</a>
+
+                                                    <a class="literature-header-row-comments btn btn-sm btn-secondary tooltipster"
+                                                        title="" href="#" data-original-title="0 Comments">
+                                                        <i class="fa fa-comment mr-1"></i>0
+                                                    </a>
+                                                </dd>
+                                            </div>
+                                            <hr>
+                                            <div class="literature-header-rows">
+                                                <div class="row literature-header-row">
+                                                    <dt class="literature-header-row-title col-sm-4">
+                                                        Chapter 1
+                                                    </dt>
+                                                    <dd class="literature-header-row-value col-sm-8">
+                                                        Published <abbr class="tooltipster datetime" title="1 Jan 1900, 0:00:00 am" data-toggle="tooltip">0 years, 0 months
+                                                            ago</abbr>
+                                                    </dd>
+                                                </div>
+                                                <div class="row literature-header-row">
+                                                    <dt class="literature-header-row-title col-sm-4">
+                                                    </dt>
+                                                    <dd class="literature-header-row-value col-sm-8">
+                                                        <span
+                                                            class="literature-header-row-words mr-1 btn btn-sm btn-secondary tooltipster"
+                                                            title="12345 Words" data-toggle="tooltip">
+                                                            <i class="fa fa-ellipsis-h mr-1"></i>12345
+                                                        </span>
+                                                        <a href="#"
+                                                            class="literature-header-row-comments mr-1 btn btn-sm btn-secondary tooltipster"
+                                                            title="0 Comments">
+                                                            <i class="fa fa-comment mr-1"></i>0
+                                                        </a>
+                                                    </dd>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="literature-header-subinfo col-xl-8 col-lg-6 col-12">
+                                        <div class="literature-header-rows">
+                                            <hr class="hidden-lg-up">
+                                            <div class="literature-header-warnings">
+                                                Warnings. Magna ullamco do proident anim aliqua magna excepteur. Ea est et sit eu cillum sunt occaecat eu.
+                                            </div>
+                                            <hr>
+                                            <div class="literature-header-blurb">
+                                                Exercitation occaecat occaecat culpa dolor voluptate proident laboris consequat proident sit. Nostrud dolor excepteur voluptate eu nisi esse elit quis minim. Sit velit id non aute mollit consequat exercitation in culpa eu incididunt eiusmod cillum duis.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="literature-controls text-right">
+                    <div class="literature-controls-theme">
+                        <i class="fa fa-palette"></i>
+                        Theme
+                        <span class="btn btn-sm btn-default literature-controls-theme-lighter" data-theme="lighter" onclick="toggleLitTheme('literature-theme-lighter')">
+                            Lighter
+                        </span>
+                        <span class="btn btn-sm btn-default literature-controls-theme-light" data-theme="light" onclick="toggleLitTheme('literature-theme-light')">
+                            Light
+                        </span>
+                        <span class="btn btn-sm btn-default literature-controls-theme-dark" data-theme="dark" onclick="toggleLitTheme('literature-theme-dark')">
+                            Dark
+                        </span>
+                        <span class="btn btn-sm btn-default literature-controls-theme-darker" data-theme="darker" onclick="toggleLitTheme('literature-theme-darker')">
+                            Darker
+                        </span>
+                        <span class="btn btn-sm btn-default literature-controls-theme-reset" onclick="toggleLitTheme('')">
+                            Reset
+                        </span>
+                    </div>
+                    <div class="literature-controls-font">
+                        <i class="fa fa-font"></i>
+                        Text
+                        <span class="btn btn-sm btn-default literature-controls-font-serif" onclick="toggleLitFont('Garamond')">
+                            Serif
+                        </span>
+                        <span class="btn btn-sm btn-default literature-controls-font-sans" onclick="toggleLitFont('Segoe UI')">
+                            Sans Serif
+                        </span>
+                        <span class="btn btn-sm btn-default literature-controls-font-reset" onclick="toggleLitFont('')">
+                            Reset
+                        </span>
+                    </div>
+                    <div class="literature-controls-size">
+                        <i class="fa fa-text-height"></i>
+                        Text Size
+                        <span class="btn btn-sm btn-default literature-controls-size-up" onclick="toggleLitSize(2)">
+                            <i class="fa fa-chevron-up"></i>
+                        </span>
+                        <span class="btn btn-sm btn-default literature-controls-size-down" onclick="toggleLitSize(-2)">
+                            <i class="fa fa-chevron-down"></i>
+                        </span>
+                        <span class="btn btn-sm btn-default literature-controls-size-reset" onclick="toggleLitSize(false)">
+                            Reset
+                        </span>
+                    </div>
+                </div>
+                <div class="literature-chapter mt-2">
+                    <div class="literature-chapter-title">
+                        <h2>
+                            Chapter title
+                        </h2>
+                        <hr>
+                    </div>
+                    <div class="literature-chapter-content fr-view ace-code-container">
+                    </div>
+                </div>
+                <div class="literature-next-chapter text-right mr-5 my-2">
+                    <a href="#" class="btn btn-default">
+                        <span class="badge badge-default">Chapter 2</span>
+                        Chapter title
+                        <i class="fa fa-arrow-right ml-2"></i>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

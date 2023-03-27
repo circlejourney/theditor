@@ -6,6 +6,10 @@ styles = {
     "Bee": "../src/site_apis-mellifera.css",
     "Pink Velvet": "../src/site_pink-velvet-cake.css"
 }
+
+$(document).ready(function(){
+    $("body").tooltip({ selector: '[data-toggle=tooltip]' });
+});
  
 function switchTo(mode) {
 
@@ -60,6 +64,8 @@ function importProfile(profilePath, importType){
     });
 }
 
+// Page interactivity functions
+
 function toggleUI (){
     $(".hide-ui-label").toggleClass("hide");
     
@@ -79,4 +85,19 @@ function toggleUI (){
 
 function toggleLightbox() {
     $(".mfp-ready").toggleClass("hide");
+}
+
+function toggleLitTheme(className) {
+    $("#main")
+        .removeClass()
+        .addClass("clearfix container-fluid main-container full-sidebar "+className);
+}
+
+function toggleLitFont(fontFamily) {
+    $(".literature-chapter-content").css("font-family", fontFamily);
+}
+
+function toggleLitSize(delta) {
+    if(delta) $(".literature-chapter-content").css("font-size", parseInt($(".literature-chapter-content").css("font-size")) + delta);
+    else  $(".literature-chapter-content").css("font-size", "");
 }

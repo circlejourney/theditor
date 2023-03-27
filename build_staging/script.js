@@ -9,6 +9,7 @@ const isMobile = typeof screen.orientation !== 'undefined';
 var htmlChanged = true;
 var cssChanged = true;
 var textChanged = true;
+let sessionSettings = {isBlurb: false, mobileView: false};
 var cssPanel, textPanel, editor, css_editor, text_editor, frame, importedmeta, importedcode;
 const loremipsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sollicitudin elit sed tellus blandit viverra sed eget odio. Donec accumsan tempor lacus, et venenatis elit feugiat non. Duis porta eros et velit blandit dapibus. Curabitur ac finibus eros. Duis placerat velit vitae massa sodales, eget mattis nibh pellentesque.";
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -53,7 +54,7 @@ $(window).on("load", function(){
         $(window).on("touchend", cancelDrag);
     });
     
-    $("#mobile-switch").on("touchstart", mobileSwitch);
+    $("#mobile-switch").on("click", mobileSwitch);
 
 
     // Set blank ACE text field behaviour
@@ -185,7 +186,7 @@ function loadLocal() {
     
     if(localStorage.th_cj_vertical) {
         $("#vertical").prop("checked", localStorage.th_cj_vertical == "true");
-        setVerticalLayout();
+        toggleVertical();
     }
     
     if(localStorage.th_cj_htmlpanel) {
@@ -227,7 +228,7 @@ function initEditors() {
         editor.setValue(showval);
         AceColorPicker.load(ace, editor);
     });
-    editor.isBlurb = false;
+    sessionSettings.isBlurb = false;
     editor.setShowPrintMargin(false);
     editor.session.setUseWrapMode(true);
     editor.session.on("change", function(){
@@ -287,7 +288,7 @@ function updateCode(){
 function updateHTML(){
     var val = editor.getValue();
     let updateDiv;
-    if(editor.isBlurb) {
+    if(sessionSettings.isBlurb) {
         localStorage.th_cj_blurb = val;
         updateDiv = "ace-code-container-2";
     } else {
@@ -322,57 +323,6 @@ function updateText() {
 function showInfo() {
     localStorage.th_cj_hidenotif2 = "true";
     $("#info").toggleClass("d-none");
-}
- 
-function setAutoUpdate() {
-    localStorage.th_cj_auto = $("#auto").prop("checked");
-    if($("#auto").prop("checked")) {
-        updateCode();
-    }
-}
-
-function setVerticalLayout() {
-    localStorage.th_cj_vertical = $("#vertical").prop("checked");
-    var codeheight, codewidth;
-    
-    if($("#vertical").prop("checked")) {
-        
-        $("#fields").append($(".html-visible"));
-        $("#fields").append($(".css-visible"));
-        $("#fields").append($(".text-visible"));
-        
-        $(document.body).addClass("vertical");
-        $("#main").addClass("vertical");
-        $("#frame").addClass("vertical");
-        $("#adjustbar").addClass("vertical");
-        $("#editor").addClass("vertical");
-        $("#titles").addClass("vertical");
-        $("#fields").addClass("vertical");
-        
-        $(document.body).append($("#footer"));
-    
-        codewidth = localStorage.th_cj_width;
-        codeheight = "100%";
-        
-    } else {
-        
-        $("#titles").append($(".field-title"));
-        
-        $(document.body).removeClass("vertical");
-        $("#main").removeClass("vertical");
-        $("#frame").removeClass("vertical");
-        $("#adjustbar").removeClass("vertical");
-        $("#editor").removeClass("vertical");
-        $("#titles").removeClass("vertical");
-        $("#fields").removeClass("vertical");
-        
-        $("#main").append($("#footer"));
-    
-        codeheight = localStorage.th_cj_height;
-        codewidth = "100%";
-    }
-    
-    initHeight(codeheight, codewidth);
 }
 
 function setHTMLPanel() {
@@ -530,58 +480,19 @@ function uploadFile(div){
     
 }
 
-function clearEditor(div, panel) {
-    var toClear;
-    
-    if(panel == "html") toClear = editor;
-    else if(panel == "css") toClear = css_editor
-    else if(panel == "text") toClear = text_editor;
-    
-    if(!$(div).data("justcleared")) {
-        $(div)
-            .html("<i class='fa fa-undo'></i>")
-            .attr("data-original-title", "Restore")
-            .data("justcleared", "true");
-        toClear.setValue("");
-    } else {
-        toClear.undo();
-        $(div)
-            .html("<i class='fa fa-trash'></i>")
-            .attr("data-original-title", "Clear")
-            .removeData("justcleared");
-    }
-    
-    toClear.focus();
-}
-
 function mobileSwitch(e) {
     e.stopPropagation();
-    if(!$("#editor").hasClass("shrunk")) {
-        $("#editor").addClass("shrunk");
+    if(!$("#editor").hasClass("d-none")) {
+        $("#editor").addClass("d-none");
+        $("#footer").addClass("d-none");
         $("#frame").addClass("expanded");
         $("#mobile-switch").html("<i class='fa fa-caret-up'></i>");
     } else {
-        $("#editor").removeClass("shrunk");
+        $("#editor").removeClass("d-none");
+        $("#footer").removeClass("d-none");
         $("#frame").removeClass("expanded");
         $("#mobile-switch").html("<i class='fa fa-caret-down'></i>");
     }
-}
-
-
-// DEBUG 
-
-var debugdiv;
-
-$(document).ready(function(){
-    if(location.hash == "#debug") {
-        debugdiv = $('<div id="debug" style="background-color: white; width: 40%; height: 90%; position: fixed; top: 0; right: 0; z-index: 10; overflow: auto;" onclick="shrinkGrow(this)"></div>');
-        $(document.body).append(debugdiv);
-    }
-});
-
-function debug_log(text) {
-    console.log(text);
-    if(debugdiv) debugdiv.append(text+"<br>");
 }
 
 function shrinkGrow(div) {
@@ -608,7 +519,7 @@ function renderProfileCode(data) {
         const changeHTML = confirm("Import HTML and CSS? This will overwrite anything that's currently inside your HTML and CSS fields.");
         
         if(changeHTML) {
-            if(editor.isBlurb) toggleBlurb();
+            if(sessionSettings.isBlurb) toggleBlurb();
             editor.setValue(
                 $(data).find(".user-content:not(.blurb)").html()
             );
@@ -634,7 +545,7 @@ function renderProfileMeta(data) {
         
         frame.contentWindow.$(".blurb").addClass("ace-code-container-2");
         localStorage.th_cj_blurb = $(data).find(".blurb").html();
-        if(editor.isBlurb) editor.setValue(localStorage.th_cj_blurb);
+        if(sessionSettings.isBlurb) editor.setValue(localStorage.th_cj_blurb);
 }
 
 function renderProfileCode(data) {
@@ -685,6 +596,65 @@ function insertLorem(panel) {
     }
 }
 
+// TOGGLERS
+ 
+function toggleAuto() {
+    localStorage.th_cj_auto = $("#auto").prop("checked");
+    if($("#auto").prop("checked")) {
+        updateCode();
+    }
+}
+
+function toggleVertical() {
+    localStorage.th_cj_vertical = $("#vertical").prop("checked");
+    var codeheight, codewidth;
+    
+    if($("#vertical").prop("checked")) {
+        
+        $("#fields").append($(".html-visible"));
+        $("#fields").append($(".css-visible"));
+        $("#fields").append($(".text-visible"));
+        
+        $(document.body).addClass("vertical");
+        $("#main").addClass("vertical");
+        $("#frame").addClass("vertical");
+        $("#adjustbar").addClass("vertical");
+        $("#editor").addClass("vertical");
+        $("#titles").addClass("vertical");
+        $("#fields").addClass("vertical");
+        
+        $(document.body).append($("#footer"));
+    
+        codewidth = localStorage.th_cj_width;
+        codeheight = "100%";
+        
+    } else {
+        
+        $("#titles").append($(".field-title"));
+        
+        $(document.body).removeClass("vertical");
+        $("#main").removeClass("vertical");
+        $("#frame").removeClass("vertical");
+        $("#adjustbar").removeClass("vertical");
+        $("#editor").removeClass("vertical");
+        $("#titles").removeClass("vertical");
+        $("#fields").removeClass("vertical");
+        
+        $("#main").append($("#footer"));
+    
+        codeheight = localStorage.th_cj_height;
+        codewidth = "100%";
+    }
+    
+    initHeight(codeheight, codewidth);
+}
+
+function toggleMobilePreview() {
+    if($("#mobile").prop("checked")) {
+        $("#frame").addClass("mobile-preview");
+    } else $("#frame").removeClass("mobile-preview");
+}
+
 function toggleUITheme(){
 
     localStorage.th_cj_lowContrast = $("#low-contrast").prop("checked");
@@ -711,13 +681,13 @@ function toggleUITheme(){
 }
 
 function toggleBlurb() {
-    if(editor.isBlurb) {
-        editor.isBlurb = false;
+    if(sessionSettings.isBlurb) {
+        sessionSettings.isBlurb = false;
         $("#html-tab").removeClass("text-dark");
         $("#blurb-tab").addClass("text-dark");
         editor.setValue(localStorage.th_cj);
     } else {
-        editor.isBlurb = true;
+        sessionSettings.isBlurb = true;
         $("#blurb-tab").removeClass("text-dark");
         $("#html-tab").addClass("text-dark");
         editor.setValue(localStorage.th_cj_blurb);

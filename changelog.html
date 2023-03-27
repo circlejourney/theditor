@@ -1,10 +1,26 @@
 <div class="changelog-item">
     <p>
-    <b>1.8.0 (26 March 2023):</b> This is a pretty big update that adds [ace-colorpicker by easylogic](https://github.com/easylogic/ace-colorpicker). Huge, huge thank you to <a href="https://toyhou.se/Venfaaniik">Venfaaniik</a> for bringing the extension to my attention and working with me on integrating it! It also fixes a couple of issues with code import, and adds CSS import.
+        <b>1.8.0 (26 March 2023):</b> This is a pretty big update that adds the following:
     </p>
+    
+    <ul>
+        <li>New feature (beta): <b>Colour picker</b>, using <a href="https://github.com/easylogic/ace-colorpicker">ace-colorpicker by easylogic</a>. Huge thank you to <a href="https://toyhou.se/Venfaaniik">Venfaaniik</a> for bringing the extension to my attention and working with me to integrate it! There are still some little bugs that I'll iron out...eventually.</li>
+        <li>New feature: <b>Mobile view toggle</b>. This was requested a lot and I'm still ironing it out across various devices (the flex sizing can be finicky).</li>
+        <li>New feature: <b>Undo and redo buttons</b>. This was also requested a lot and the poll indicated that most people would find this useful. Hopefully makes for easier mobile coding.</li>
+        <li>New feature: <b>Show/hide UI panel button</b>. Now you can hide the entire UI and preview your code at the full screen size. It's the little pink button in the bottom right corner of the preview area.</li>
+        <li>New layouts: <b>Bulletin, world page, literature chapter</b></li>
+        <li>Updated feature: <b>Code import now imports both HTML and CSS from the chosen page</b> (if the "allow-thcj-import" line is found on the page) and should also be a little less buggy.</li>
+        <li>Under the hood: PHP backend now imports Toyhouse pages with cURL instead of include (the janky and kinda insecure old-fashioned way of doing it).</li>
+        <li>Housekeeping/debug: Tooltips should now appear on mouse over. There may be some layouts where I haven't caught non-functional tooltips&mdash;let me know if you find any.</li>
+        <li>Housekeeping/debug: Reorganised layout menu into an order that makes a bit more sense.</li>
+        <li>Housekeeping/debug: Cleaned up and deidentified the layouts because I found some story IDs here and there.</li>
+    </ul>
+
     <p>
-        [The Github repo](https://github.com/circlejourney/theditor) is also way, way tidier now, which is just the cherry on top. I moved the manual versioning out of the dev environment (as I should have done long ago) and wrote a readme that will hopefully make it much easier to edit and preview in a local dev environment. You are always welcome to help me out if you wish. I'm just one person and there's a lot of feature requests and bug reports!
+        By the way, <a href="https://github.com/circlejourney/theditor">the Github repo</a> is also way, way tidier now, and now has a readme that will hopefully make it much easier to start edited and previewing in a local dev environment. I moved the manual versioning out of the dev environment (as I should have done long ago). You're always welcome to help me out if you wish. I'm just one person and there's a lot of feature requests and bug reports!
     </p>
+    
+    <p>Because of the size of this update, I'm expecting there to be some bugs that I haven't caught. As always, if you run into any issues, you can <a href="https://toyhou.se/~forums/26275.feedback-bugs-suggestions/388328.bug-reports">report the bug here</a> and use <a href="https://th.circlejourney.net/build_20221027">the previous version</a>. And of course, if you like the work I'm doing, I'm always happy for <a href="https://ko-fi.com/circlejourney">donations to my Ko-fi</a>!</p>
 </div>
 
 <div class="changelog-item">

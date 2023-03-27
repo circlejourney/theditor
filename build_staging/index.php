@@ -17,20 +17,20 @@
         <link rel="icon" href="https://circlejourney.net/resources/images/favicon.png">
         
         <!-- Misc libraries -->
-    	<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+    	<script src="/src/jquery-3.6.0/jquery-3.6.0.min.js"></script>
         <script src="/src/ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
         <link rel="stylesheet" href="/src/ace-colorpicker.css" />
         <script type="text/javascript" src="/src/ace-colorpicker.js" ></script>
-        <script src="../src/sass.js-master/dist/sass.js"></script>
+        <script src="/src/sass.js-master/dist/sass.js"></script>
         
         <!-- TH source -->
-    	<link id="theme-css" href="../src/site_black-forest.css?cachebust=2" rel="stylesheet">
+    	<link id="theme-css" href="/src/site_black-forest.css?cachebust=2" rel="stylesheet">
     	
         <!-- FONT AWESOME -->
-        <link rel="stylesheet" href="../src/fontawesome-pro-6.0.0-beta3-web/css/all.min.css">
-        <script src="../src/fontawesome-pro-6.0.0-beta3-web/js/all.min.js" crossorigin="anonymous"></script>
+        <link rel="stylesheet" href="/src/fontawesome-pro-6.0.0-beta3-web/css/all.min.css">
+        <script src="/src/fontawesome-pro-6.0.0-beta3-web/js/all.min.js" crossorigin="anonymous"></script>
         
-        <script src="/build_<?php echo $lastUpdate ?>/script.js?cachebust=1" type="text/javascript"></script>
+        <script src="/build_<?php echo $lastUpdate ?>/script.js?cachebust=2" type="text/javascript"></script>
         <link rel="stylesheet" href="/build_<?php echo $lastUpdate ?>/style.css?cachebust=1">
             
     </head>
@@ -88,16 +88,16 @@
     </div>
     
     <div id="main">
-        <iframe src="/build_<?php echo $lastUpdate ?>/frame.html" id="frame" class="d-flex">
+        <iframe src="/build_<?php echo $lastUpdate ?>/frame.html" id="frame" class="d-flex align-self-center">
         </iframe>
         
         <div id="adjustbar" class="progress-bar progress-bar-striped bg-secondary">
-            <button class="btn btn-primary show-small" id="mobile-switch">
+            <button class="btn btn-primary" id="mobile-switch">
                 <i class="fa fa-caret-down"></i>
             </button>
         </div>
         
-        <div id="editor" class="d-flex">
+        <div id="editor">
             
             <div id="titles">
                 <div class="field-title html-visible">
@@ -105,29 +105,33 @@
                         <a class="nav-tab" id="html-tab" onclick="toggleBlurb('html')">HTML</a> &ensp; <a class="nav-tab text-dark" id="blurb-tab" onclick="toggleBlurb('blurb')">Blurb</a>
                     </div>
                     <span class="panel-options" id="html-options">
-                        <a class="edit-button" onclick="insertLorem('html')" data-toggle="tooltip" title="Insert lorem ipsum"><i class="fas fa-text"></i></a>
-                        <a class="edit-button" onclick="uploadFileDialogue('html')" data-toggle="tooltip" title="Upload file"><i class="fa fa-file-upload"></i></a>                        
+                        <a class="edit-button" onclick="editor.undo()" data-toggle="tooltip" title="Undo"><i class="fas fa-undo-alt"></i></a>
+                        <a class="edit-button" onclick="editor.redo()" data-toggle="tooltip" title="Redo"><i class="fas fa-redo-alt"></i></a>
+                        <a class="edit-button" onclick="editor.insert(loremipsum)" data-toggle="tooltip" title="Insert lorem ipsum"><i class="fas fa-text"></i></a>
+                        <a class="edit-button" onclick="uploadFileDialogue('html')" data-toggle="tooltip" title="Import file"><i class="fa fa-file-import"></i></a>                        
                         <a class="edit-button" onclick="downloadFile('html')" data-toggle="tooltip" title="Save as file"><i class="fa fa-save"></i></a>
-                        <a class="edit-button clear-button" id="clear-html" onclick="clearEditor(this, 'html')" data-toggle="tooltip" title="Clear"><i class="fa fa-trash"></i></a>
+                        <a class="edit-button clear-button" id="clear-html" onclick="editor.setValue('')" data-toggle="tooltip" title="Clear"><i class="fa fa-trash"></i></a>
                     </span>
                 </div>
                 <div class="field-title css-visible">
                     CSS
                     <span class="panel-options" id="css-options">
-                        <a class="edit-button" onclick="insertLorem('css')" data-toggle="tooltip" title="Insert lorem ipsum"><i class="fas fa-text"></i></a>
+                        <a class="edit-button" onclick="css_editor.undo()" data-toggle="tooltip" title="Undo"><i class="fas fa-undo-alt"></i></a>
+                        <a class="edit-button" onclick="css_editor.redo()" data-toggle="tooltip" title="Redo"><i class="fas fa-redo-alt"></i></a>
                         
-                        <a class="edit-button" onclick="uploadFileDialogue('css')" data-toggle="tooltip" title="Upload file"><i class="fa fa-file-upload"></i></a>
+                        <a class="edit-button" onclick="uploadFileDialogue('css')" data-toggle="tooltip" title="Import file"><i class="fa fa-file-import"></i></a>
                         <a class="edit-button" onclick="downloadFile('css')" data-toggle="tooltip" title="Save as file"><i class="fa fa-save"></i></a>
-                        <a class="edit-button clear-button" id="clear-css" onclick="clearEditor(this, 'css')" data-toggle="tooltip" title="Clear"><i class="fa fa-trash"></i></a>
+                        <a class="edit-button clear-button" id="clear-css" onclick="css_editor.setValue('')" data-toggle="tooltip" title="Clear"><i class="fa fa-trash"></i></a>
                     </span>
                 </div>
                 <div class="field-title text-visible">
                     Scratch pad
                     
                     <span class="panel-options" id="text-options">
-                        <a class="edit-button" onclick="insertLorem('text')" data-toggle="tooltip" title="Insert lorem ipsum"><i class="fas fa-text"></i></a>
+                        <a class="edit-button" onclick="text_editor.undo()" data-toggle="tooltip" title="Undo"><i class="fas fa-undo-alt"></i></a>
+                        <a class="edit-button" onclick="text_editor.redo()" data-toggle="tooltip" title="Redo"><i class="fas fa-redo-alt"></i></a>
                         
-                        <a class="edit-button clear-button" id="clear-text" onclick="clearEditor(this, 'text')" data-toggle="tooltip" title="Clear"><i class="fa fa-trash"></i></a>
+                        <a class="edit-button clear-button" id="clear-text" onclick="text_editor.setValue('')" data-toggle="tooltip" title="Clear"><i class="fa fa-trash"></i></a>
                     </span>
                 </div>
             </div>
@@ -140,7 +144,7 @@
             </div>
         </div>
             
-        <div id="footer" class="bg-light d-flex justify-content-between ">
+        <div id="footer" class="bg-light justify-content-between ">
             <div id="footer-left">
                 <a class="btn btn-secondary" onclick="showInfo()"><i class="fa fa-info"></i></a>
     
@@ -175,11 +179,27 @@
                         Character basic tab
                     </a>
                     
-                    <a class="dropdown-item" onclick="switchTo('thread')">
+                    <a class="dropdown-item" onclick="switchTo('char-gallery')">
+                        Character gallery (static)
+                    </a>
+                    
+                    <a class="dropdown-item" onclick="switchTo('forum-thread')">
                         Forum thread
                     </a>
                     <a class="dropdown-item" onclick="switchTo('forum-post')">
                         Forum post
+                    </a>
+                    
+                    <a class="dropdown-item" onclick="switchTo('char-library')">
+                        Character library (static)
+                    </a>
+
+                    <a class="dropdown-item" onclick="switchTo('lit-chapter')">
+                        Literature chapter
+                    </a>
+
+                    <a class="dropdown-item" onclick="switchTo('bulletin')">
+                        Bulletin
                     </a>
                     <a class="dropdown-item" onclick="switchTo('folder')">
                         Folder
@@ -187,18 +207,14 @@
                     <a class="dropdown-item" onclick="switchTo('world')">
                         World
                     </a>
+                    <a class="dropdown-item" onclick="switchTo('world-page')">
+                        World page
+                    </a>
 
                     <a class="dropdown-item" onclick="switchTo('warning')">
                         Warning
                     </a>
-                    
-                    <a class="dropdown-item" onclick="switchTo('char-gallery')">
-                        Character gallery (static)
-                    </a>
-                    
-                    <a class="dropdown-item" onclick="switchTo('char-library')">
-                        Character library (static)
-                    </a>
+
                     </div>
                 </div>
                 
@@ -235,11 +251,11 @@
                 
 
                 <span class="checkbox-container">
-                    <input type="checkbox" id="auto" onchange="setAutoUpdate();" checked="true">&nbsp;<label for="auto">Auto-update</label>
+                    <input type="checkbox" id="auto" onchange="toggleAuto()" checked="true">&nbsp;<label for="auto">Auto update</label>
                 </span>
 
                 <span class="checkbox-container">
-                    <input type="checkbox" class="hide-small" id="vertical" onchange="setVerticalLayout();">&nbsp;<label for="vertical" class="hide-small">Vertical</label>
+                    <input type="checkbox" class="hide-small" id="mobile" onchange="toggleMobilePreview()">&nbsp;<label for="mobile">Mobile view</label>
                 </span>
 
                 <div id="ui-options" class="dropdown d-sm-inline">
@@ -248,10 +264,6 @@
                     </a>
                     
                     <div class="dropdown-menu ui-options px-2" aria-labelledby="dropdownbutton">
-
-                        <span class="checkbox-container">
-                            <input type="checkbox" id="low-contrast" onchange="toggleUITheme();">&nbsp;<label for="low-contrast">Low contrast</label>
-                        </span>
 
                         <span class="checkbox-container">
                             <input type="checkbox" id="html-panel" onclick="setHTMLPanel();" checked="true">&nbsp;<label for="html-panel">HTML</label>
@@ -266,6 +278,14 @@
                         </span>
 
                         <span class="checkbox-container">
+                            <input type="checkbox" class="hide-small" id="vertical" onchange="toggleVertical()">&nbsp;<label for="vertical" class="hide-small">Vertical</label>
+                        </span>
+
+                        <span class="checkbox-container">
+                            <input type="checkbox" id="low-contrast" onchange="toggleUITheme();">&nbsp;<label for="low-contrast">Low contrast</label>
+                        </span>
+
+                        <span class="checkbox-container">
                             <input type="checkbox" id="big-text" onclick="toggleBigFont();"> <label for="big-text">Big text</label>
                         </span>
                     </div>
@@ -277,7 +297,7 @@
         </div>
     </div>
     
-    <script src="../src/site.js" type="text/javascript"></script>
+    <script src="/src/site.js" type="text/javascript"></script>
     
     
         <!-- Default Statcounter code for Th.circlejourney.net
