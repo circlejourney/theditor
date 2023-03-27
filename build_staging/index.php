@@ -19,8 +19,9 @@
         <!-- Misc libraries -->
     	<script src="https://code.jquery.com/jquery-3.5.1.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
         <script src="/src/ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../src/sass.js-master/dist/sass.js">
-        </script>
+        <link rel="stylesheet" href="/src/ace-colorpicker.css" />
+        <script type="text/javascript" src="/src/ace-colorpicker.js" ></script>
+        <script src="../src/sass.js-master/dist/sass.js"></script>
         
         <!-- TH source -->
     	<link id="theme-css" href="../src/site_black-forest.css?cachebust=2" rel="stylesheet">
@@ -29,7 +30,7 @@
         <link rel="stylesheet" href="../src/fontawesome-pro-6.0.0-beta3-web/css/all.min.css">
         <script src="../src/fontawesome-pro-6.0.0-beta3-web/js/all.min.js" crossorigin="anonymous"></script>
         
-        <script src="/build_<?php echo $lastUpdate ?>/script.js?cachebust=0" type="text/javascript"></script>
+        <script src="/build_<?php echo $lastUpdate ?>/script.js?cachebust=1" type="text/javascript"></script>
         <link rel="stylesheet" href="/build_<?php echo $lastUpdate ?>/style.css?cachebust=1">
             
     </head>
@@ -228,7 +229,6 @@
                      <i id='sidebar-toggle-icon' class="fa fa-chevron-left"></i> Sidebar
                 </a>
                         
-                <a class="hide-small btn btn-primary" href="/watermark" target="_blank">Watermark previewer</a>
             </div>
             
             <div id="footer-right">
