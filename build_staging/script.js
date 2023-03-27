@@ -606,6 +606,7 @@ function toggleVertical() {
         $("#editor").addClass("vertical");
         $("#titles").addClass("vertical");
         $("#fields").addClass("vertical");
+        $("#mobile-switch").addClass("vertical")
         
         $(document.body).append($("#footer"));
     
@@ -623,6 +624,7 @@ function toggleVertical() {
         $("#editor").removeClass("vertical");
         $("#titles").removeClass("vertical");
         $("#fields").removeClass("vertical");
+        $("#mobile-switch").removeClass("vertical")
         
         $("#main").append($("#footer"));
     

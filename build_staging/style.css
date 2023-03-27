@@ -176,6 +176,10 @@ a {
     height: 100% !important;
 }
 
+#frame.expanded.vertical {
+    width: 100% !important;
+}
+
 #adjustbar {
     cursor: ns-resize;
     position: relative;
@@ -199,8 +203,20 @@ a {
 #mobile-switch {
     z-index: 6;
     position: absolute;
+    top: auto;
     bottom: 13px;
-    right: 20px;
+    right: 22px;
+    padding: 0.5rem 0.8rem;
+}
+
+#mobile-switch.vertical {
+    top: 13px;
+    bottom: auto;
+    right: 26px;
+}
+
+#mobile-switch.vertical {
+    transform: rotate(-90deg);
 }
 
 #editor { 
@@ -360,11 +376,6 @@ a {
     margin-right: 1em;
 }
 
-.dropdown-menu {
-    z-index: 1000;
-    line-height: 1.6rem;
-}
-
 #footer-left {
     -webkit-flex-grow: 2;
     -moz-flex-grow: 2;
@@ -382,6 +393,15 @@ a {
     flex-grow: 3;
     margin-left: 5px;
     width: 45%;
+}
+
+.dropdown {
+    position: static;
+}
+
+.dropdown-menu {
+    z-index: 1000;
+    line-height: 1.6rem;
 }
 
 .disclaimer {

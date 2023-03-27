@@ -93,7 +93,7 @@
         
         <div id="adjustbar" class="progress-bar progress-bar-striped bg-secondary">
             <button class="btn btn-primary" id="mobile-switch">
-                <i class="fa fa-caret-down"></i>
+                <i class="mobile-switch-arrow fa fa-caret-down"></i>
             </button>
         </div>
         
