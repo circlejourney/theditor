@@ -9605,8 +9605,4 @@ var index = _extends({}, Util, ColorPicker, AceExtension);
 
 return index;
 
-<<<<<<< HEAD
 }());
-=======
-}());
->>>>>>> restructure
