@@ -1,7 +1,0 @@
-[
-  "ccall",
-  "UTF8ToString",
-  "getValue",
-  "lengthBytesUTF8",
-  "stringToUTF8"
-]

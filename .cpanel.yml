@@ -1,5 +1,5 @@
 ---
 deployment:
  tasks:
- - export DEPLOYPATH=/home/circlejo/public_html/
+ - export DEPLOYPATH=/home/circlejo/theditor_latest/
  - /bin/cp -R * $DEPLOYPATH
