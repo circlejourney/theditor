@@ -14,6 +14,9 @@ Once you've started up the server, you can view a local preview of the code edit
 - **src**: contains all project dependencies and source files from Toyhouse. Includes various Toyhouse theme CSS files. Files in this folder should generally not change unless the external sources change (such as if Toyhouse updates their code).
 - **templates**: HTML templates for layouts. These file names are referenced by frame.js > `switchTo()` and any new layouts should also be added to the layout menu in index.php.
 
+# Dependencies and copyright
+This editor uses [jQuery](https://code.jquery.com/), [Ace Editor](https://ace.c9.io/), [ace-colorpicker](https://github.com/easylogic/ace-colorpicker), [Bootstrap](https://getbootstrap.com/), [Font Awesome](https://fontawesome.com/), [Foundation Icons](https://zurb.com/playground/foundation-icon-fonts-3), and of course the [Toyhouse](https://toyhou.se) source files. The source files are included in the codebase. I do not own any of these libraries or resources.
+
 # How to guides
 
 ## General
