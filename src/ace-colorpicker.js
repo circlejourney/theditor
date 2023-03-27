@@ -473,6 +473,7 @@ function convertMatchesArray(str) {
         it = trim(it);
 
         if (ret.matches[index]) {
+            console.log(index);
             it = it.replace('@' + index, ret.matches[index].color);
         }
 
@@ -489,7 +490,7 @@ function reverseMatches(str, matches) {
 }
 
 function trim(str) {
-    return str.replace(/^\s+|\s+$/g, '');
+    return str.trim();
 }
 
 /**
@@ -6661,7 +6662,7 @@ var ColorManager = function (_BaseModule) {
     }, {
         key: '/toHEX',
         value: function toHEX($store) {
-            return $store.dispatch('/toString', 'hex').toUpperCase();
+            return $store.dispatch('/toString', 'hex');
         }
     }]);
     return ColorManager;
@@ -7178,7 +7179,7 @@ var BaseColorPicker = function (_UIElement) {
         value: function initializeStoreEvent() {
             get(BaseColorPicker.prototype.__proto__ || Object.getPrototypeOf(BaseColorPicker.prototype), 'initializeStoreEvent', this).call(this);
 
-            this.$store.on('changeColor', this.callbackChange);
+            this.$store.on('lastUpdateColor', this.callbackChange);
             this.$store.on('lastUpdateColor', this.callbackLastUpdate);
             this.$store.on('changeFormat', this.callbackChange);
         }
@@ -7187,7 +7188,7 @@ var BaseColorPicker = function (_UIElement) {
         value: function destroy() {
             get(BaseColorPicker.prototype.__proto__ || Object.getPrototypeOf(BaseColorPicker.prototype), 'destroy', this).call(this);
 
-            this.$store.off('changeColor', this.callbackChange);
+            this.$store.off('lastUpdateColor', this.callbackChange);
             this.$store.off('lastUpdateColor', this.callbackLastUpdate);
             this.$store.off('changeFormat', this.callbackChange);
 
@@ -9453,6 +9454,11 @@ var ColorView = function () {
 
             var rules = session.$mode.$highlightRules.getRules();
             for (var stateName in rules) {
+                // Fixes SCSS variable.language highlight rule that overrides colour highlighting
+                rules[stateName].map(
+                    i => { if(i.regex == ":[a-z0-9-_]+" && i.token == "variable.language") i.regex = "^\s*:[a-z0-9-_]+"; }
+                );
+
                 if (Object.prototype.hasOwnProperty.call(rules, stateName)) {
                     rules[stateName].unshift({
                         token: "color",
@@ -9469,7 +9475,7 @@ var ColorView = function () {
             }
             // force recreation of tokenizer
             session.$mode.$tokenizer = null;
-            session.bgTokenizer.setTokenizer(editor.session.$mode.getTokenizer());
+            session.bgTokenizer.setTokenizer(this.editor.session.$mode.getTokenizer());
             // force re-highlight whole document
             session.bgTokenizer.start(0);
 

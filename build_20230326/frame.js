@@ -17,7 +17,7 @@ function switchTo(mode) {
         updateCSS(localStorage.th_cj_css);
 
         if(parent.importedmeta) {
-            importProfileMeta(parent.importedmeta);
+            parent.renderProfileMeta(parent.importedmeta);
         }
         
         if(mode == "world" || mode.indexOf("profile") != -1 || mode == "warning") {
@@ -49,46 +49,23 @@ function updateHTML(newHTML, div) {
 }
 
 function importProfile(profilePath, importType){
-    $.get("get.php", { "profileCode": profilePath, "getMeta": importType=="meta" }, function(data){    
-        if(data==="") {
-            alert("Private or invalid profile.");
-            return;
-        }
-        
-        switchTo(parent.activemode);
-        
-        parent["imported"+importType] = data;
-        localStorage["th_cj_imported"+importType] = data;
-        
-        if(importType=="meta") importProfileMeta(parent.importedmeta);
-        else if (importType=="code") importProfileCode(parent.importedcode);
-    });
-}
+    
+    if(importType == "meta" || confirm("Import HTML and CSS? This will overwrite anything that's currently inside your HTML and CSS fields.")) {
 
-function importProfileMeta(data) {
-        
-        var profileHeader = $(data).find(".profile-header").html();
-        $(".profile-header").html(profileHeader);
-        $(".profile-header a").prop("href", "#");
-        
-        var worldHeader = $(data).find(".profile-name-section").html();
-        $(".profile-name-section").html(worldHeader);
-        $(".profile-name-section a").prop("href", "#");
-        
-        var profileSidebar = $(data).find("#sidebar").html();
-        $("#sidebar").html(profileSidebar);
-        $("#sidebar a").prop("href", "#");
-}
+        $.post("get.php", { "profilePath": profilePath, "getMeta": importType=="meta" }).done(
+            function(data){
+                switchTo(parent.activemode);
+                
+                parent["imported"+importType] = data;
+                localStorage["th_cj_imported"+importType] = data;
+                
+                if(importType=="meta") parent.renderProfileMeta(data);
+                else if (importType=="code") parent.renderProfileCode(data);
+            }
+        );
 
-function importProfileCode(data) {
+    }
 
-        const changeHTML = confirm("Import HTML? This will overwrite your current work.");
-        
-        if(changeHTML) {
-            parent.editor.setValue(
-                $(data).find(".user-content:not(.blurb)").html()
-            );
-        }
 }
 
 function toggleUI (){

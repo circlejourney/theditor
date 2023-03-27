@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <?php $lastUpdate = "20221027"; ?>
+        <?php $lastUpdate = "20230326"; ?>
         <script>
             const lastUpdate = <?php echo $lastUpdate ?>;
         </script>
@@ -30,7 +30,7 @@
         <link rel="stylesheet" href="../src/fontawesome-pro-6.0.0-beta3-web/css/all.min.css">
         <script src="../src/fontawesome-pro-6.0.0-beta3-web/js/all.min.js" crossorigin="anonymous"></script>
         
-        <script src="/build_<?php echo $lastUpdate ?>/script.js?cachebust=0" type="text/javascript"></script>
+        <script src="/build_<?php echo $lastUpdate ?>/script.js?cachebust=1" type="text/javascript"></script>
         <link rel="stylesheet" href="/build_<?php echo $lastUpdate ?>/style.css?cachebust=1">
             
     </head>
@@ -229,7 +229,6 @@
                      <i id='sidebar-toggle-icon' class="fa fa-chevron-left"></i> Sidebar
                 </a>
                         
-                <a class="hide-small btn btn-primary" href="/watermark" target="_blank">Watermark previewer</a>
             </div>
             
             <div id="footer-right">

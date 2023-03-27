@@ -4,7 +4,6 @@ var activemode = "profile";
 var activetheme = "Default";
 var showcss = "\/* Enter CSS here... *\/";
 var showtext = "Paste drafts and snippets here...";
-var isBlurb = false;
 const isSafari = navigator.userAgent.indexOf("Safari") > -1;
 const isMobile = typeof screen.orientation !== 'undefined';
 var htmlChanged = true;
@@ -112,10 +111,8 @@ $(window).on("load", function(){
     }, 1000);
     
     $("#import .dropdown-menu").click(function(e){
-        console.log("clock");
         e.stopPropagation();
     });
-
 
     $(window).keypress(function(e){
         if(e.keyCode == 10 && e.ctrlKey) {
@@ -227,10 +224,11 @@ function initEditors() {
 
     editor = ace.edit("html-editor");
     editor.session.setMode("ace/mode/html", () => {
+        editor.setValue(showval);
         AceColorPicker.load(ace, editor);
     });
+    editor.isBlurb = false;
     editor.setShowPrintMargin(false);
-    editor.setValue(showval);
     editor.session.setUseWrapMode(true);
     editor.session.on("change", function(){
         htmlChanged=true;
@@ -240,11 +238,11 @@ function initEditors() {
     });
     
     css_editor = ace.edit("css-editor");
-    css_editor.session.setMode("ace/mode/css", () => {
-        AceColorPicker.load(ace, editor);
+    css_editor.session.setMode("ace/mode/scss", () => {
+        css_editor.setValue(showcss);
+        AceColorPicker.load(ace, css_editor);
     });
     css_editor.setShowPrintMargin(false);
-    css_editor.setValue(showcss);
     css_editor.session.setUseWrapMode(true);
     css_editor.session.on("change", function(){
         cssChanged = true;
@@ -289,7 +287,7 @@ function updateCode(){
 function updateHTML(){
     var val = editor.getValue();
     let updateDiv;
-    if(isBlurb) {
+    if(editor.isBlurb) {
         localStorage.th_cj_blurb = val;
         updateDiv = "ace-code-container-2";
     } else {
@@ -604,6 +602,39 @@ function startImport(importType){
     frame.contentWindow.importProfile($("#char-id").val(), importType);
 }
 
+function renderProfileCode(data) {
+    let customCSS;
+    if(data.indexOf("<style>") > -1) {
+        customCSS = data.split("<style>")[1].split("</style>")[0].replace("<![CDATA[", "").replace("]]>", "").trim();
+    }
+        if(editor.isBlurb) toggleBlurb();
+        editor.setValue(
+            $(data).find(".user-content:not(.blurb)").html()
+        );
+        customCSS || css_editor.setValue(
+            customCSS
+        )
+}
+
+function renderProfileMeta(data) {
+        
+        let profileHeader = $(data).find(".profile-header").html();
+        frame.contentWindow.$(".profile-header").html(profileHeader);
+        frame.contentWindow.$(".profile-header a").prop("href", "#");
+        
+        let worldHeader = $(data).find(".profile-name-section").html();
+        frame.contentWindow.$(".profile-name-section").html(worldHeader);
+        frame.contentWindow.$(".profile-name-section a").prop("href", "#");
+        
+        let profileSidebar = $(data).find("#sidebar").html();
+        frame.contentWindow.$("#sidebar").html(profileSidebar);
+        frame.contentWindow.$("#sidebar a").prop("href", "#");
+        
+        frame.contentWindow.$(".blurb").addClass("ace-code-container-2");
+        localStorage.th_cj_blurb = $(data).find(".blurb").html();
+        if(editor.isBlurb) editor.setValue(localStorage.th_cj_blurb);
+}
+
 function hardReset() {
     if(!confirm("Download all code as text files and reset?")) return false;
     
@@ -663,13 +694,13 @@ function toggleUITheme(){
 }
 
 function toggleBlurb() {
-    if(isBlurb) {
-        isBlurb = false;
+    if(editor.isBlurb) {
+        editor.isBlurb = false;
         $("#html-tab").removeClass("text-dark");
         $("#blurb-tab").addClass("text-dark");
         editor.setValue(localStorage.th_cj);
     } else {
-        isBlurb = true;
+        editor.isBlurb = true;
         $("#blurb-tab").removeClass("text-dark");
         $("#html-tab").addClass("text-dark");
         editor.setValue(localStorage.th_cj_blurb);
