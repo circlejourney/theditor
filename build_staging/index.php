@@ -22,6 +22,8 @@
         <link rel="stylesheet" href="/src/ace-colorpicker.css" />
         <script type="text/javascript" src="/src/ace-colorpicker.js" ></script>
         <script src="/src/sass.js-master/dist/sass.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.7/beautify-css.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.7/beautify-html.min.js"></script>
         
         <!-- TH source -->
     	<link id="theme-css" href="/src/site_black-forest.css?cachebust=2" rel="stylesheet">
@@ -108,6 +110,7 @@
                         <a class="edit-button" onclick="editor.undo()" data-toggle="tooltip" title="Undo"><i class="fas fa-undo-alt"></i></a>
                         <a class="edit-button" onclick="editor.redo()" data-toggle="tooltip" title="Redo"><i class="fas fa-redo-alt"></i></a>
                         <a class="edit-button" onclick="editor.insert(loremipsum)" data-toggle="tooltip" title="Insert lorem ipsum"><i class="fas fa-text"></i></a>
+                        <a class="edit-button" onclick="beautifyHTML()" data-toggle="tooltip" title="Format file"><i class="fas fa-brackets-curly"></i></a>
                         <a class="edit-button" onclick="uploadFileDialogue('html')" data-toggle="tooltip" title="Import file"><i class="fa fa-file-import"></i></a>                        
                         <a class="edit-button" onclick="downloadFile('html')" data-toggle="tooltip" title="Save as file"><i class="fa fa-save"></i></a>
                         <a class="edit-button clear-button" id="clear-html" onclick="editor.setValue('')" data-toggle="tooltip" title="Clear"><i class="fa fa-trash"></i></a>
@@ -118,7 +121,7 @@
                     <span class="panel-options" id="css-options">
                         <a class="edit-button" onclick="css_editor.undo()" data-toggle="tooltip" title="Undo"><i class="fas fa-undo-alt"></i></a>
                         <a class="edit-button" onclick="css_editor.redo()" data-toggle="tooltip" title="Redo"><i class="fas fa-redo-alt"></i></a>
-                        
+                        <a class="edit-button" onclick="beautifyCSS()" data-toggle="tooltip" title="Format file"><i class="fas fa-brackets-curly"></i></a>
                         <a class="edit-button" onclick="uploadFileDialogue('css')" data-toggle="tooltip" title="Import file"><i class="fa fa-file-import"></i></a>
                         <a class="edit-button" onclick="downloadFile('css')" data-toggle="tooltip" title="Save as file"><i class="fa fa-save"></i></a>
                         <a class="edit-button clear-button" id="clear-css" onclick="css_editor.setValue('')" data-toggle="tooltip" title="Clear"><i class="fa fa-trash"></i></a>

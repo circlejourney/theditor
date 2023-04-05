@@ -13,6 +13,8 @@ let sessionSettings = {isBlurb: false, mobileView: false};
 var cssPanel, textPanel, editor, css_editor, text_editor, frame, importedmeta, importedcode;
 const loremipsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sollicitudin elit sed tellus blandit viverra sed eget odio. Donec accumsan tempor lacus, et venenatis elit feugiat non. Duis porta eros et velit blandit dapibus. Curabitur ac finibus eros. Duis placerat velit vitae massa sodales, eget mattis nibh pellentesque.";
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const beautify_HTML_Options = { "indent_size": "1", "indent_char": "\t", "max_preserve_newlines": "-1", "preserve_newlines": false, "keep_array_indentation": false, "break_chained_methods": false, "indent_scripts": "normal", "brace_style": "expand", "space_before_conditional": true, "unescape_strings": false, "jslint_happy": false, "end_with_newline": false, "wrap_line_length": "0", "indent_inner_html": false, "comma_first": false, "e4x": false, "indent_empty_lines": false }
+const beautify_CSS_Options = { "indent_size": "2", "indent_char": " ", "max_preserve_newlines": "-1", "preserve_newlines": false, "keep_array_indentation": false, "break_chained_methods": false, "indent_scripts": "normal", "brace_style": "collapse", "space_before_conditional": true, "unescape_strings": false, "jslint_happy": false, "end_with_newline": false, "wrap_line_length": "0", "indent_inner_html": false, "comma_first": false, "e4x": false, "indent_empty_lines": false };
 
 // Initialisation of web app is housed inside the window.onload event listener. TODO: Make this promise-based, i.e. upon loading all required files
 $(window).on("load", function(){
@@ -319,6 +321,16 @@ function updateCSS() {
 function updateText() {
     localStorage.th_cj_text = text_editor.getValue();
 };
+
+function beautifyHTML() {
+    var beautifiedText = html_beautify(editor.getValue(), beautify_HTML_Options);
+    editor.session.setValue(beautifiedText);
+}
+
+function beautifyCSS() {
+    var beautifiedText = css_beautify(css_editor.getValue(), beautify_CSS_Options);
+    css_editor.session.setValue(beautifiedText);
+}
 
 function showInfo() {
     localStorage.th_cj_hidenotif2 = "true";
