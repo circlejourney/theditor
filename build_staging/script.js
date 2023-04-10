@@ -324,12 +324,14 @@ function updateText() {
 
 function beautifyHTML() {
     var beautifiedText = html_beautify(editor.getValue(), beautify_HTML_Options);
-    editor.session.setValue(beautifiedText);
+    editor.setValue(beautifiedText);
+    editor.clearSelection();
 }
 
 function beautifyCSS() {
     var beautifiedText = css_beautify(css_editor.getValue(), beautify_CSS_Options);
-    css_editor.session.setValue(beautifiedText);
+    css_editor.setValue(beautifiedText);
+    css_editor.clearSelection();
 }
 
 function showInfo() {
