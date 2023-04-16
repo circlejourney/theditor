@@ -20,8 +20,8 @@ function switchTo(mode) {
         updateHTML(localStorage.th_cj, "ace-code-container");
         updateCSS(localStorage.th_cj_css);
 
-        if(parent.importedmeta) {
-            parent.renderProfileMeta(parent.importedmeta);
+        if(localStorage.th_cj_importedmeta) {
+            parent.renderProfileMeta(localStorage.th_cj_importedmeta);
         }
         
         if(mode == "world" || mode.indexOf("profile") != -1 || mode == "warning") {
@@ -55,9 +55,8 @@ function updateHTML(newHTML, div) {
 function importProfile(profilePath, importType){
     if(confirm("Import from Toyhouse? This will overwrite existing "+importType+".")) {
         $.post("get.php", { "profilePath": profilePath, "getMeta": importType=="meta" }, function(data){ 
-            switchTo(parent.activemode);
+            switchTo(parent.sessionSettings.activeMode);
             
-            parent["imported"+importType] = data;
             localStorage["th_cj_imported"+importType] = data;
             
             if(importType=="meta") parent.renderProfileMeta(data);
