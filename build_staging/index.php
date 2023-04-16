@@ -19,9 +19,17 @@
         <!-- Misc libraries -->
     	<script src="/src/jquery-3.6.0/jquery-3.6.0.min.js"></script>
         <script src="/src/ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+        <script src="/src/ace-builds/src-noconflict/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
+        <script src="/src/sass.js-master/dist/sass.js"></script>
+
+        
+        <!-- Ace Colorpicker -->
         <link rel="stylesheet" href="/src/ace-colorpicker.css" />
         <script type="text/javascript" src="/src/ace-colorpicker.js" ></script>
-        <script src="/src/sass.js-master/dist/sass.js"></script>
+
+        <!-- Beautify -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.7/beautify-css.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.7/beautify-html.min.js"></script>
         
         <!-- TH source -->
     	<link id="theme-css" href="/src/site_black-forest.css?cachebust=2" rel="stylesheet">
@@ -88,11 +96,11 @@
     </div>
     
     <div id="main">
-        <iframe src="/build_<?php echo $lastUpdate ?>/frame.html" id="frame" class="d-flex align-self-center">
+        <iframe src="/build_<?php echo $lastUpdate ?>/frame.html?2" id="frame" class="d-flex align-self-center">
         </iframe>
         
         <div id="adjustbar" class="progress-bar progress-bar-striped bg-secondary">
-            <button class="btn btn-primary" id="mobile-switch">
+            <button class="btn btn-primary" id="mobile-switch" onclick="mobileSwitch()">
                 <i class="mobile-switch-arrow fa fa-caret-down"></i>
             </button>
         </div>
@@ -101,13 +109,14 @@
             
             <div id="titles">
                 <div class="field-title html-visible">
-                    <div>
-                        <a class="nav-tab" id="html-tab" onclick="toggleBlurb('html')">HTML</a> &ensp; <a class="nav-tab text-dark" id="blurb-tab" onclick="toggleBlurb('blurb')">Blurb</a>
+                    <div class="panel-title-tabs">
+                        <a class="nav-tab" id="html-tab" onclick="toggleBlurb('html')">HTML</a> &nbsp; <a class="nav-tab text-dark" id="blurb-tab" onclick="toggleBlurb('blurb')">Blurb</a>
                     </div>
                     <span class="panel-options" id="html-options">
                         <a class="edit-button" onclick="editor.undo()" data-toggle="tooltip" title="Undo"><i class="fas fa-undo-alt"></i></a>
                         <a class="edit-button" onclick="editor.redo()" data-toggle="tooltip" title="Redo"><i class="fas fa-redo-alt"></i></a>
                         <a class="edit-button" onclick="editor.insert(loremipsum)" data-toggle="tooltip" title="Insert lorem ipsum"><i class="fas fa-text"></i></a>
+                        <a class="edit-button" onclick="beautifyHTML()" data-toggle="tooltip" title="Format HTML"><i class="fas fa-brackets-curly"></i></a>
                         <a class="edit-button" onclick="uploadFileDialogue('html')" data-toggle="tooltip" title="Import file"><i class="fa fa-file-import"></i></a>                        
                         <a class="edit-button" onclick="downloadFile('html')" data-toggle="tooltip" title="Save as file"><i class="fa fa-save"></i></a>
                         <a class="edit-button clear-button" id="clear-html" onclick="editor.setValue('')" data-toggle="tooltip" title="Clear"><i class="fa fa-trash"></i></a>
@@ -118,7 +127,7 @@
                     <span class="panel-options" id="css-options">
                         <a class="edit-button" onclick="css_editor.undo()" data-toggle="tooltip" title="Undo"><i class="fas fa-undo-alt"></i></a>
                         <a class="edit-button" onclick="css_editor.redo()" data-toggle="tooltip" title="Redo"><i class="fas fa-redo-alt"></i></a>
-                        
+                        <a class="edit-button" onclick="beautifyCSS()" data-toggle="tooltip" title="Format CSS"><i class="fas fa-brackets-curly"></i></a>
                         <a class="edit-button" onclick="uploadFileDialogue('css')" data-toggle="tooltip" title="Import file"><i class="fa fa-file-import"></i></a>
                         <a class="edit-button" onclick="downloadFile('css')" data-toggle="tooltip" title="Save as file"><i class="fa fa-save"></i></a>
                         <a class="edit-button clear-button" id="clear-css" onclick="css_editor.setValue('')" data-toggle="tooltip" title="Clear"><i class="fa fa-trash"></i></a>
@@ -224,7 +233,7 @@
                     Import from TH
                   </a>
                 
-                  <div class="dropdown-menu px-2" aria-labelledby="dropdownbutton2">
+                  <div class="dropdown-menu px-2" aria-labelledby="dropdownbutton2" onclick="event.stopPropagation()">
                       <div class="d-flex flex-column">
                           <div class="d-flex mb-1">
                             <input type="text" id="char-id" class="form-control mr-1 import-button" placeholder="Enter ID"></input>
@@ -266,19 +275,31 @@
                     <div class="dropdown-menu ui-options px-2" aria-labelledby="dropdownbutton">
 
                         <span class="checkbox-container">
-                            <input type="checkbox" id="html-panel" onclick="setHTMLPanel();" checked="true">&nbsp;<label for="html-panel">HTML</label>
+                            <input type="checkbox" id="html-panel" onclick="toggleHTMLPanel();" checked="true">&nbsp;<label for="html-panel">HTML</label>
                         </span>
 
                         <span class="checkbox-container">
-                            <input type="checkbox" id="css-panel" onclick="setCSSPanel();" checked="true">&nbsp;<label for="css-panel">CSS</label>
+                            <input type="checkbox" id="css-panel" onclick="toggleCSSPanel();" checked="true">&nbsp;<label for="css-panel">CSS</label>
                         </span>
 
                         <span class="checkbox-container">
-                            <input type="checkbox" id="text-panel" onclick="setTextPanel();" checked="true">&nbsp;<label for="text-panel">Scratchpad</label>
+                            <input type="checkbox" id="text-panel" onclick="toggleTextPanel();" checked="true">&nbsp;<label for="text-panel">Scratchpad</label>
+                        </span>
+
+                        <span class="checkbox-container">
+                            <input type="checkbox" id="autocomplete" onclick="toggleAutocomplete();"> <label for="autocomplete">Autocomplete</label>
                         </span>
 
                         <span class="checkbox-container hide-small">
-                            <input type="checkbox" id="vertical" onchange="toggleVertical()">&nbsp;<label for="vertical" class="hide-small">Vertical</label>
+                            <input type="checkbox" id="colorpicker" onchange="toggleColorpicker()" checked="true">&nbsp;<label for="colorpicker">Colorpicker</label>
+                        </span>
+
+                        <span class="checkbox-container hide-small">
+                            <input type="checkbox" id="vertical" onchange="toggleVertical()">&nbsp;<label for="vertical" class="hide-small">Vertical view</label>
+                        </span>
+
+                        <span class="checkbox-container hide-small">
+                            <input type="checkbox" id="gutter" onchange="toggleGutter()">&nbsp;<label for="gutter">Line numbers</label>
                         </span>
 
                         <span class="checkbox-container">
@@ -286,11 +307,11 @@
                         </span>
 
                         <span class="checkbox-container">
-                            <input type="checkbox" id="big-text" onclick="toggleBigFont();"> <label for="big-text">Big text</label>
+                            <input type="checkbox" id="big-text" onclick="toggleBigText();"> <label for="big-text">Big text</label>
                         </span>
                     </div>
                 </div>
-                <a class="btn btn-primary update-btn d-inline-block" id="update-preview" onclick="updateCode()" href="#">Update preview</a>
+                <a class="btn btn-primary update-btn d-inline-block" id="update-preview" onclick="updateHTML(); updateCSS();" href="#">Update preview</a>
             </div>
             
             <input type="file" class="d-none" id="fileupload" onclick="uploadFile(this)">

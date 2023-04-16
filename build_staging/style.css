@@ -302,11 +302,14 @@ a {
     color: white;
 }
 
+.panel-title-tabs {
+    white-space: nowrap;
+}
+
 .panel-options {
     float: right;
     opacity: 0.8;
     margin-right: 5px;
-    white-space: nowrap;
 }
 
 .ace_editor {
@@ -460,6 +463,10 @@ a {
         -ms-flex-direction: column;
         -o-flex-direction: column;
         flex-direction: column;
+    }
+
+    #titles, .field-title {
+        font-size: 13pt;
     }
     
     #titles div {

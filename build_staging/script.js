@@ -1,39 +1,49 @@
-// Setup variables. TODO: Put everything in a container object
-var showval = "\<!-- Enter HTML here... --\>";
-var activemode = "profile";
-var activetheme = "Default";
-var showcss = "\/* Enter CSS here... *\/";
-var showtext = "Paste drafts and snippets here...";
+/**************************************
+    vvv  Setup variables  vvv
+**************************************/
+// TODO: Put everything in sessionSettings object
+// TODO: better way to determine if device is mobile (specifically to target desktop Safari for weird flex sizing) or a more elegant fix for weird sizing
 const isSafari = navigator.userAgent.indexOf("Safari") > -1;
 const isMobile = typeof screen.orientation !== 'undefined';
-var htmlChanged = true;
-var cssChanged = true;
-var textChanged = true;
-let sessionSettings = {isBlurb: false, mobileView: false};
-var cssPanel, textPanel, editor, css_editor, text_editor, frame, importedmeta, importedcode;
+var sessionSettings = { activeMode: "profile", activeTheme: "Default", isBlurb: false, HTMLChanged: true, CSSChanged: true, textChanged: true, colorpicker: true };
+// DOM elements
+var editor, css_editor, text_editor, frame;
+
+
+/**************************************
+    vvv  Constants  vvv
+**************************************/
+const defaultHTML = "\<!-- Enter HTML here... --\>";
+const defaultCSS = "\/* Enter CSS here... *\/";
+const defaultText =  "Paste drafts and snippets here...";
 const loremipsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sollicitudin elit sed tellus blandit viverra sed eget odio. Donec accumsan tempor lacus, et venenatis elit feugiat non. Duis porta eros et velit blandit dapibus. Curabitur ac finibus eros. Duis placerat velit vitae massa sodales, eget mattis nibh pellentesque.";
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const beautify_HTML_Options = { "indent_size": "1", "indent_char": "\t", "max_preserve_newlines": "-1", "preserve_newlines": false, "keep_array_indentation": false, "break_chained_methods": false, "indent_scripts": "normal", "brace_style": "expand", "space_before_conditional": true, "unescape_strings": false, "jslint_happy": false, "end_with_newline": false, "wrap_line_length": "0", "indent_inner_html": false, "comma_first": false, "e4x": false, "indent_empty_lines": false }
+const beautify_CSS_Options = { "indent_size": "2", "indent_char": " ", "max_preserve_newlines": "-1", "preserve_newlines": false, "keep_array_indentation": false, "break_chained_methods": false, "indent_scripts": "normal", "brace_style": "collapse", "space_before_conditional": true, "unescape_strings": false, "jslint_happy": false, "end_with_newline": false, "wrap_line_length": "0", "indent_inner_html": false, "comma_first": false, "e4x": false, "indent_empty_lines": false };
 
-// Initialisation of web app is housed inside the window.onload event listener. TODO: Make this promise-based, i.e. upon loading all required files
+
+/**************************************
+    vvv  Window events  vvv
+**************************************/
+
 $(window).on("load", function(){
+    // Web app is initialised here, as code should only start running after all DOM elements are loaded.
+    // TODO: Make this promise-based, i.e. upon loading all required files
 
     // Get frame and set frame's internal lastUpdate to parent lastUpdate
     frame = document.getElementById("frame");
     frame.contentWindow.lastUpdate = lastUpdate;
 
-    const showChar = location.hash.substring(1);
-    if(location.hash.substring(1)) {
-        frame.contentWindow.importProfile(showChar);
-    }
-
     $(".ui-options").click(function(e){
         e.stopPropagation();
     })
     
+    // Import notes, changelog, version list etc.
     loadNotes();
-    loadLocal();
+    
+    // initEditors must be called before loadLocalSettings so that editors are initialised before changing their appearance.
     initEditors();
-    toggleUITheme();
+    loadLocalSettings();
     
     // Init click/touch events. Needs tidying and Safari compatibility
     $("#adjustbar").mousedown(function(){
@@ -54,86 +64,36 @@ $(window).on("load", function(){
         $(window).on("touchend", cancelDrag);
     });
     
-    $("#mobile-switch").on("click", mobileSwitch);
-
-
-    // Set blank ACE text field behaviour
+    updateHTML();
+    updateCSS();
+    switchTo(sessionSettings.activeMode);
+    toggleTheme(sessionSettings.activeTheme);
     
-    updateCode();
-    switchTo(activemode);
-    toggleTheme(activetheme);
-    resizeElements();
-    setHTMLPanel();
-    setCSSPanel();
-    setTextPanel();
-    
-    // Ugly solution to not updating screen every time the user enters a new character.
-    // TODO: Needs tidier behaviour e.g. a "queue" or something where each update request cancels the last.
-    var tick = setInterval(function() {
-        if($("#auto").prop("checked")) {
-            if(htmlChanged) {
-                if(editor.getValue()) {
-                    $("#clear-html")
-                        .html("<i class='fa fa-trash'></i>")
-                        .attr("data-original-title", "Clear")
-                        .removeData("justcleared");
-                    if(editor.getValue()=="Please reset!") {
-                        var confirmReset = confirm("Really hard reset? You will lose all drafts and settings.");
-                        if(confirmReset === true) hardReset();
-                        else editor.setValue("");
-                    }
-                }
-                updateHTML();
-                htmlChanged=false;
-            }
-            
-            if(cssChanged) {
-                if(css_editor.getValue()) {
-                    $("#clear-css")
-                        .html("<i class='fa fa-trash'></i>")
-                        .attr("data-original-title", "Clear")
-                        .removeData("justcleared");
-                }
-                updateCSS();
-                cssChanged=false;
-            }
-            
-            if(textChanged) {
-                if(text_editor.getValue()) {
-                    $("#clear-text")
-                        .html("<i class='fa fa-trash'></i>")
-                        .attr("data-original-title", "Clear")
-                        .removeData("justcleared");
-                }
-                updateText();
-                textChanged=false;
-            }
-        }
-    }, 1000);
-    
-    $("#import .dropdown-menu").click(function(e){
-        e.stopPropagation();
-    });
-
-    $(window).keypress(function(e){
-        if(e.keyCode == 10 && e.ctrlKey) {
-            e.preventDefault();
-            updateCode();
-        }
-    });
+    // Start tick function that runs every second
+    setInterval(tick, 1000);
     
     $(window).resize(function(){
-        resizeElements();
+        resizeScreen();
         resizeEditors();
     });
     
     setTimeout(function(){
         $("#loader").addClass("invisible");
+        resizeScreen();
+        resizeEditors();
+        // This is an ugly solution, waiting .5 seconds before resizing the editors tends to ensure they resize to fit the content after the content is loaded.
     }, 500);
 });
 
-// TODO: Change this to promise-based
+$(window).on("beforeunload", function() {
+    if(editor.getValue() && editor.getValue() !== defaultHTML) localStorage.th_cj_backup = editor.getValue();
+});
+
+
 function loadNotes() {
+    // Get the current meta info and imports it into the info modal.
+    // TODO: Change this to promise-based
+
     $.get("../known-issues.html?"+lastUpdate, function(data) {
         $("#issues-text").html(data);
     });
@@ -154,34 +114,34 @@ function loadNotes() {
     });
 }
 
-// TODO: Use destructuring of localStorage object to tidy this up
-function loadLocal() {
-    if(localStorage.th_cj) {
-        showval = localStorage.th_cj;
+
+function loadLocalSettings() {
+    // Extract the user's settings and content from local storage and update UI + editors.
+    // TODO: Use destructuring of localStorage object to tidy this up
+
+    editor.setValue( localStorage.th_cj ? localStorage.th_cj : defaultHTML );
+    css_editor.setValue( localStorage.th_cj_css ? localStorage.th_cj_css : defaultCSS );
+    text_editor.setValue( localStorage.th_cj_text ? localStorage.th_cj_text : defaultText );
+    
+    if(localStorage.th_cj_colorpicker) {
+        $("#colorpicker").prop("checked", localStorage.th_cj_colorpicker == "true");
+        toggleColorpicker();
     }
     
     if(localStorage.th_cj_mode) {
-        activemode = localStorage.th_cj_mode;
+        sessionSettings.activeMode = localStorage.th_cj_mode;
     }
     
     if(localStorage.th_cj_theme) {
-        activetheme = localStorage.th_cj_theme;
-    }
-    
-    if(localStorage.th_cj_css) {
-        showcss = localStorage.th_cj_css;
-    }
-    
-    if(localStorage.th_cj_text) {
-        showtext = localStorage.th_cj_text;
+        sessionSettings.activeTheme = localStorage.th_cj_theme;
     }
     
     if(localStorage.th_cj_importedmeta) {
-       importedmeta = localStorage.th_cj_importedmeta;
+       //importedmeta = localStorage.th_cj_importedmeta;
     }
     
     if(localStorage.th_cj_importedcode) {
-       importedcode = localStorage.th_cj_importedcode;
+       //importedcode = localStorage.th_cj_importedcode;
     }
     
     if(localStorage.th_cj_vertical) {
@@ -189,20 +149,33 @@ function loadLocal() {
         toggleVertical();
     }
     
+    if(localStorage.th_cj_gutter) {
+        $("#gutter").prop("checked", localStorage.th_cj_gutter == "true");
+        toggleGutter();
+    }
+    
+    if(localStorage.th_cj_lowContrast) {
+        $("#low-contrast").prop("checked", localStorage.th_cj_lowContrast == "true");
+        toggleUITheme();
+    }
+    
     if(localStorage.th_cj_htmlpanel) {
         $("#html-panel").prop("checked", localStorage.th_cj_htmlpanel == "true");
+        toggleHTMLPanel();
     }
     
     if(localStorage.th_cj_csspanel) {
         $("#css-panel").prop("checked", localStorage.th_cj_csspanel == "true");
+        toggleCSSPanel();
     }
     
     if(localStorage.th_cj_textpanel) {
         $("#text-panel").prop("checked", localStorage.th_cj_textpanel == "true");
+        toggleTextPanel();
     }
     
     if(localStorage.th_cj_bigtext) {
-        if(localStorage.th_cj_bigtext == "true") $(".editor-panel").addClass("big-text");
+        if(localStorage.th_cj_bigtext == "true") toggleBigText();
         $("#big-text").prop("checked", localStorage.th_cj_bigtext == "true");
     }
     
@@ -210,156 +183,156 @@ function loadLocal() {
         $("#auto").prop("checked", localStorage.th_cj_auto == "true");
     }
     
+    if(localStorage.th_cj_mobile) {
+        $("#mobile").prop("checked", localStorage.th_cj_mobile == "true");
+        toggleMobilePreview();
+    }
+    
+    if(localStorage.th_cj_autocomplete) {
+        $("#autocomplete").prop("checked", localStorage.th_cj_autocomplete == "true");
+        toggleAutocomplete();
+    }
+    
     if(localStorage.th_cj_lastUpdate != lastUpdate && location.pathname.indexOf("/unstable") == -1) {
         $("#info").removeClass("d-none");
         $("#info-back").removeClass("d-none");
         localStorage.th_cj_lastUpdate = lastUpdate;
     }
-    
-    if(localStorage.th_cj_lowContrast) {
-        $("#low-contrast").prop("checked", localStorage.th_cj_lowContrast == "true");
-    }
 }
 
 function initEditors() {
+    // Initialise the three Ace editors on the page with initial settings.
 
     editor = ace.edit("html-editor");
     editor.session.setMode("ace/mode/html", () => {
-        editor.setValue(showval);
-        AceColorPicker.load(ace, editor);
+        if($("#colorpicker").prop("checked")) toggleColorpicker();
     });
     sessionSettings.isBlurb = false;
     editor.setShowPrintMargin(false);
     editor.session.setUseWrapMode(true);
     editor.session.on("change", function(){
-        htmlChanged=true;
+        sessionSettings.HTMLChanged=true;
     });
     editor.on("focus", function() {
-        if(editor.getValue()=="<!-- Enter HTML here... -->") editor.setValue("");
+        if(editor.getValue()==defaultHTML) editor.setValue("");
     });
     
     css_editor = ace.edit("css-editor");
     css_editor.session.setMode("ace/mode/scss", () => {
-        css_editor.setValue(showcss);
-        AceColorPicker.load(ace, css_editor);
+        if($("#colorpicker").prop("checked")) toggleColorpicker();
     });
     css_editor.setShowPrintMargin(false);
     css_editor.session.setUseWrapMode(true);
     css_editor.session.on("change", function(){
-        cssChanged = true;
+        sessionSettings.CSSChanged = true;
     });
     css_editor.on("focus", function() {
-        if(css_editor.getValue()=="\/* Enter CSS here... *\/") css_editor.setValue("");
+        if(css_editor.getValue()==defaultCSS) css_editor.setValue("");
     })
 
     text_editor = ace.edit("text-editor");
     text_editor.setShowPrintMargin(false);
     text_editor.renderer.setShowGutter(false);
-    text_editor.setValue(showtext);
     text_editor.session.setUseWrapMode(true);
     text_editor.session.on("change", function(){
-        textChanged = true;
+        sessionSettings.textChanged = true;
     });
     text_editor.on("focus", function() {
-        if(text_editor.getValue()=="Paste drafts and snippets here...") text_editor.setValue("");
+        if(text_editor.getValue()==defaultText) text_editor.setValue("");
     })
 
 }
 
-function toggleTheme(theme) {
-    activetheme = theme;
-    localStorage.th_cj_theme = theme;
-    if(frame){
-        frame.contentWindow.toggleTheme(theme);
+function tick() {
+    // Ugly solution to not updating screen every time the user enters a new character.
+    // TODO: Needs tidier behaviour e.g. a "queue" or something where each update request cancels the last.
+    // TODO: When auto is unchecked, still update local storage
+
+    if(sessionSettings.HTMLChanged) {
+        if(editor.getValue().indexOf("Please reset!") !== -1) {
+            editor.setValue( editor.getValue().replace("Please reset!", "") );
+            hardReset();
+        } else {
+            updateHTML();
+            sessionSettings.HTMLChanged=false;
+        }
     }
+    
+    if(sessionSettings.CSSChanged) {
+        updateCSS();
+        sessionSettings.CSSChanged=false;
+    }
+    
+    if(sessionSettings.textChanged) {
+        updateText();
+        sessionSettings.textChanged=false;
+    }
+
 }
 
-function switchTo(mode) {
-    activemode = mode;
-    localStorage.th_cj_mode = mode;
-    frame.contentWindow.switchTo(mode);
-}
 
-function updateCode(){
-    updateHTML();
-    updateCSS();
-}
+/**************************************
+    vvv  Code update functions  vvv
+**************************************/
 
 function updateHTML(){
-    var val = editor.getValue();
-    let updateDiv;
+    let val = editor.getValue();
+    let updateEditor;
     if(sessionSettings.isBlurb) {
         localStorage.th_cj_blurb = val;
-        updateDiv = "ace-code-container-2";
+        updateEditor = "ace-code-container-2";
     } else {
         localStorage.th_cj = val;
-        updateDiv = "ace-code-container";
+        updateEditor = "ace-code-container";
     }
-    val = val.replace(/(<\/*)(script|style|head)(.*>)/g, "$1div$3");
-    frame.contentWindow.updateHTML(val, updateDiv);
+
+    if($("#auto").prop("checked")) {
+        val = val.replace(/(<\/*)(script|style|head)(.*>)/g, "$1div$3");
+        frame.contentWindow.updateHTML(val, updateEditor);
+    }
 };
 
 function updateCSS() {
     var sass = new Sass();
     var raw_css = css_editor.getValue();
-    
-    if(raw_css) {
-        sass.compile(raw_css, function(result) {
-            let css = result.text;
-            if(css) frame.contentWindow.updateCSS(css);
-            else frame.contentWindow.updateCSS(raw_css);
-        });
-    } else {
-        frame.contentWindow.updateCSS("");
-    }
-    
     localStorage.th_cj_css = raw_css;
+    
+    if($("#auto").prop("checked")) {
+        if(raw_css) {
+            sass.compile(raw_css, function(result) {
+                let css = result.text;
+                if(css) frame.contentWindow.updateCSS(css);
+                else frame.contentWindow.updateCSS(raw_css);
+            });
+        } else {
+            frame.contentWindow.updateCSS("");
+        }
+    }
 }
 
 function updateText() {
     localStorage.th_cj_text = text_editor.getValue();
 };
 
-function showInfo() {
-    localStorage.th_cj_hidenotif2 = "true";
-    $("#info").toggleClass("d-none");
+function beautifyHTML() {
+    var beautifiedText = html_beautify(editor.getValue(), beautify_HTML_Options);
+    editor.setValue(beautifiedText);
+    editor.clearSelection();
 }
 
-function setHTMLPanel() {
-    htmlPanel = $("#html-panel").prop("checked");
-    if(htmlPanel){
-        $(".html-visible").removeClass("d-none");
-    } else $(".html-visible").addClass("d-none");
-    localStorage.th_cj_htmlpanel = htmlPanel;
-    resizeEditors();
+function beautifyCSS() {
+    var beautifiedText = css_beautify(css_editor.getValue(), beautify_CSS_Options);
+    css_editor.setValue(beautifiedText);
+    css_editor.clearSelection();
 }
 
-function setCSSPanel() {
-    cssPanel = $("#css-panel").prop("checked");
-    if(cssPanel){
-        $(".css-visible").removeClass("d-none");
-    } else $(".css-visible").addClass("d-none");
-    localStorage.th_cj_csspanel = cssPanel;
-    resizeEditors();
-}
 
-function setTextPanel() {
-    textPanel = $("#text-panel").prop("checked");
-    if(textPanel){
-        $(".text-visible").removeClass("d-none");
-    } else {
-        $(".text-visible").addClass("d-none");
-    }
-    localStorage.th_cj_textpanel = textPanel;
-    resizeEditors();
-}
+/**************************************
+    vvv  Sizing functions  vvv
+**************************************/
 
-function toggleBigFont() {
-    $(".ace_editor").toggleClass("big-text");
-    localStorage.th_cj_bigtext = $("#big-text").prop("checked");
-}
-
-function resizeElements() {
+function resizeScreen() {
+    // This function resizes the main element (where preview window and Ace panels are located) after screen size changes e.g. rotating device.
     if(screen.width < 576) {
         if(!$("#main").hasClass("mobile-display")) {
             $("#main").addClass("mobile-display");
@@ -369,22 +342,8 @@ function resizeElements() {
     }
 }
 
-function resizeEditors() {
-
-    if(isSafari && !isMobile) {
-        if(! $("#vertical").prop("checked")) {
-            $(".ace_editor").css("height", window.innerHeight - $("#frame").height() - $("#adjustbar").height() - $("#footer").height() - $("#titles").height());
-        } else {
-            $(".ace_editor").css("width", window.innerWidth - $("#frame").width() - $("#adjustbar").width() - $("#footer").width() - $("#titles").width());
-        }
-    }
-
-    editor.resize();
-    css_editor.resize();
-    text_editor.resize();
-}
-
-function initHeight(newheight, newwidth) {
+function resizeFrame(newheight, newwidth) {
+    // This function resizes the frame element, usually after the drag bar has been moved.
     if(!newheight) {
         newheight = window.innerHeight*0.55;
     }
@@ -396,9 +355,22 @@ function initHeight(newheight, newwidth) {
     
     $("#frame").css("height", newheight);
     
-    if(editor) {
-        resizeEditors();
+    if(editor) resizeEditors();
+}
+
+function resizeEditors() {
+    // This function resizes the Ace editors to fill the space left by the preview window, useful after preview window has changed size. On Safari, which handles flex differently, this includes forcibly setting the width/height of the editors.
+    if(isSafari && !isMobile) {
+        if(! $("#vertical").prop("checked")) {
+            $(".ace_editor").css("height", window.innerHeight - $("#frame").height() - $("#adjustbar").height() - $("#footer").height() - $("#titles").height());
+        } else {
+            $(".ace_editor").css("width", window.innerWidth - $("#frame").width() - $("#adjustbar").width() - $("#footer").width() - $("#titles").width());
+        }
     }
+
+    editor.resize();
+    css_editor.resize();
+    text_editor.resize();
 }
 
 function dragHandler(e) {
@@ -438,6 +410,26 @@ function cancelDrag(e) {
     $(frame.contentWindow).off("touchmove");
     $(frame.contentWindow).off("touchend");
 }
+
+function mobileSwitch() {
+    event.stopPropagation();
+    if(!$("#editor").hasClass("d-none")) {
+        $("#editor").addClass("d-none");
+        $("#footer").addClass("d-none");
+        $("#frame").addClass("expanded");
+        $("#mobile-switch").html("<i class='fa fa-caret-up'></i>");
+    } else {
+        $("#editor").removeClass("d-none");
+        $("#footer").removeClass("d-none");
+        $("#frame").removeClass("expanded");
+        $("#mobile-switch").html("<i class='fa fa-caret-down'></i>");
+    }
+}
+
+
+/**************************************
+    vvv  Local file upload/download functions  vvv
+**************************************/
 
 function downloadFile(panel) {
     var thedate = new Date();
@@ -480,34 +472,10 @@ function uploadFile(div){
     
 }
 
-function mobileSwitch(e) {
-    e.stopPropagation();
-    if(!$("#editor").hasClass("d-none")) {
-        $("#editor").addClass("d-none");
-        $("#footer").addClass("d-none");
-        $("#frame").addClass("expanded");
-        $("#mobile-switch").html("<i class='fa fa-caret-up'></i>");
-    } else {
-        $("#editor").removeClass("d-none");
-        $("#footer").removeClass("d-none");
-        $("#frame").removeClass("expanded");
-        $("#mobile-switch").html("<i class='fa fa-caret-down'></i>");
-    }
-}
 
-function shrinkGrow(div) {
-    if(!$(div).hasClass("shrunk")) {
-        $(div).css("width", "10%");
-        $(div).css("height", "10%");
-        $(div).css("opacity", "0.5");
-        $(div).addClass("shrunk");
-    } else {
-        $(div).css("width", "40%");
-        $(div).css("height", "90%");
-        $(div).css("opacity", "1");
-        $(div).removeClass("shrunk");
-    }
-}
+/**************************************
+    vvv  TH import functions  vvv
+**************************************/
 
 function startImport(importType){
     frame.contentWindow.importProfile($("#char-id").val(), importType);
@@ -516,7 +484,7 @@ function startImport(importType){
 function renderProfileCode(data) {
         let customCSS;
 
-        if(data.indexOf("<style>") > -1) {
+        if(data.indexOf("<style>") !== -1) {
             customCSS = data.split("<style>")[1].split("</style>")[0].replace("<![CDATA[", "").replace("]]>", "").trim();
         }
 
@@ -545,6 +513,17 @@ function renderProfileMeta(data) {
         frame.contentWindow.$(".blurb").addClass("ace-code-container-2");
         localStorage.th_cj_blurb = $(data).find(".blurb").html();
         if(sessionSettings.isBlurb) editor.setValue(localStorage.th_cj_blurb);
+
+}
+
+
+/**************************************
+    vvv  UI functionality  vvv
+**************************************/
+
+function showInfo() {
+    localStorage.th_cj_hidenotif2 = "true";
+    $("#info").toggleClass("d-none");
 }
 
 function hardReset() {
@@ -564,6 +543,8 @@ function hardReset() {
     localStorage.removeItem("th_cj_csspanel");
     localStorage.removeItem("th_cj_textpanel");
     localStorage.removeItem("th_cj_auto");
+    localStorage.removeItem("th_cj_mobile");
+    localStorage.removeItem("th_cj_gutter");
     localStorage.removeItem("th_cj_lastUpdate");
     localStorage.removeItem("th_cj_hidenotif");
     localStorage.removeItem("th_cj_hidenotif2");
@@ -580,12 +561,69 @@ function insertLorem(panel) {
     }
 }
 
-// TOGGLERS
+/**************************************
+    vvv  UI toggles  vvv
+**************************************/
+
+function toggleTheme(theme) {
+    sessionSettings.activeTheme = theme;
+    localStorage.th_cj_theme = theme;
+    if(frame){
+        frame.contentWindow.toggleTheme(theme);
+    }
+}
+
+function switchTo(mode) {
+    sessionSettings.activeMode = mode;
+    localStorage.th_cj_mode = mode;
+    frame.contentWindow.switchTo(mode);
+}
+
+function toggleBlurb() {
+    if(sessionSettings.isBlurb) {
+        $("#html-tab").removeClass("text-dark");
+        $("#blurb-tab").addClass("text-dark");
+        editor.setValue(localStorage.th_cj);
+    } else {
+        $("#blurb-tab").removeClass("text-dark");
+        $("#html-tab").addClass("text-dark");
+        editor.setValue(localStorage.th_cj_blurb);
+    }
+    sessionSettings.isBlurb = !sessionSettings.isBlurb;
+}
+
+function toggleHTMLPanel() {
+    htmlPanel = $("#html-panel").prop("checked");
+    if(htmlPanel){
+        $(".html-visible").removeClass("d-none");
+    } else $(".html-visible").addClass("d-none");
+    localStorage.th_cj_htmlpanel = htmlPanel;
+    resizeEditors();
+}
+
+function toggleCSSPanel() {
+    if( $("#css-panel").prop("checked") ){
+        $(".css-visible").removeClass("d-none");
+    } else $(".css-visible").addClass("d-none");
+    localStorage.th_cj_csspanel = $("#css-panel").prop("checked");
+    resizeEditors();
+}
+
+function toggleTextPanel() {
+    if( $("#text-panel").prop("checked") ){
+        $(".text-visible").removeClass("d-none");
+    } else {
+        $(".text-visible").addClass("d-none");
+    }
+    localStorage.th_cj_textpanel = $("#text-panel").prop("checked");
+    resizeEditors();
+}
  
 function toggleAuto() {
     localStorage.th_cj_auto = $("#auto").prop("checked");
     if($("#auto").prop("checked")) {
-        updateCode();
+        updateHTML();
+        updateCSS();
     }
 }
 
@@ -632,30 +670,27 @@ function toggleVertical() {
         codewidth = "100%";
     }
     
-    initHeight(codeheight, codewidth);
+    resizeFrame(codeheight, codewidth);
 }
 
 function toggleMobilePreview() {
-    if($("#mobile").prop("checked")) {
-        $("#frame").addClass("mobile-preview");
-    } else $("#frame").removeClass("mobile-preview");
+    localStorage.th_cj_mobile = $("#mobile").prop("checked");
+    if($("#mobile").prop("checked")) $("#frame").addClass("mobile-preview");
+    else $("#frame").removeClass("mobile-preview");
+    resizeEditors();
 }
 
 function toggleUITheme(){
-
     localStorage.th_cj_lowContrast = $("#low-contrast").prop("checked");
 
     if($("#low-contrast").prop("checked")) { 
-
         $("#theme-css").attr("href", "../src/site_night-forest.css");
         $(".bg-light").removeClass("bg-light").addClass("bg-dark");
-
         editor.setTheme("ace/theme/tomorrow_night");
         css_editor.setTheme("ace/theme/tomorrow_night");
         text_editor.setTheme("ace/theme/tomorrow_night");
 
     } else {
-        
         $("#theme-css").attr("href", "../src/site_black-forest.css")
         $(".bg-dark").removeClass("bg-dark").addClass("bg-light");
 
@@ -666,16 +701,64 @@ function toggleUITheme(){
 
 }
 
-function toggleBlurb() {
-    if(sessionSettings.isBlurb) {
-        sessionSettings.isBlurb = false;
-        $("#html-tab").removeClass("text-dark");
-        $("#blurb-tab").addClass("text-dark");
-        editor.setValue(localStorage.th_cj);
+function toggleBigText() {
+    localStorage.th_cj_bigtext = $("#big-text").prop("checked");
+    if($("#big-text").prop("checked")) $(".ace_editor").addClass("big-text");
+    else  $(".ace_editor").removeClass("big-text");
+}
+
+function toggleGutter() {
+    localStorage.th_cj_gutter = $("#gutter").prop("checked");
+
+    if($("#gutter").prop("checked")) { 
+        editor.renderer.setShowGutter(true);
+        css_editor.renderer.setShowGutter(true);
+        
     } else {
-        sessionSettings.isBlurb = true;
-        $("#blurb-tab").removeClass("text-dark");
-        $("#html-tab").addClass("text-dark");
-        editor.setValue(localStorage.th_cj_blurb);
+        editor.renderer.setShowGutter(false);
+        css_editor.renderer.setShowGutter(false);
+    }
+
+}
+
+function toggleAutocomplete() {
+    localStorage.th_cj_autocomplete = $("#autocomplete").prop("checked");
+    if($("#autocomplete").prop("checked")) {
+        editor.setOptions({behavioursEnabled: true});
+        css_editor.setOptions({behavioursEnabled: true});
+    } else {
+        editor.setOptions({behavioursEnabled: false});
+        css_editor.setOptions({behavioursEnabled: false});
+    }
+}
+
+function toggleColorpicker() {
+    localStorage.th_cj_colorpicker = $("#colorpicker").prop("checked");
+
+    if( !$("#colorpicker").prop("checked") ) {
+        [editor.session, css_editor.session].forEach(function(session){
+
+            let rules = session.$mode.$highlightRules.getRules();
+            for (let stateName in rules) {
+                rules[stateName].map(
+                    i => {
+                        if(i.token == "color" && i.regex == '#(?:[\\da-f]{8})|#(?:[\\da-f]{3}){1,2}|rgb\\((?:\\s*\\d{1,3},\\s*){2}\\d{1,3}\\s*\\)|rgba\\((?:\\s*\\d{1,3},\\s*){3}\\d*\\.?\\d+\\s*\\)|hsl\\(\\s*\\d{1,3}(?:,\\s*\\d{1,3}%){2}\\s*\\)|hsla\\(\\s*\\d{1,3}(?:,\\s*\\d{1,3}%){2},\\s*\\d*\\.?\\d+\\s*\\)') delete i.regex;
+                    }
+                );
+            }
+            // force recreation of tokenizer
+            session.$mode.$tokenizer = null;
+            session.bgTokenizer.setTokenizer(session.$mode.getTokenizer());
+            // force re-highlight whole document
+            session.bgTokenizer.start(0);
+            
+        });
+
+        delete editor.colorview;
+        delete css_editor.colorview;
+
+    } else {
+        editor.colorview = AceColorPicker.load(ace, editor);
+        css_editor.colorview = AceColorPicker.load(ace, css_editor);
     }
 }
