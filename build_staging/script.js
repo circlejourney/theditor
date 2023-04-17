@@ -103,7 +103,8 @@ function loadNotes() {
     });
     
     $.get("../notes.html?"+lastUpdate, function(data) {
-		let year = Math.floor(lastUpdate / 10000);
+        lastUpdate = lastUpdate;
+		let year = Math.floor( lastUpdate / 10000);
 		let month = months[Math.floor( (lastUpdate % 10000) / 100 ) - 1];
 		let day = lastUpdate % 100;
         $("#notes").html(data).find("#latest").text("Latest update: "+day+" "+month+" "+year);
@@ -157,6 +158,10 @@ function loadLocalSettings() {
     if(localStorage.th_cj_lowContrast) {
         $("#low-contrast").prop("checked", localStorage.th_cj_lowContrast == "true");
         toggleUITheme();
+    } else {
+        editor.setTheme("ace/theme/monokai");
+        css_editor.setTheme("ace/theme/monokai");
+        text_editor.setTheme("ace/theme/monokai");
     }
     
     if(localStorage.th_cj_htmlpanel) {

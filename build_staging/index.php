@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <?php $lastUpdate = "staging"; ?>
+        <?php $lastUpdate = 20230417; $latestBuild = "staging" ?>
         <script>
             const lastUpdate = '<?php echo $lastUpdate ?>';
         </script>
@@ -38,8 +38,8 @@
         <link rel="stylesheet" href="/src/fontawesome-pro-6.0.0-beta3-web/css/all.min.css">
         <script src="/src/fontawesome-pro-6.0.0-beta3-web/js/all.min.js" crossorigin="anonymous"></script>
         
-        <script src="/build_<?php echo $lastUpdate ?>/script.js?cachebust=3" type="text/javascript"></script>
-        <link rel="stylesheet" href="/build_<?php echo $lastUpdate ?>/style.css?cachebust=2">
+        <script src="/build_<?php echo $latestBuild ?>/script.js?cachebust=3" type="text/javascript"></script>
+        <link rel="stylesheet" href="/build_<?php echo $latestBuild ?>/style.css?cachebust=2">
             
     </head>
     <body>
@@ -96,7 +96,7 @@
     </div>
     
     <div id="main">
-        <iframe src="/build_<?php echo $lastUpdate ?>/frame.html?2" id="frame" class="d-flex align-self-center">
+        <iframe src="/build_<?php echo $latestBuild ?>/frame.html?2" id="frame" class="d-flex align-self-center">
         </iframe>
         
         <div id="adjustbar" class="progress-bar progress-bar-striped bg-secondary">
