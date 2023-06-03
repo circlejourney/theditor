@@ -21,8 +21,10 @@
 
     if(strpos($body, "We can't find that page") !== false || strpos($body, "Invalid character selected")!== false || strpos($body, "Invalid user selected") !== false) {
         $body = "<div><div class='user-content thcj-warn'>Private or invalid profile.</div></div>";
+
     } else if(strpos($body, "allow-thcj-import") === false && $getMeta == "false") {
         $body = "<div><div class='user-content thcj-warn'>Security alert: You are attempting to import a profile that has not been set to allow code import. To allow code import, paste the line <code>&lt;span id='allow-thcj-import'>&lt;/span></code> anywhere in your code.</div></div>";
+        
     } else {
         $config = array(
             'indent' => true,
