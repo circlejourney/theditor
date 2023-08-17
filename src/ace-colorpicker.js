@@ -9460,7 +9460,8 @@ var ColorView = function () {
                 if (Object.prototype.hasOwnProperty.call(rules, stateName)) {
                     rules[stateName].unshift({
                         token: "color",
-                        regex: '#(?:[\\da-f]{8})|#(?:[\\da-f]{3}){1,2}|rgb\\((?:\\s*\\d{1,3},\\s*){2}\\d{1,3}\\s*\\)|rgba\\((?:\\s*\\d{1,3},\\s*){3}\\d*\\.?\\d+\\s*\\)|hsl\\(\\s*\\d{1,3}(?:,\\s*\\d{1,3}%){2}\\s*\\)|hsla\\(\\s*\\d{1,3}(?:,\\s*\\d{1,3}%){2},\\s*\\d*\\.?\\d+\\s*\\)'
+                        // New regex to fix issue where Ace highlights the most exclusive match first
+                        regex: /#[\da-f]{8}|#[\dA-F]{8}|#[\dA-F]{6}|#[\da-f]{6}|#[\dA-F]{3}|#[\da-f]{3}|rgb\((?:\\s*\\d{1,3},\s*){2}\d{1,3}\s*\)|rgba\((?:\s*\d{1,3},\s*){3}\d*\.?\d+\s*\)|hsl\(\s*\d{1,3}(?:,\s*\d{1,3}%){2}\s*\)|hsla\(\s*\d{1,3}(?:,\s*\d{1,3}%){2},\s*\d*\.?\d+\s*\)/gi
                     });
 
                     // FIXME: Exception handling when the highlight does not turn into color due to the scss function name

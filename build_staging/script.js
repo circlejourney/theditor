@@ -280,7 +280,7 @@ function tick() {
     vvv  Code update functions  vvv
 **************************************/
 
-function updateHTML(){
+function updateHTML(buttonTriggered=false){
     let val = editor.getValue();
     let updateEditor;
     if(sessionSettings.isBlurb) {
@@ -291,18 +291,18 @@ function updateHTML(){
         updateEditor = "ace-code-container";
     }
 
-    if($("#auto").prop("checked")) {
+    if($("#auto").prop("checked") || buttonTriggered) {
         val = val.replace(/(<\/*)(script|style|head)(.*>)/g, "$1div$3");
         frame.contentWindow.updateHTML(val, updateEditor);
     }
 };
 
-function updateCSS() {
+function updateCSS(buttonTriggered=false) {
     var sass = new Sass();
     var raw_css = css_editor.getValue();
     localStorage.th_cj_css = raw_css;
     
-    if($("#auto").prop("checked")) {
+    if($("#auto").prop("checked") || buttonTriggered) {
         if(raw_css) {
             sass.compile(raw_css, function(result) {
                 let css = result.text;

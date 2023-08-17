@@ -25,7 +25,7 @@
         
         <!-- Ace Colorpicker -->
         <link rel="stylesheet" href="/src/ace-colorpicker.css" />
-        <script type="text/javascript" src="/src/ace-colorpicker.js" ></script>
+        <script type="text/javascript" src="/src/ace-colorpicker.js?3" ></script>
 
         <!-- Beautify -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.7/beautify-css.min.js"></script>
@@ -311,7 +311,7 @@
                         </span>
                     </div>
                 </div>
-                <a class="btn btn-primary update-btn d-inline-block" id="update-preview" onclick="updateHTML(); updateCSS();" href="#">Update preview</a>
+                <a class="btn btn-primary update-btn d-inline-block" id="update-preview" onclick="updateHTML(true); updateCSS(true);" href="#">Update preview</a>
             </div>
             
             <input type="file" class="d-none" id="fileupload" onclick="uploadFile(this)">
