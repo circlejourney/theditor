@@ -120,6 +120,7 @@
                         <a class="edit-button" onclick="uploadFileDialogue('html')" data-toggle="tooltip" title="Import file"><i class="fa fa-file-import"></i></a>                        
                         <a class="edit-button" onclick="downloadFile('html')" data-toggle="tooltip" title="Save as file"><i class="fa fa-save"></i></a>
                         <a class="edit-button clear-button" id="clear-html" onclick="editor.setValue('')" data-toggle="tooltip" title="Clear"><i class="fa fa-trash"></i></a>
+                        <a class="edit-button restore-button d-none" id="restore-html" onclick="restoreBackup('html')" data-toggle="tooltip" title="Restore backup"><i class="fa fa-trash-undo"></i></a>
                     </span>
                 </div>
                 <div class="field-title css-visible">
@@ -131,6 +132,7 @@
                         <a class="edit-button" onclick="uploadFileDialogue('css')" data-toggle="tooltip" title="Import file"><i class="fa fa-file-import"></i></a>
                         <a class="edit-button" onclick="downloadFile('css')" data-toggle="tooltip" title="Save as file"><i class="fa fa-save"></i></a>
                         <a class="edit-button clear-button" id="clear-css" onclick="css_editor.setValue('')" data-toggle="tooltip" title="Clear"><i class="fa fa-trash"></i></a>
+                        <a class="edit-button restore-button d-none" id="restore-css" onclick="restoreBackup('css')" data-toggle="tooltip" title="Restore backup"><i class="fa fa-trash-undo"></i></a>
                     </span>
                 </div>
                 <div class="field-title text-visible">
@@ -139,8 +141,8 @@
                     <span class="panel-options" id="text-options">
                         <a class="edit-button" onclick="text_editor.undo()" data-toggle="tooltip" title="Undo"><i class="fas fa-undo-alt"></i></a>
                         <a class="edit-button" onclick="text_editor.redo()" data-toggle="tooltip" title="Redo"><i class="fas fa-redo-alt"></i></a>
-                        
                         <a class="edit-button clear-button" id="clear-text" onclick="text_editor.setValue('')" data-toggle="tooltip" title="Clear"><i class="fa fa-trash"></i></a>
+                        <a class="edit-button restore-button d-none" id="restore-text" onclick="restoreBackup('text')" data-toggle="tooltip" title="Restore backup"><i class="fa fa-trash-undo"></i></a>
                     </span>
                 </div>
             </div>
@@ -314,7 +316,8 @@
                 <a class="btn btn-primary update-btn d-inline-block" id="update-preview" onclick="updateHTML(true); updateCSS(true);" href="#">Update preview</a>
             </div>
             
-            <input type="file" class="d-none" id="fileupload" onclick="uploadFile(this)">
+            <input type="file" class="d-none" id="fileupload" onclick="uploadFile">
+
         </div>
     </div>
     

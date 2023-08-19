@@ -5,10 +5,10 @@
 // TODO: better way to determine if device is mobile (specifically to target desktop Safari for weird flex sizing) or a more elegant fix for weird sizing
 const isSafari = navigator.userAgent.indexOf("Safari") > -1;
 const isMobile = typeof screen.orientation !== 'undefined';
-var sessionSettings = { activeMode: "profile", activeTheme: "Default", isBlurb: false, HTMLChanged: true, CSSChanged: true, textChanged: true, colorpicker: true };
+var sessionSettings = { activeMode: "profile", activeTheme: "Default" };
 // DOM elements
 var editor, css_editor, text_editor, frame;
-
+const sass = new Sass();
 
 /**************************************
     vvv  Constants  vvv
@@ -26,25 +26,25 @@ const codeTypes = {
     "html": {
         storageName: "th_cj",
         backupName: "th_cj_backup",
-        editorID: "editor",
+        aceEditor: "editor",
         defaultContent: defaultHTML
     },
     "blurb": {
         storageName: "th_cj_blurb",
         backupName: "th_cj_blurbbackup",
-        editorVarName: "editor",
+        aceEditor: "editor",
         defaultContent: defaultHTML
     },
     "css": {
         storageName: "th_cj_css",
         backupName: "th_cj_cssbackup",
-        editorVarName: "css_editor",
+        aceEditor: "css_editor",
         defaultContent: defaultCSS
     },
     "text": {
         storageName: "th_cj_text",
         backupName: "th_cj_textbackup",
-        editorVarName: "text_editor",
+        aceEditor: "text_editor",
         defaultContent: defaultText
     }
 }
@@ -54,27 +54,36 @@ const codeTypes = {
     vvv  Window events  vvv
 **************************************/
 
-$(window).on("load", function(){
+$(window).on("load", () => {
     // Web app is initialised here; code should only start running after all DOM elements are loaded.
     // TODO: Make this promise-based, i.e. upon loading all required files
 
     // Get frame and set frame's internal lastUpdate date to parent lastUpdate date
     frame = document.getElementById("frame");
     frame.contentWindow.lastUpdate = lastUpdate;
-
-    $(".ui-options").click(function(e){
-        e.stopPropagation();
-    })
     
     // Import notes, changelog, version list etc.
     loadNotes();
     
-    // initEditors must be called before loadLocalSettings so that editors are initialised before changing their appearance.
+    // initEditors is called before loadLocalSettings so that editors are initialised before changing their appearance and contents.
     initEditors();
     loadLocalSettings();
+    updateHTML();
+    updateCSS();
+    switchTo(sessionSettings.activeMode);
+    toggleTheme(sessionSettings.activeTheme);
+
     
-    // Init click/touch events. Needs tidying and Safari compatibility
-    $("#adjustbar").mousedown(function(){
+    // Start backup cycle
+    setInterval(updateBackup, 300000);
+
+    // Init event listeners. Needs tidying and Safari compatibility
+    $(window).resize(() => {
+        resizeScreen();
+        resizeEditors();
+    });
+
+    $("#adjustbar").mousedown(() => {
         $(window).mousemove(dragHandler);
         $(frame.contentWindow).mousemove(dragHandler);
         
@@ -82,7 +91,7 @@ $(window).on("load", function(){
         $(frame.contentWindow).mouseup(cancelDrag);
     });
     
-    $("#adjustbar").on("touchstart", function(e){
+    $("#adjustbar").on("touchstart", (e) => {
         e.stopPropagation();
         
         $(window).on("touchmove", dragHandler);
@@ -91,42 +100,20 @@ $(window).on("load", function(){
         $(frame.contentWindow).on("touchend", cancelDrag);
         $(window).on("touchend", cancelDrag);
     });
-    
-    updateHTML();
-    updateCSS();
-    switchTo(sessionSettings.activeMode);
-    toggleTheme(sessionSettings.activeTheme);
-    
-    // Start polling for changes. Ugly solution to not updating screen every time the user enters a new character.
-    // TODO: Needs tidier behaviour e.g. a "queue" or waiting for the user to stop typing for a second.
-    setInterval(checkForChanges, 1000);
-    setInterval(updateBackup, 300000);
-    
-    $(window).resize(function(){
-        resizeScreen();
-        resizeEditors();
+
+    $(".ui-options").click((e) => {
+        e.stopPropagation();
     });
-    
-    // Init file uploader with change listener
-    $("#fileupload").on('change', function(e) {
-        const panel = $(e.target).data("target-panel");
-        var fr=new FileReader(); 
-        fr.onload=function() {
-            if(panel == "html")
-                editor.setValue(fr.result);
-            else if(panel == "css")
-                css_editor.setValue(fr.result);
-        }
-        fr.readAsText(this.files[0]); 
-    });
+
+    $("#fileupload").click(uploadFile);
 
     $(window).on("beforeunload", updateBackup);
     
-    setTimeout(function(){
+    setTimeout(() => {
         $("#loader").addClass("invisible");
         resizeScreen();
         resizeEditors();
-        // This is an ugly solution, waiting .5 seconds before resizing the editors tends to ensure they resize to fit the content after the content is loaded.
+        // Ugly solution, waiting .5 seconds before resizing the editors ensures they resize to fit the content after the content is loaded. Can we make this promise based?
     }, 500);
 });
 
@@ -138,13 +125,13 @@ function initEditors() {
     editor.session.setMode("ace/mode/html", () => {
         if($("#colorpicker").prop("checked")) toggleColorpicker();
     });
-    sessionSettings.isBlurb = false;
     editor.setShowPrintMargin(false);
     editor.session.setUseWrapMode(true);
-    editor.session.on("change", function(){
-        sessionSettings.HTMLChanged=true;
+    editor.isBlurb = false;
+    editor.session.on("change", () => {
+        waitForIdle("html");
     });
-    editor.on("focus", function() {
+    editor.on("focus", () => {
         if(editor.getValue()==defaultHTML) editor.setValue("");
     });
     
@@ -154,10 +141,10 @@ function initEditors() {
     });
     css_editor.setShowPrintMargin(false);
     css_editor.session.setUseWrapMode(true);
-    css_editor.session.on("change", function(){
-        sessionSettings.CSSChanged = true;
+    css_editor.session.on("change", () => {
+        waitForIdle("css");
     });
-    css_editor.on("focus", function() {
+    css_editor.on("focus", () => {
         if(css_editor.getValue()==defaultCSS) css_editor.setValue("");
     })
 
@@ -165,49 +152,26 @@ function initEditors() {
     text_editor.setShowPrintMargin(false);
     text_editor.renderer.setShowGutter(false);
     text_editor.session.setUseWrapMode(true);
-    text_editor.session.on("change", function(){
-        sessionSettings.textChanged = true;
+    text_editor.session.on("change", () => {
+        waitForIdle("text");
     });
-    text_editor.on("focus", function() {
+    text_editor.on("focus", () => {
         if(text_editor.getValue()==defaultText) text_editor.setValue("");
     })
 
 }
 
 
-function loadNotes() {
-    // Get the current meta info and imports it into the info modal.
-    // TODO: Change this to promise-based
-
-    $.get("../known-issues.html?"+lastUpdate, function(data) {
-        $("#issues-text").html(data);
-    });
-    
-    $.get("../changelog.html?"+lastUpdate, function (data) {
-        $("#changelog-text").html(data);
-    });
-    
-    $.get("../notes.html?"+lastUpdate, function(data) {
-        lastUpdate = lastUpdate;
-		let year = Math.floor( lastUpdate / 10000);
-		let month = months[Math.floor( (lastUpdate % 10000) / 100 ) - 1];
-		let day = lastUpdate % 100;
-        $("#notes").html(data).find("#latest").text("Latest update: "+day+" "+month+" "+year);
-    });
-    
-    $.get("../versions.html?"+lastUpdate, function(data) {
-        $("#versions-text").html(data);
-    });
-}
-
-
 function loadLocalSettings() {
     // Extract the user's settings and content from local storage and update UI + editors.
     // TODO: Use destructuring of localStorage object to tidy this up
-
     editor.setValue( localStorage.th_cj ? localStorage.th_cj : defaultHTML );
     css_editor.setValue( localStorage.th_cj_css ? localStorage.th_cj_css : defaultCSS );
     text_editor.setValue( localStorage.th_cj_text ? localStorage.th_cj_text : defaultText );
+    if(localStorage.th_cj === defaultHTML) {
+        $("#clear-html").addClass("d-none");
+        $("#restore-html").removeClass("d-none");
+    }
     
     if(localStorage.th_cj_colorpicker) {
         $("#colorpicker").prop("checked", localStorage.th_cj_colorpicker == "true");
@@ -283,30 +247,75 @@ function loadLocalSettings() {
 }
 
 
+function loadNotes() {
+    // Get the current meta info and imports it into the info modal.
+    // TODO: Change this to promise-based
+
+    $.get("../known-issues.html?"+lastUpdate, (data) => {
+        $("#issues-text").html(data);
+    });
+    
+    $.get("../changelog.html?"+lastUpdate, function (data) {
+        $("#changelog-text").html(data);
+    });
+    
+    $.get("../notes.html?"+lastUpdate, (data) => {
+        lastUpdate = lastUpdate;
+		let year = Math.floor( lastUpdate / 10000);
+		let month = months[Math.floor( (lastUpdate % 10000) / 100 ) - 1];
+		let day = lastUpdate % 100;
+        $("#notes").html(data).find("#latest").text("Latest update: "+day+" "+month+" "+year);
+    });
+    
+    $.get("../versions.html?"+lastUpdate, (data) => {
+        $("#versions-text").html(data);
+    });
+}
+
+
 /**************************************
     vvv  Code update functions  vvv
 **************************************/
 
-function checkForChanges() {
-    let anychange = false;
-    if(sessionSettings.HTMLChanged) {
+function waitForIdle(panel) {
+    console.log("Waiting for idle...");
+    const { aceEditor, defaultContent, backupName } = codeTypes[panel];
+    if(window[aceEditor].getValue() && window[aceEditor].getValue() !== defaultContent && localStorage[backupName]) {
+        $("#clear-"+panel).removeClass("d-none");
+        $("#restore-"+panel).addClass("d-none");
+    } else {
+        $("#clear-"+panel).addClass("d-none");
+        $("#restore-"+panel).removeClass("d-none");
+    }
+
+    const wait = setTimeout( () => {checkForChanges(panel)}, 400 );
+    window[aceEditor].session.on("change", () => {
+        console.log("Update cancelled by user input.");
+        clearTimeout(wait);
+    })
+}
+
+function checkForChanges(panel) {
+    console.log("Checking "+ panel + " panel for changes...");
+    const { aceEditor } = codeTypes[panel];
+    console.log(panel + " changed.");
+
+    if(panel == "html") {
         if(editor.getValue().indexOf("Please reset!") !== -1) {
             editor.setValue( editor.getValue().replace("Please reset!", "") );
             hardReset();
+            return false;
         } else {
             updateHTML();
-            sessionSettings.HTMLChanged=false;
         }
     }
-    
-    if(sessionSettings.CSSChanged) {
+
+    if(panel == "css") {
         updateCSS();
-        sessionSettings.CSSChanged=false;
     }
     
-    if(sessionSettings.textChanged) {
+    if(panel == "text") {
         updateText();
-        sessionSettings.textChanged=false;
     }
 
 }
@@ -314,7 +323,7 @@ function checkForChanges() {
 function updateHTML(buttonTriggered=false){
     let val = editor.getValue();
     let updateEditor;
-    if(sessionSettings.isBlurb) {
+    if(editor.isBlurb) {
         localStorage.th_cj_blurb = val;
         updateEditor = "ace-code-container-2";
     } else {
@@ -329,13 +338,13 @@ function updateHTML(buttonTriggered=false){
 };
 
 function updateCSS(buttonTriggered=false) {
-    var sass = new Sass();
+    //var sass = new Sass();
     var raw_css = css_editor.getValue();
     localStorage.th_cj_css = raw_css;
     
     if($("#auto").prop("checked") || buttonTriggered) {
         if(raw_css) {
-            sass.compile(raw_css, function(result) {
+            sass.compile(raw_css, (result) => {
                 let css = result.text;
                 if(css) frame.contentWindow.updateCSS(css);
                 else frame.contentWindow.updateCSS(raw_css);
@@ -470,21 +479,21 @@ function mobileSwitch() {
 function updateBackup() {
     const updatePanels = ["html", "blurb", "css", "text"];
     console.log("Backing up " + updatePanels.join(", ") + "...");
-    updatePanels.forEach( function(panel) {
+    updatePanels.forEach( (panel) => {
         const { storageName, defaultContent, backupName } = codeTypes[panel];
         if(localStorage[storageName] &&  localStorage[storageName] !== defaultContent) {
             localStorage[backupName] = localStorage[storageName];
-            console.log(panel+" backed up as localStorage."+storageName+".");
+            console.log(panel+" backed up as localStorage."+backupName+".");
         }
         else console.log(panel+" is empty,  not backing up.");
     } );
 }
 
 function restoreBackup(panel) {
-    if(isBlurb) panel = "blurb";
-    const { storageName, editorID } = codeTypes[panel];
-    const useEditor = panel == "html" || panel == "blurb" ? editor : panel == "css" ? css_editor : text_editor;
-    useEditor.setValue(localStorage[storageName]);
+    if(editor.isBlurb) panel = "blurb";
+    const { backupName, aceEditor } = codeTypes[panel];
+    const useEditor = window[aceEditor];
+    useEditor.setValue(localStorage[backupName]);
 }
 
 
@@ -495,7 +504,7 @@ function restoreBackup(panel) {
 function downloadFile(panel) {
     var thedate = new Date();
     let datestring = thedate.toLocaleDateString('en-GB')+"_"+thedate.toLocaleTimeString('en-GB');
-    storageName = panel == "html" ? "th_cj" : storagePrefix + panel;
+    const { storageName } = codeTypes[panel];
     var file = new Blob([ localStorage[storageName] ], {type: "text/plain"});
     var filesuffix = " " + panel.toUpperCase()+" "+datestring+".txt"
         .replace(/\:|\//g, "-");
@@ -524,6 +533,17 @@ function uploadFileDialogue(panel) {
     $("#fileupload").click()
 }
 
+function uploadFile(){
+    const panel = $(this).data("target-panel");
+    const { aceEditor } = codeTypes[panel];
+    $(this).on('change', function() {
+        const filereader = new FileReader(); 
+        filereader.onload = () => {
+            window[aceEditor].setValue(filereader.result)
+        }
+        filereader.readAsText(this.files[0]);
+    });
+}
 
 /**************************************
     vvv  TH import functions  vvv
@@ -540,7 +560,7 @@ function renderProfileCode(data) {
             customCSS = data.split("<style>")[1].split("</style>")[0].replace("<![CDATA[", "").replace("]]>", "").trim();
         }
 
-        if(sessionSettings.isBlurb) toggleBlurb();
+        if(editor.isBlurb) toggleBlurb();
         editor.setValue(
             $(data).find(".user-content:not(.blurb)").html()
         );
@@ -564,7 +584,7 @@ function renderProfileMeta(data) {
         
         frame.contentWindow.$(".blurb").addClass("ace-code-container-2");
         localStorage.th_cj_blurb = $(data).find(".blurb").html();
-        if(sessionSettings.isBlurb) editor.setValue(localStorage.th_cj_blurb);
+        if(editor.isBlurb) editor.setValue(localStorage.th_cj_blurb);
 
 }
 
@@ -620,7 +640,7 @@ function switchTo(mode) {
 }
 
 function toggleBlurb() {
-    if(sessionSettings.isBlurb) {
+    if(editor.isBlurb) {
         $("#html-tab").removeClass("text-dark");
         $("#blurb-tab").addClass("text-dark");
         editor.setValue(localStorage.th_cj);
@@ -629,7 +649,7 @@ function toggleBlurb() {
         $("#html-tab").addClass("text-dark");
         editor.setValue(localStorage.th_cj_blurb);
     }
-    sessionSettings.isBlurb = !sessionSettings.isBlurb;
+    editor.isBlurb = !editor.isBlurb;
 }
 
 function toggleHTMLPanel() {
@@ -677,6 +697,7 @@ function toggleVertical() {
         $("#fields").append($(".css-visible"));
         $("#fields").append($(".text-visible"));
         
+        // TODO: Tidy this up!  Too many things having the same classname toggled. Consider styling based on parent (body element?) with vertical class
         $(document.body).addClass("vertical");
         $("#main").addClass("vertical");
         $("#frame").addClass("vertical");
@@ -694,7 +715,7 @@ function toggleVertical() {
     } else {
         
         $("#titles").append($(".field-title"));
-        
+
         $(document.body).removeClass("vertical");
         $("#main").removeClass("vertical");
         $("#frame").removeClass("vertical");
@@ -776,7 +797,7 @@ function toggleColorpicker() {
     localStorage.th_cj_colorpicker = $("#colorpicker").prop("checked");
 
     if( !$("#colorpicker").prop("checked") ) {
-        [editor.session, css_editor.session].forEach(function(session){
+        [editor.session, css_editor.session].forEach((session) => {
 
             let rules = session.$mode.$highlightRules.getRules();
             for (let stateName in rules) {
