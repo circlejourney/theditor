@@ -20,6 +20,34 @@ const loremipsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Dui
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const beautify_HTML_Options = { "indent_size": "1", "indent_char": "\t", "max_preserve_newlines": "-1", "preserve_newlines": false, "keep_array_indentation": false, "break_chained_methods": false, "indent_scripts": "normal", "brace_style": "expand", "space_before_conditional": true, "unescape_strings": false, "jslint_happy": false, "end_with_newline": false, "wrap_line_length": "0", "indent_inner_html": false, "comma_first": false, "e4x": false, "indent_empty_lines": false }
 const beautify_CSS_Options = { "indent_size": "2", "indent_char": " ", "max_preserve_newlines": "-1", "preserve_newlines": false, "keep_array_indentation": false, "break_chained_methods": false, "indent_scripts": "normal", "brace_style": "collapse", "space_before_conditional": true, "unescape_strings": false, "jslint_happy": false, "end_with_newline": false, "wrap_line_length": "0", "indent_inner_html": false, "comma_first": false, "e4x": false, "indent_empty_lines": false };
+const storagePrefix = "th_cj_";
+const storages = ["th_cj", "th_cj_mode", "th_cj_theme", "th_cj_css", "th_cj_text", "th_cj_vertical", "th_cj_htmlpanel", "th_cj_csspanel", "th_cj_textpanel", "th_cj_auto", "th_cj_mobile", "th_cj_gutter", "th_cj_lastUpdate", "th_cj_hidenotif", "th_cj_hidenotif2", "th_cj_projectname"];
+const codeTypes = {
+    "html": {
+        storageName: "th_cj",
+        backupName: "th_cj_backup",
+        editorID: "editor",
+        defaultContent: defaultHTML
+    },
+    "blurb": {
+        storageName: "th_cj_blurb",
+        backupName: "th_cj_blurbbackup",
+        editorVarName: "editor",
+        defaultContent: defaultHTML
+    },
+    "css": {
+        storageName: "th_cj_css",
+        backupName: "th_cj_cssbackup",
+        editorVarName: "css_editor",
+        defaultContent: defaultCSS
+    },
+    "text": {
+        storageName: "th_cj_text",
+        backupName: "th_cj_textbackup",
+        editorVarName: "text_editor",
+        defaultContent: defaultText
+    }
+}
 
 
 /**************************************
@@ -27,10 +55,10 @@ const beautify_CSS_Options = { "indent_size": "2", "indent_char": " ", "max_pres
 **************************************/
 
 $(window).on("load", function(){
-    // Web app is initialised here, as code should only start running after all DOM elements are loaded.
+    // Web app is initialised here; code should only start running after all DOM elements are loaded.
     // TODO: Make this promise-based, i.e. upon loading all required files
 
-    // Get frame and set frame's internal lastUpdate to parent lastUpdate
+    // Get frame and set frame's internal lastUpdate date to parent lastUpdate date
     frame = document.getElementById("frame");
     frame.contentWindow.lastUpdate = lastUpdate;
 
@@ -69,13 +97,30 @@ $(window).on("load", function(){
     switchTo(sessionSettings.activeMode);
     toggleTheme(sessionSettings.activeTheme);
     
-    // Start tick function that runs every second
-    setInterval(tick, 1000);
+    // Start polling for changes. Ugly solution to not updating screen every time the user enters a new character.
+    // TODO: Needs tidier behaviour e.g. a "queue" or waiting for the user to stop typing for a second.
+    setInterval(checkForChanges, 1000);
+    setInterval(updateBackup, 300000);
     
     $(window).resize(function(){
         resizeScreen();
         resizeEditors();
     });
+    
+    // Init file uploader with change listener
+    $("#fileupload").on('change', function(e) {
+        const panel = $(e.target).data("target-panel");
+        var fr=new FileReader(); 
+        fr.onload=function() {
+            if(panel == "html")
+                editor.setValue(fr.result);
+            else if(panel == "css")
+                css_editor.setValue(fr.result);
+        }
+        fr.readAsText(this.files[0]); 
+    });
+
+    $(window).on("beforeunload", updateBackup);
     
     setTimeout(function(){
         $("#loader").addClass("invisible");
@@ -85,9 +130,49 @@ $(window).on("load", function(){
     }, 500);
 });
 
-$(window).on("beforeunload", function() {
-    if(editor.getValue() && editor.getValue() !== defaultHTML) localStorage.th_cj_backup = editor.getValue();
-});
+
+function initEditors() {
+    // Initialise the three Ace editors on the page with initial settings.
+        
+    editor = ace.edit("html-editor");
+    editor.session.setMode("ace/mode/html", () => {
+        if($("#colorpicker").prop("checked")) toggleColorpicker();
+    });
+    sessionSettings.isBlurb = false;
+    editor.setShowPrintMargin(false);
+    editor.session.setUseWrapMode(true);
+    editor.session.on("change", function(){
+        sessionSettings.HTMLChanged=true;
+    });
+    editor.on("focus", function() {
+        if(editor.getValue()==defaultHTML) editor.setValue("");
+    });
+    
+    css_editor = ace.edit("css-editor");
+    css_editor.session.setMode("ace/mode/scss", () => {
+        if($("#colorpicker").prop("checked")) toggleColorpicker();
+    });
+    css_editor.setShowPrintMargin(false);
+    css_editor.session.setUseWrapMode(true);
+    css_editor.session.on("change", function(){
+        sessionSettings.CSSChanged = true;
+    });
+    css_editor.on("focus", function() {
+        if(css_editor.getValue()==defaultCSS) css_editor.setValue("");
+    })
+
+    text_editor = ace.edit("text-editor");
+    text_editor.setShowPrintMargin(false);
+    text_editor.renderer.setShowGutter(false);
+    text_editor.session.setUseWrapMode(true);
+    text_editor.session.on("change", function(){
+        sessionSettings.textChanged = true;
+    });
+    text_editor.on("focus", function() {
+        if(text_editor.getValue()==defaultText) text_editor.setValue("");
+    })
+
+}
 
 
 function loadNotes() {
@@ -135,14 +220,6 @@ function loadLocalSettings() {
     
     if(localStorage.th_cj_theme) {
         sessionSettings.activeTheme = localStorage.th_cj_theme;
-    }
-    
-    if(localStorage.th_cj_importedmeta) {
-       //importedmeta = localStorage.th_cj_importedmeta;
-    }
-    
-    if(localStorage.th_cj_importedcode) {
-       //importedcode = localStorage.th_cj_importedcode;
     }
     
     if(localStorage.th_cj_vertical) {
@@ -205,54 +282,13 @@ function loadLocalSettings() {
     }
 }
 
-function initEditors() {
-    // Initialise the three Ace editors on the page with initial settings.
 
-    editor = ace.edit("html-editor");
-    editor.session.setMode("ace/mode/html", () => {
-        if($("#colorpicker").prop("checked")) toggleColorpicker();
-    });
-    sessionSettings.isBlurb = false;
-    editor.setShowPrintMargin(false);
-    editor.session.setUseWrapMode(true);
-    editor.session.on("change", function(){
-        sessionSettings.HTMLChanged=true;
-    });
-    editor.on("focus", function() {
-        if(editor.getValue()==defaultHTML) editor.setValue("");
-    });
-    
-    css_editor = ace.edit("css-editor");
-    css_editor.session.setMode("ace/mode/scss", () => {
-        if($("#colorpicker").prop("checked")) toggleColorpicker();
-    });
-    css_editor.setShowPrintMargin(false);
-    css_editor.session.setUseWrapMode(true);
-    css_editor.session.on("change", function(){
-        sessionSettings.CSSChanged = true;
-    });
-    css_editor.on("focus", function() {
-        if(css_editor.getValue()==defaultCSS) css_editor.setValue("");
-    })
+/**************************************
+    vvv  Code update functions  vvv
+**************************************/
 
-    text_editor = ace.edit("text-editor");
-    text_editor.setShowPrintMargin(false);
-    text_editor.renderer.setShowGutter(false);
-    text_editor.session.setUseWrapMode(true);
-    text_editor.session.on("change", function(){
-        sessionSettings.textChanged = true;
-    });
-    text_editor.on("focus", function() {
-        if(text_editor.getValue()==defaultText) text_editor.setValue("");
-    })
-
-}
-
-function tick() {
-    // Ugly solution to not updating screen every time the user enters a new character.
-    // TODO: Needs tidier behaviour e.g. a "queue" or something where each update request cancels the last.
-    // TODO: When auto is unchecked, still update local storage
-
+function checkForChanges() {
+    let anychange = false;
     if(sessionSettings.HTMLChanged) {
         if(editor.getValue().indexOf("Please reset!") !== -1) {
             editor.setValue( editor.getValue().replace("Please reset!", "") );
@@ -274,11 +310,6 @@ function tick() {
     }
 
 }
-
-
-/**************************************
-    vvv  Code update functions  vvv
-**************************************/
 
 function updateHTML(buttonTriggered=false){
     let val = editor.getValue();
@@ -333,7 +364,7 @@ function beautifyCSS() {
 
 
 /**************************************
-    vvv  Sizing functions  vvv
+      vvv  Sizing functions  vvv
 **************************************/
 
 function resizeScreen() {
@@ -432,24 +463,54 @@ function mobileSwitch() {
 }
 
 
-/**************************************
+/******************************************
+    vvv  Backup functions  vvv
+ ******************************************/
+
+function updateBackup() {
+    const updatePanels = ["html", "blurb", "css", "text"];
+    console.log("Backing up " + updatePanels.join(", ") + "...");
+    updatePanels.forEach( function(panel) {
+        const { storageName, defaultContent, backupName } = codeTypes[panel];
+        if(localStorage[storageName] &&  localStorage[storageName] !== defaultContent) {
+            localStorage[backupName] = localStorage[storageName];
+            console.log(panel+" backed up as localStorage."+storageName+".");
+        }
+        else console.log(panel+" is empty,  not backing up.");
+    } );
+}
+
+function restoreBackup(panel) {
+    if(isBlurb) panel = "blurb";
+    const { storageName, editorID } = codeTypes[panel];
+    const useEditor = panel == "html" || panel == "blurb" ? editor : panel == "css" ? css_editor : text_editor;
+    useEditor.setValue(localStorage[storageName]);
+}
+
+
+/*************************************************
     vvv  Local file upload/download functions  vvv
-**************************************/
+ *************************************************/
 
 function downloadFile(panel) {
     var thedate = new Date();
-    panel == "html" ? storageName = "" : storageName = "_"+panel;
-    var file = new Blob([ localStorage["th_cj"+storageName] ], {type: "text/plain"});
-    var filetitle = "THeditor_"+panel.toUpperCase()+"_"+thedate.toLocaleDateString('en-GB')+"_"+thedate.toLocaleTimeString('en-GB')+".txt"
+    let datestring = thedate.toLocaleDateString('en-GB')+"_"+thedate.toLocaleTimeString('en-GB');
+    storageName = panel == "html" ? "th_cj" : storagePrefix + panel;
+    var file = new Blob([ localStorage[storageName] ], {type: "text/plain"});
+    var filesuffix = " " + panel.toUpperCase()+" "+datestring+".txt"
         .replace(/\:|\//g, "-");
+
+    const projectname = prompt("Downloading "+panel+", project name:", localStorage.th_cj_projectname);
+    if(!projectname) return false;
+    localStorage.th_cj_projectname = projectname || "";
     
     if (window.navigator.msSaveOrOpenBlob)
-        window.navigator.msSaveOrOpenBlob(file, filetitle);
+        window.navigator.msSaveOrOpenBlob(file, (projectname || "THeditor") + filesuffix);
     else {
         var a = document.createElement("a")
         var url = URL.createObjectURL(file);
         a.href = url;
-        a.download = filetitle;
+        a.download = (projectname || "THeditor") + filesuffix;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -458,23 +519,9 @@ function downloadFile(panel) {
 }
 
 function uploadFileDialogue(panel) {
+    // This function uses a dummy file input to element #fileupload to open upload dialogues for all 3 panels.
     $("#fileupload").data("target-panel", panel)
     $("#fileupload").click()
-}
-
-function uploadFile(div){
-    var panel = $(div).data("target-panel");
-    div.addEventListener('change', function() {
-        var fr=new FileReader(); 
-        fr.onload=function() {
-            if(panel == "html")
-                editor.setValue(fr.result);
-            else if(panel == "css")
-                css_editor.setValue(fr.result);
-        }
-        fr.readAsText(this.files[0]); 
-    })
-    
 }
 
 
@@ -533,10 +580,8 @@ function showInfo() {
 
 function hardReset() {
     if(!confirm("Download all code as text files and reset?")) return false;
-    
-    ["html", "css", "text"].forEach(function(i){
-        downloadFile(i);
-    });
+    ["html", "css", "text"].forEach((i) => { downloadFile(i); });
+    storages.forEach((storageKey) => { localStorage.removeItme(storageKey); });
 
     localStorage.removeItem("th_cj");
     localStorage.removeItem("th_cj_mode");
@@ -554,16 +599,6 @@ function hardReset() {
     localStorage.removeItem("th_cj_hidenotif");
     localStorage.removeItem("th_cj_hidenotif2");
     location.reload();
-}
-
-function insertLorem(panel) {
-    if(panel=='html') {
-        editor.session.insert(editor.getCursorPosition(), loremipsum)
-    } else if(panel=='css') {
-        css_editor.session.insert(editor.getCursorPosition(), loremipsum)
-    } else if(panel=='text') {
-        text_editor.session.insert(editor.getCursorPosition(), loremipsum)
-    }
 }
 
 /**************************************

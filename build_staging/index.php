@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <?php $lastUpdate = 20230417; $latestBuild = "staging" ?>
+        <?php $lastUpdate = 20230819; $latestBuild = "staging" ?>
         <script>
             const lastUpdate = '<?php echo $lastUpdate ?>';
         </script>
@@ -299,7 +299,7 @@
                         </span>
 
                         <span class="checkbox-container hide-small">
-                            <input type="checkbox" id="gutter" onchange="toggleGutter()">&nbsp;<label for="gutter">Line numbers</label>
+                            <input type="checkbox" id="gutter" onchange="toggleGutter()" checked>&nbsp;<label for="gutter">Line numbers</label>
                         </span>
 
                         <span class="checkbox-container">
