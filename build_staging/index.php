@@ -32,13 +32,13 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.7/beautify-html.min.js"></script>
         
         <!-- TH source -->
-    	<link id="theme-css" href="/src/site_black-forest.css?cachebust=2" rel="stylesheet">
+    	<link id="theme-css" href="/src/site_black-forest.css?2" rel="stylesheet">
     	
         <!-- FONT AWESOME -->
         <link rel="stylesheet" href="/src/fontawesome-pro-6.0.0-beta3-web/css/all.min.css">
         <script src="/src/fontawesome-pro-6.0.0-beta3-web/js/all.min.js" crossorigin="anonymous"></script>
         
-        <script src="/build_<?php echo $latestBuild ?>/script.js?cachebust=3" type="text/javascript"></script>
+        <script src="/build_<?php echo $latestBuild ?>/script.js?3" type="text/javascript"></script>
         <link rel="stylesheet" href="/build_<?php echo $latestBuild ?>/style.css?cachebust=2">
             
     </head>

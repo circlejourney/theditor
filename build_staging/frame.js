@@ -46,10 +46,13 @@ function updateCSS(newCSS) {
     $("#custom-css").append(newCSS);
 }
 
-function updateHTML(newHTML, div) {
+function updateHTML(newHTML, className) {
     var content = $.parseHTML(newHTML);
-    $("."+div).empty();
-    $("."+div).append(content);
+    $("."+className).empty();
+    $("."+className).append(content);
+    $(".fr-spoiler").click(function(e){
+        e.pageY - $(this).offset().top < 32 && $(this).toggleClass("fr-spoiler-show");
+    });
 }
 
 function importProfile(profilePath, importType){
