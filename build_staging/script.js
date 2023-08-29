@@ -260,7 +260,6 @@ function loadNotes() {
     });
     
     $.get("../notes.html?"+lastUpdate, (data) => {
-        lastUpdate = lastUpdate;
 		let year = Math.floor( lastUpdate / 10000);
 		let month = months[Math.floor( (lastUpdate % 10000) / 100 ) - 1];
 		let day = lastUpdate % 100;
@@ -278,7 +277,6 @@ function loadNotes() {
 **************************************/
 
 function waitForIdle(panel) {
-    console.log("Waiting for idle...");
     const { aceEditor, defaultContent, backupName } = codeTypes[panel];
     if(window[aceEditor].getValue() && window[aceEditor].getValue() !== defaultContent && localStorage[backupName]) {
         $("#clear-"+panel).removeClass("d-none");
@@ -290,15 +288,11 @@ function waitForIdle(panel) {
 
     const wait = setTimeout( () => {checkForChanges(panel)}, 400 );
     window[aceEditor].session.on("change", () => {
-        console.log("Update cancelled by user input.");
         clearTimeout(wait);
     })
 }
 
 function checkForChanges(panel) {
-    console.log("Checking "+ panel + " panel for changes...");
-    const { aceEditor } = codeTypes[panel];
-    console.log(panel + " changed.");
 
     if(panel == "html") {
         if(editor.getValue().indexOf("Please reset!") !== -1) {

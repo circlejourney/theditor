@@ -25,7 +25,7 @@
         
         <!-- Ace Colorpicker -->
         <link rel="stylesheet" href="/src/ace-colorpicker.css" />
-        <script type="text/javascript" src="/src/ace-colorpicker.js?3" ></script>
+        <script type="text/javascript" src="/src/ace-colorpicker.js?4" ></script>
 
         <!-- Beautify -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.7/beautify-css.min.js"></script>
