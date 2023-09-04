@@ -1,5 +1,5 @@
 # Toyhouse Live Code Editor
-An editor with live preview for [Toyhouse](https://toyhou.se) themes. Created by Circlejourney, licenced under a CC-BY-SA-4.0 licence. Thank you so much for your help, I'm a busy person and I would love all the help I can get with updating the editor!
+An editor with live preview for [Toyhouse](https://toyhou.se) themes. View changes as you type, in various site skins/themes and page layouts.
 
 ## Previewing on local server
 To preview a local copy of the code, you will need to Install [XAMPP](https://www.apachefriends.org/) from Apache Friends. Once you add XAMPP's programme directory to your PATH variable, navigate to the theditor root directory in the command line and start a local server:
