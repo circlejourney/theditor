@@ -24,7 +24,7 @@ This editor uses [jQuery](https://code.jquery.com/), [Ace Editor](https://ace.c9
 
 ## Edit code editor functionality
 - If you're editing the UI functionality (anything related to buttons on the UI and frame appearance), almost everything you need to edit will be found in /index.php and build_staging/script.js.
-- Occasionally you may need to change things inside the preview frame; this is mostly housed in frame.html and its associated script, frame.js.
+- Occasionally you may need to change things inside the preview frame; this is mostly housed in frame.php and its associated script, frame.js.
 
 ## Adding a new page layout
 - Open the HTML page on Toyhouse using the inspector or view source and locate the element with the `#main` ID and copy *only* the that element.
