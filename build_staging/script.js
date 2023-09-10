@@ -255,7 +255,7 @@ function loadNotes() {
         $("#issues-text").html(data);
     });
     
-    $.get("../changelog.html?"+lastUpdate, function (data) {
+    $.get("../changelog.html?"+lastUpdate, function (data) {k
         $("#changelog-text").html(data);
     });
     
@@ -595,23 +595,7 @@ function showInfo() {
 function hardReset() {
     if(!confirm("Download all code as text files and reset?")) return false;
     ["html", "css", "text"].forEach((i) => { downloadFile(i); });
-    storages.forEach((storageKey) => { localStorage.removeItme(storageKey); });
-
-    localStorage.removeItem("th_cj");
-    localStorage.removeItem("th_cj_mode");
-    localStorage.removeItem("th_cj_theme");
-    localStorage.removeItem("th_cj_css");
-    localStorage.removeItem("th_cj_text");
-    localStorage.removeItem("th_cj_vertical");
-    localStorage.removeItem("th_cj_htmlpanel");
-    localStorage.removeItem("th_cj_csspanel");
-    localStorage.removeItem("th_cj_textpanel");
-    localStorage.removeItem("th_cj_auto");
-    localStorage.removeItem("th_cj_mobile");
-    localStorage.removeItem("th_cj_gutter");
-    localStorage.removeItem("th_cj_lastUpdate");
-    localStorage.removeItem("th_cj_hidenotif");
-    localStorage.removeItem("th_cj_hidenotif2");
+    storages.forEach((storageKey) => { localStorage.removeItem(storageKey); });
     location.reload();
 }
 

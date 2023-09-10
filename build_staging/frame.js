@@ -47,10 +47,11 @@ function updateCSS(newCSS) {
 }
 
 function updateHTML(newHTML, className) {
-    var content = $.parseHTML(newHTML);
-    $("."+className).empty();
-    $("."+className).append(content);
-    $(".fr-spoiler").click(function(e){
+    const dummy = document.createElement("div");
+    // Use innerHTML to avoid problems DocumentFragment parsing HTML tags inside comments. Recalculating DOM should be OK if the updates are only every few seconds.
+    dummy.innerHTML = newHTML;
+    $("."+className).empty().append($(dummy).contents());
+    $(".fr-spoiler").on("click", function(e){
         e.pageY - $(this).offset().top < 32 && $(this).toggleClass("fr-spoiler-show");
     });
 }

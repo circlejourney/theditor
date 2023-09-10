@@ -18,8 +18,8 @@
         
         <!-- Misc libraries -->
     	<script src="/src/jquery-3.6.0/jquery-3.6.0.min.js"></script>
-        <script src="/src/ace-builds/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
-        <script src="/src/ace-builds/src-noconflict/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
+        <script src="/src/ace-1.4.14/src-min/ace.js" type="text/javascript" charset="utf-8"></script>
+        <script src="/src/ace-1.4.14/src-min/ext-language_tools.js" type="text/javascript" charset="utf-8"></script>
         <script src="/src/sass.js-master/dist/sass.js"></script>
 
         
