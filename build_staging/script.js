@@ -255,7 +255,7 @@ function loadNotes() {
         $("#issues-text").html(data);
     });
     
-    $.get("../changelog.html?"+lastUpdate, function (data) {k
+    $.get("../changelog.html?"+lastUpdate, function (data) {
         $("#changelog-text").html(data);
     });
     
