@@ -318,7 +318,7 @@ function updateHTML(buttonTriggered=false){
     let val = editor.getValue();
     let updateEditor;
     if(editor.isBlurb) {
-        localStorage.th_cj_blurb = val;
+        localStorage.th_cj_blurb = val || "";
         updateEditor = "ace-code-container-2";
     } else {
         localStorage.th_cj = val;
@@ -577,7 +577,7 @@ function renderProfileMeta(data) {
         frame.contentWindow.$("#sidebar a").prop("href", "#");
         
         frame.contentWindow.$(".blurb").addClass("ace-code-container-2");
-        localStorage.th_cj_blurb = $(data).find(".blurb").html();
+        localStorage.th_cj_blurb = $(data).find(".blurb").html() || "";
         if(editor.isBlurb) editor.setValue(localStorage.th_cj_blurb);
 
 }
