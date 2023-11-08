@@ -33,6 +33,13 @@ This editor uses [jQuery](https://code.jquery.com/), [Ace Editor](https://ace.c9
 - Create an HTML file with a suitable filename in the templates folder and paste the processed code inside.
 - Add a new item to the dropdown menu in index.php. Its onclick property should be `switchTo( <HTML filename without extension> )`
 
+## Set up import credentials
+Since Version 1.10.3, the code editor's importer now authenticates itself with Toyhouse so that it can retrieve guest-blocked profiles. The live production version uses Circlejourney's bot account [fuchsiamoonrise](https://toyhou.se/fuchsiamoonrise), but these are not committed to the repo for security purposes.
+
+To make the feature work in full, you can set up your local version to log in with your own Toyhouse credentials. To do so, create a file called `settings.conf` *one directory above* the editor's root directory. For example, if the editor is in `C:/theditor`, `settings.conf` should be in `C:/`.
+
+`settings.conf` is formatted  as a [PHP ini file](https://www.php.net/manual/en/function.parse-ini-file.php) containing two settings: a username and a password. The structure of this file is demonstrated in `settings.conf.example`. This file should *not* be committed to the repository.
+
 ## Thank yous
 Huge thank you [Min](https://github.com/liwoyadan) for very kindly shared their Font Awesome Pro courtesy of subscription with us 💙 This gives us access to premium FA icons.
 
