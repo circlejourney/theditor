@@ -54,7 +54,7 @@ const codeTypes = {
     vvv  Window events  vvv
 **************************************/
 
-$(window).on("load", () => {
+$(window).on("load", function() {
     // Web app is initialised here; code should only start running after all DOM elements are loaded.
     // TODO: Make this promise-based, i.e. upon loading all required files
 
@@ -134,6 +134,12 @@ function initEditors() {
     editor.on("focus", () => {
         if(editor.getValue()==defaultHTML) editor.setValue("");
     });
+    $(editor.container).on("keydown", (e) => {
+        if(e.ctrlKey && e.key=="s") {
+            e.preventDefault();
+            downloadFile("html");
+        }
+    });
     
     css_editor = ace.edit("css-editor");
     css_editor.session.setMode("ace/mode/scss", () => {
@@ -147,6 +153,12 @@ function initEditors() {
     css_editor.on("focus", () => {
         if(css_editor.getValue()==defaultCSS) css_editor.setValue("");
     })
+    $(css_editor.container).on("keydown", (e) => {
+        if(e.ctrlKey && e.key=="s") {
+            e.preventDefault();
+            downloadFile("text");
+        }
+    });
 
     text_editor = ace.edit("text-editor");
     text_editor.setShowPrintMargin(false);
@@ -158,6 +170,12 @@ function initEditors() {
     text_editor.on("focus", () => {
         if(text_editor.getValue()==defaultText) text_editor.setValue("");
     })
+    $(text_editor.container).on("keydown", (e) => {
+        if(e.ctrlKey && e.key=="s") {
+            e.preventDefault();
+            downloadFile("html");
+        }
+    });
 
 }
 
