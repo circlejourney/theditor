@@ -1,84 +1,127 @@
 <?php
     /* This PHP programme handles the basic verification flow in the absence of a full Toyhouse API.
-    *   1. Verify that the profile is valid and not blank.
-    *   2. Verify that the user / character has the appropriate permissions set (using the allow-thcj-import string).
-    *   3. OR verify that the user has global import permissions allowed (using allow-thcj-import-all string).
-    *   4. If all checks are passed, fetch the full HTML contents of the profile page, including site meta, and print them to the browser.
+    *   1. Log into the (to view guest blocked profiles)
+    *   2. Verify that the profile is valid and not blank.
+    *   3. Verify that the user / character has the appropriate permissions set (using the allow-thcj-import string).
+    *   4. OR verify that the user has global import permissions allowed (using allow-thcj-import-all string).
+    *   5. If all checks are passed, fetch the full HTML contents of the profile page, including site meta, and print them to the browser.
     */
+    require_once("../phpQuery/phpQuery.php");
+    $homepage = "https://toyhou.se";
+    $loginendpoint = "https://toyhou.se/~account/login";
+    $settings = parse_ini_file("../../settings.conf");
+    $username = $settings["username"];
+    $password = $settings["password"];
 
-    // CSRF token request
-    $csrfrequest = curl_init();
-    curl_setopt($csrfrequest, CURLOPT_URL, $profile);
-    curl_setopt ($csrfrequest, CURLOPT_COOKIEJAR, $cookie);
-    curl_setopt ($csrfrequest, CURLOPT_COOKIEFILE, $cookie);
-    curl_setopt ($csrfrequest, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($csrfrequest, CURLOPT_FOLLOWLOCATION, 0);
+    // Login CSRF handshake
+    $curlrequest = curl_init();
+    curl_setopt($curlrequest, CURLOPT_URL, $loginendpoint);
+    curl_setopt($curlrequest, CURLOPT_COOKIEJAR, $cookie);
+    curl_setopt($curlrequest, CURLOPT_COOKIEFILE, $cookie);
+    curl_setopt($curlrequest, CURLOPT_RETURNTRANSFER, 1);
+    $csrfresponse = curl_exec($curlrequest);
+    phpQuery::newDocumentHTML($csrfresponse);
+    $authed = pq("meta[name='csrf-token']")->count() === 0;
     
-    $csrfresponse = curl_exec($csrfrequest);
-    curl_close($csrfrequest);
-    preg_match("/<meta\sname=\"csrf-token\"\scontent=\"(.*?)\">/", $csrfresponse, $tokenmatches);
-    $token = $tokenmatches[1] ?? null;
-    $haswarning = preg_match("/name=\"user\"\stype=\"hidden\"\svalue=\"([0-9]+)\"/", $csrfresponse, $usermatches);
-    $hascharwarning = preg_match("/name=\"character\"\stype=\"hidden\"\svalue=\"([0-9]+)\"/", $csrfresponse, $charactermatches);
+    if(!$authed) {
+        error_log("Application currently not logged in. Logging in...");
+        $token = pq("meta[name='csrf-token']")->attr("content");
 
+        // Login post request
+        $loginheaders = array(
+            "username" => $username,
+            "password" => $password,
+            "_token" => $token
+        );
+        curl_setopt($curlrequest, CURLOPT_URL, $loginendpoint);
+        curl_setopt($curlrequest, CURLOPT_POST, 1);
+        curl_setopt($curlrequest, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curlrequest, CURLOPT_FOLLOWLOCATION, 0);
+        curl_setopt($curlrequest, CURLOPT_POSTFIELDS, http_build_query($loginheaders));
+        $loginresponse = curl_exec($curlrequest);
+        error_log($loginresponse);
+    }
+
+    // Find user and accept user warning if it exists
+    if($ischaracter) {
+        error_log("Finding owner...");
+        curl_setopt($curlrequest, CURLOPT_URL, $profile);
+        curl_setopt ($curlrequest, CURLOPT_COOKIEJAR, $cookie);
+        curl_setopt ($curlrequest, CURLOPT_COOKIEFILE, $cookie);
+        curl_setopt($curlrequest, CURLOPT_POST, 0);
+        curl_setopt ($curlrequest, CURLOPT_RETURNTRANSFER, 1);
+        $profileresponse = curl_exec($curlrequest);
+        preg_match("/\"display-user-username\">(.*?)<\/span>/", $profileresponse, $ownermatches);
+        $owner = $ownermatches[1];
+    } else $owner = $profilePath;
+    $ownerprofile = "https://toyhou.se/$owner";
+    
+    error_log("Getting user profile...");
+    curl_setopt($curlrequest, CURLOPT_URL, $ownerprofile);
+    curl_setopt ($curlrequest, CURLOPT_COOKIEJAR, $cookie);
+    curl_setopt ($curlrequest, CURLOPT_COOKIEFILE, $cookie);
+    curl_setopt ($curlrequest, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($curlrequest, CURLOPT_FOLLOWLOCATION, 0);
+
+    $haswarning = preg_match("/name=\"user\"\stype=\"hidden\"\svalue=\"([0-9]+)\"/", $csrfresponse, $usermatches);
     if($haswarning) {
+        error_log("Accepting user warning...");
         $user = $usermatches[1];
+        $token = pq("meta[name='csrf-token']")->attr("content");
 
         $postquery = array(
             'user'=>$user,
             '_token'=>$token
         );
-
-        if($hascharwarning) {
-            $character = $charactermatches[1];
-            $postquery = array_merge($postquery, array("character" => $character));
-        }
-
-        $acceptrequest = curl_init();
-        curl_setopt($acceptrequest, CURLOPT_URL, "https://toyhou.se/~account/warnings/accept");
-        curl_setopt ($acceptrequest, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($acceptrequest, CURLOPT_POST, 1);
-        curl_setopt ($acceptrequest, CURLOPT_COOKIEFILE, $cookie);
-        curl_setopt($acceptrequest, CURLOPT_POSTFIELDS, http_build_query($postquery));
-        $acceptresponse = curl_exec($acceptrequest);
-        curl_close($acceptrequest);
+        curl_setopt($curlrequest, CURLOPT_URL, "https://toyhou.se/~account/warnings/accept");
+        curl_setopt ($curlrequest, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curlrequest, CURLOPT_POST, 1);
+        curl_setopt($curlrequest, CURLOPT_POSTFIELDS, http_build_query($postquery));
+        $warningresponse = curl_exec($curlrequest);
     }
     
-    $profilerequest = curl_init();
-    curl_setopt($profilerequest, CURLOPT_URL, $profile);
-    curl_setopt ($profilerequest, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt ($profilerequest, CURLOPT_COOKIEFILE, $cookie);
-    curl_setopt($profilerequest, CURLOPT_POST, 0);
-    $profileresponse = curl_exec($profilerequest);
-    
+    // Check user profile for global user allow string
+    curl_setopt($curlrequest, CURLOPT_URL, $ownerprofile);
+    curl_setopt($curlrequest, CURLOPT_POST, 0);
+    $profileresponse = curl_exec($curlrequest);
+    $userglobalpermit = strpos($profileresponse, "allow-thcj-import-all") !== false;
 
-    if($ischaracter) {
-        preg_match("/\"display-user-username\">(.*?)<\/span>/", $profileresponse, $ownermatches);
-        $owner = $ownermatches[1];
-        
-        $ownerrequest = curl_init();
-        curl_setopt($ownerrequest, CURLOPT_URL, "https://toyhou.se/".$owner);
-        curl_setopt ($ownerrequest, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt ($ownerrequest, CURLOPT_COOKIEFILE, $cookie);
-        
-        $ownerresponse = curl_exec($ownerrequest);
-        $ownerhaswarning = preg_match("/name=\"user\"\stype=\"hidden\"\svalue=\"([0-9]+)\"/", $ownerresponse, $usermatches);
-        if($ownerhaswarning) {
+    // Accept character warning if character
+    if($ischaracter){
+        error_log("Getting character's profile...");
+        curl_setopt($curlrequest, CURLOPT_URL, $profile);
+        curl_setopt ($curlrequest, CURLOPT_COOKIEJAR, $cookie);
+        curl_setopt ($curlrequest, CURLOPT_COOKIEFILE, $cookie);
+        curl_setopt($curlrequest, CURLOPT_POST, 0);
+        curl_setopt ($curlrequest, CURLOPT_RETURNTRANSFER, 1);
+        $charwarningresponse = curl_exec($curlrequest);
+        phpQuery::newDocumentHTML($charwarningresponse);
+        $hascharwarning = pq("input[name='character']")->count() > 0;
 
-            $ownerpostquery = array(
-                'user'=>$usermatches[1],
-                '_token'=>$token
+        if($hascharwarning) {
+            error_log("Accepting $profilePath's warning...");
+            $user = pq("input[name='user']")->attr("value");
+            $character = pq("input[name='character']")->attr("value");
+            $token = pq("meta[name='csrf-token']")->attr("content");
+
+            $postquery = array(
+                '_token'=>$token,
+                'user'=>$user,
+                'character'=>$character
             );
 
-            curl_setopt($ownerrequest, CURLOPT_URL, "https://toyhou.se/~account/warnings/accept");
-            curl_setopt ($ownerrequest, CURLOPT_RETURNTRANSFER, 1);
-            curl_setopt ($ownerrequest, CURLOPT_COOKIEFILE, $cookie);
-            curl_setopt($ownerrequest, CURLOPT_POST, 1);
-            curl_setopt($acceptrequest, CURLOPT_POSTFIELDS, http_build_query($ownerpostquery));
-            $ownerresponse = curl_exec($ownerrequest);
+            curl_setopt($curlrequest, CURLOPT_URL, "https://toyhou.se/~account/warnings/accept");
+            curl_setopt ($curlrequest, CURLOPT_RETURNTRANSFER, 1);
+            curl_setopt($curlrequest, CURLOPT_POST, 1);
+            curl_setopt($curlrequest, CURLOPT_POSTFIELDS, http_build_query($postquery));
+            $charwarningresponse = curl_exec($curlrequest);
         }
-    } else $ownerresponse = $profileresponse;
-    $userimportpermitted = strpos($ownerresponse, "allow-thcj-import-all") !== false;
+    
+        // Finally, get the profile of interest (if character?)
+        curl_setopt($curlrequest, CURLOPT_URL, $profile);
+        curl_setopt($curlrequest, CURLOPT_POST, 0);
+        $profileresponse = curl_exec($curlrequest); // Override profileresponse with the character's profile
+    }
     
     if(strpos($profileresponse, "user-content") === false) {
         echo "<div><div class='user-content thcj-warn'>I couldn't find anything to import. The profile may be private, empty or nonexistent.</div></div>";

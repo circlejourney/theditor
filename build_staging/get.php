@@ -1,6 +1,13 @@
 <?php 
     header("Content-type: text/html");
+
+    function sanitise($string) {
+        return preg_replace("/\/\\\/", '', $string);
+    }
+
+
     $profilePath = $_POST["profilePath"] ?? $_GET["profilePath"] ?? false;
+    $profilePath = sanitise($profilePath);
     $getMeta = $_POST["getMeta"] ?? $_GET["getMeta"] ?? false;
     $profile = "https://toyhou.se/$profilePath";
     $cookie = getcwd() . DIRECTORY_SEPARATOR . "cookie.txt";
