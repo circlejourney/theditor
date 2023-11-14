@@ -15,10 +15,20 @@ function switchTo(mode) {
 
     $.get("../templates/"+mode+".html?"+lastUpdate, function(data) {
         $("#display-area").html(data);
-
-        updateHTML(localStorage.th_cj_blurb, "ace-code-container-2");
-        updateHTML(localStorage.th_cj, "ace-code-container");
-        updateCSS(localStorage.th_cj_css);
+        
+        const requestHTML = parent.requestFromDB("html");
+        const requestBlurb = parent.requestFromDB("blurb");
+        const requestCSS = parent.requestFromDB("css");
+        
+        requestHTML.onsuccess = function(e) {
+            updateHTML(e.target.result.code, "ace-code-container");
+        }
+        requestBlurb.onsuccess = function(e) {
+            updateHTML(e.target.result.code, "ace-code-container-2");
+        }
+        requestCSS.onsuccess = function(e) {
+            updateCSS(e.target.result.code);
+        }
 
         if(localStorage.th_cj_importedmeta) {
             parent.renderProfileMeta(localStorage.th_cj_importedmeta);

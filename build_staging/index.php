@@ -30,6 +30,7 @@
         
         <!-- TH source -->
     	<link id="theme-css" href="/src/site_black-forest.css?2" rel="stylesheet">
+        <link id="night-css" rel="stylesheet">
     	
         <!-- FONT AWESOME -->
         <link rel="stylesheet" href="/src/fontawesome-pro-6.0.0-beta3-web/css/all.min.css">
@@ -243,7 +244,7 @@
                          <div class="d-flex">
                         <button class="btn btn-primary mr-1 import-button" id="import-meta" onclick="startImport('meta')">Import meta</button>
                         <button class="btn btn-primary mr-1 import-button" id="import-html" onclick="startImport('code')">Import HTML</button>
-                        <button class="btn btn-primary" onclick="importedmeta=null; importedcode=null; localStorage.removeItem('th_cj_importedmeta'); localStorage.removeItem('th_cj_importedcode'); switchTo(activemode);">Reset</button>
+                        <button class="btn btn-primary" onclick="importedmeta=null; importedcode=null; localStorage.removeItem('th_cj_importedmeta'); localStorage.removeItem('th_cj_importedcode'); switchTo(activeMode);">Reset</button>
                         </div>
                     </div>
                   </div>

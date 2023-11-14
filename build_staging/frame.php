@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="../src/fontawesome-pro-6.0.0-beta3-web/css/all.min.css">
     <script src="https://kit.fontawesome.com/0ddae54ad8.js" crossorigin="anonymous"></script>
     
-    <script src="frame.js?v=<?php echo rand() ?>"></script>
+    <script src="frame.js?v=<?php echo filemtime("frame.js"); ?>"></script>
 	<style id="custom-css" type="text/css"></style>
 </head>
 <body>
