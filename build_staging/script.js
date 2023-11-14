@@ -9,6 +9,7 @@ var sessionSettings = { activeMode: "profile", activeTheme: "Default" };
 // DOM elements
 var editor, css_editor, text_editor, frame;
 const sass = new Sass();
+let DB, lastRequest;
 
 /**************************************
     vvv  Constants  vvv
@@ -20,30 +21,22 @@ const loremipsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Dui
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const beautify_HTML_Options = { "indent_size": "1", "indent_char": "\t", "max_preserve_newlines": "-1", "preserve_newlines": false, "keep_array_indentation": false, "break_chained_methods": false, "indent_scripts": "normal", "brace_style": "expand", "space_before_conditional": true, "unescape_strings": false, "jslint_happy": false, "end_with_newline": false, "wrap_line_length": "0", "indent_inner_html": false, "comma_first": false, "e4x": false, "indent_empty_lines": false }
 const beautify_CSS_Options = { "indent_size": "2", "indent_char": " ", "max_preserve_newlines": "-1", "preserve_newlines": false, "keep_array_indentation": false, "break_chained_methods": false, "indent_scripts": "normal", "brace_style": "collapse", "space_before_conditional": true, "unescape_strings": false, "jslint_happy": false, "end_with_newline": false, "wrap_line_length": "0", "indent_inner_html": false, "comma_first": false, "e4x": false, "indent_empty_lines": false };
-const storagePrefix = "th_cj_";
 const storages = ["th_cj", "th_cj_mode", "th_cj_theme", "th_cj_css", "th_cj_text", "th_cj_vertical", "th_cj_htmlpanel", "th_cj_csspanel", "th_cj_textpanel", "th_cj_auto", "th_cj_mobile", "th_cj_gutter", "th_cj_lastUpdate", "th_cj_hidenotif", "th_cj_hidenotif2", "th_cj_projectname"];
 const codeTypes = {
     "html": {
-        storageName: "th_cj",
-        backupName: "th_cj_backup",
         aceEditor: "editor",
         defaultContent: defaultHTML
     },
     "blurb": {
-        storageName: "th_cj_blurb",
-        backupName: "th_cj_blurbbackup",
         aceEditor: "editor",
         defaultContent: defaultHTML
     },
     "css": {
-        storageName: "th_cj_css",
         backupName: "th_cj_cssbackup",
         aceEditor: "css_editor",
         defaultContent: defaultCSS
     },
     "text": {
-        storageName: "th_cj_text",
-        backupName: "th_cj_textbackup",
         aceEditor: "text_editor",
         defaultContent: defaultText
     }
@@ -64,20 +57,33 @@ $(window).on("load", function() {
     
     // Import notes, changelog, version list etc.
     loadNotes();
-    
-    // initEditors is called before loadLocalSettings so that editors are initialised before changing their appearance and contents.
-    initEditors();
-    loadLocalSettings();
-    updateHTML();
-    updateCSS();
-    switchTo(sessionSettings.activeMode);
-    toggleTheme(sessionSettings.activeTheme);
 
-    
-    // Start backup cycle
-    setInterval(updateBackup, 300000);
+    // Initialise database...everything hereafter needs to happen after database since it contains the stored code.
+    const DBrequest = initDB();
+    DBrequest.onsuccess = function(event){
+        DB = event.target.result;
+        console.log("Database schema is up to date.");
 
-    // Init event listeners. Needs tidying and Safari compatibility
+        // initEditors is called before loadLocalSettings so that editors are initialised before changing their appearance and contents.
+        initEditors();
+        loadLocalSettings();
+        
+        loadFromDB("html");
+        loadFromDB("css");
+        loadFromDB("text");
+
+        updateHTML();
+        updateCSS();
+
+        switchTo(sessionSettings.activeMode);
+        toggleTheme(sessionSettings.activeTheme);
+
+        // Start backup cycle
+        setInterval(updateBackup, 300000);
+    }
+
+
+    // Init event listeners.
     $(window).resize(() => {
         resizeScreen();
         resizeEditors();
@@ -115,7 +121,33 @@ $(window).on("load", function() {
         resizeEditors();
         // Ugly solution, waiting .5 seconds before resizing the editors ensures they resize to fit the content after the content is loaded. Can we make this promise based?
     }, 500);
+
 });
+
+function initDB() {
+    // Check that indexed database for code storage is up to date with current schema.
+    const request = window.indexedDB.open("theditor", 1);
+
+    request.onerror = function(event){
+        console.error(`Database error: ${event.target.errorCode}`);
+    }
+
+    request.onupgradeneeded = function(event) {
+        DB = event.target.result;
+        const objectStore = DB.createObjectStore("codes", { keyPath: "id" });
+        objectStore.transaction.oncomplete = (event) => {
+            codeObjectStore = DB.transaction("codes", "readwrite")
+                .objectStore("codes");
+            codeObjectStore.add({ "id": "html", "code": localStorage.th_cj, "backup": localStorage.th_cj_backup });
+            codeObjectStore.add({ "id": "blurb", "code": localStorage.th_cj_blurb, "backup": localStorage.th_cj_blurbbackup });
+            codeObjectStore.add({ "id": "css", "code": localStorage.th_cj_css, "backup": localStorage.th_cj_cssbackup });
+            codeObjectStore.add({ "id": "text", "code": localStorage.th_cj_text, "backup": localStorage.th_cj_textbackup });
+        }
+        console.log("Upgraded database to version 1.");
+
+    }
+    return request;
+}
 
 
 function initEditors() {
@@ -125,11 +157,12 @@ function initEditors() {
     editor.session.setMode("ace/mode/html", () => {
         if($("#colorpicker").prop("checked")) toggleColorpicker();
     });
+    editor.setTheme("ace/theme/monokai");
     editor.setShowPrintMargin(false);
     editor.session.setUseWrapMode(true);
     editor.isBlurb = false;
     editor.session.on("change", () => {
-        waitForIdle("html");
+        lastRequest = waitForIdle("html");
     });
     editor.on("focus", () => {
         if(editor.getValue()==defaultHTML) editor.setValue("");
@@ -145,10 +178,11 @@ function initEditors() {
     css_editor.session.setMode("ace/mode/scss", () => {
         if($("#colorpicker").prop("checked")) toggleColorpicker();
     });
+    css_editor.setTheme("ace/theme/monokai");
     css_editor.setShowPrintMargin(false);
     css_editor.session.setUseWrapMode(true);
     css_editor.session.on("change", () => {
-        waitForIdle("css");
+        lastRequest = waitForIdle("css");
     });
     css_editor.on("focus", () => {
         if(css_editor.getValue()==defaultCSS) css_editor.setValue("");
@@ -161,11 +195,12 @@ function initEditors() {
     });
 
     text_editor = ace.edit("text-editor");
+    text_editor.setTheme("ace/theme/monokai");
     text_editor.setShowPrintMargin(false);
     text_editor.renderer.setShowGutter(false);
     text_editor.session.setUseWrapMode(true);
     text_editor.session.on("change", () => {
-        waitForIdle("text");
+        lastRequest = waitForIdle("text");
     });
     text_editor.on("focus", () => {
         if(text_editor.getValue()==defaultText) text_editor.setValue("");
@@ -181,15 +216,8 @@ function initEditors() {
 
 
 function loadLocalSettings() {
-    // Extract the user's settings and content from local storage and update UI + editors.
+    // Extract the user's settings from local storage and update UI. Don't import code here since it is now using Indexed DB.
     // TODO: Use destructuring of localStorage object to tidy this up
-    editor.setValue( localStorage.th_cj ? localStorage.th_cj : defaultHTML );
-    css_editor.setValue( localStorage.th_cj_css ? localStorage.th_cj_css : defaultCSS );
-    text_editor.setValue( localStorage.th_cj_text ? localStorage.th_cj_text : defaultText );
-    if(localStorage.th_cj === defaultHTML) {
-        $("#clear-html").addClass("d-none");
-        $("#restore-html").removeClass("d-none");
-    }
     
     if(localStorage.th_cj_colorpicker) {
         $("#colorpicker").prop("checked", localStorage.th_cj_colorpicker == "true");
@@ -217,10 +245,6 @@ function loadLocalSettings() {
     if(localStorage.th_cj_lowContrast) {
         $("#low-contrast").prop("checked", localStorage.th_cj_lowContrast == "true");
         toggleUITheme();
-    } else {
-        editor.setTheme("ace/theme/monokai");
-        css_editor.setTheme("ace/theme/monokai");
-        text_editor.setTheme("ace/theme/monokai");
     }
     
     if(localStorage.th_cj_htmlpanel) {
@@ -290,69 +314,74 @@ function loadNotes() {
 }
 
 
-/**************************************
-    vvv  Code update functions  vvv
-**************************************/
+/*******************************************
+    vvv  Code load & store functions  vvv
+*******************************************/
 
-function waitForIdle(panel) {
-    const { aceEditor, defaultContent, backupName } = codeTypes[panel];
-    if(window[aceEditor].getValue() && window[aceEditor].getValue() !== defaultContent && localStorage[backupName]) {
-        $("#clear-"+panel).removeClass("d-none");
-        $("#restore-"+panel).addClass("d-none");
-    } else {
-        $("#clear-"+panel).addClass("d-none");
-        $("#restore-"+panel).removeClass("d-none");
+function loadFromDB(panel) {
+    const transaction = DB.transaction(["codes"], "readonly");
+    const store = transaction.objectStore("codes");
+    request = store.get(panel);
+    request.onsuccess = function(event) {
+        const data = event.target.result;
+        if(data.code === "" || data.code === codeTypes[panel].defaultContent) {
+            $("#clear-"+panel).addClass("d-none");
+            $("#restore-"+panel).removeClass("d-none");
+        }
+        window[ codeTypes[panel].aceEditor ].setValue(
+            data.code ? data.code : codeTypes[panel].defaultContent
+        );
     }
-
-    const wait = setTimeout( () => {checkForChanges(panel)}, 400 );
-    window[aceEditor].session.on("change", () => {
-        clearTimeout(wait);
-    })
 }
 
-function checkForChanges(panel) {
-
-    if(panel == "html") {
-        if(editor.getValue().indexOf("Please reset!") !== -1) {
-            editor.setValue( editor.getValue().replace("Please reset!", "") );
-            hardReset();
-            return false;
-        } else {
-            updateHTML();
-        }
-    }
-
-    if(panel == "css") {
-        updateCSS();
-    }
-    
-    if(panel == "text") {
-        updateText();
-    }
-
+function requestFromDB(panel) {
+    const transaction = DB.transaction(["codes"], "readonly");
+    const store = transaction.objectStore("codes");
+    return store.get(panel);
 }
 
 function updateHTML(buttonTriggered=false){
-    let val = editor.getValue();
+    let raw_html = editor.getValue();
     let updateEditor;
+
+    const transaction = DB.transaction(["codes"], "readwrite");
+    const store = transaction.objectStore("codes");
+
     if(editor.isBlurb) {
-        localStorage.th_cj_blurb = val || "";
+        const rq = store.get("blurb");
+        rq.onsuccess = (event) => {
+            const data = event.target.result;
+            data.code = raw_html || "";
+            const update = store.put(data);
+        }
         updateEditor = "ace-code-container-2";
     } else {
-        localStorage.th_cj = val;
+        rq = store.get("html");
+        rq.onsuccess = (event) => {
+            const data = event.target.result;
+            data.code = raw_html;
+            const update = store.put(data);
+        }
         updateEditor = "ace-code-container";
     }
 
     if($("#auto").prop("checked") || buttonTriggered) {
-        val = val.replace(/(<\/*)(script|style|head)(.*>)/g, "$1div$3");
-        frame.contentWindow.updateHTML(val, updateEditor);
+        raw_html = raw_html.replace(/(<\/*)(script|style|head)(.*>)/g, "$1div$3");
+        frame.contentWindow.updateHTML(raw_html, updateEditor);
     }
 };
 
 function updateCSS(buttonTriggered=false) {
-    //var sass = new Sass();
     var raw_css = css_editor.getValue();
-    localStorage.th_cj_css = raw_css;
+
+    const transaction = DB.transaction(["codes"], "readwrite");
+    const store = transaction.objectStore("codes");
+    const rq = store.get("css");
+    rq.onsuccess = (event) => {
+        const data = event.target.result;
+        data.code = css_editor.getValue();
+        const update = store.put(data);
+    }
     
     if($("#auto").prop("checked") || buttonTriggered) {
         if(raw_css) {
@@ -368,7 +397,14 @@ function updateCSS(buttonTriggered=false) {
 }
 
 function updateText() {
-    localStorage.th_cj_text = text_editor.getValue();
+    const transaction = DB.transaction(["codes"], "readwrite");
+    const store = transaction.objectStore("codes");
+    const rq = store.get("text");
+    rq.onsuccess = (event) => {
+        const data = event.target.result;
+        data.code = text_editor.getValue();
+        const update = store.put(data);
+    }
 };
 
 function beautifyHTML() {
@@ -381,6 +417,47 @@ function beautifyCSS() {
     var beautifiedText = css_beautify(css_editor.getValue(), beautify_CSS_Options);
     css_editor.setValue(beautifiedText);
     css_editor.clearSelection();
+}
+
+
+/**************************************
+    vvv  Code update functions  vvv
+**************************************/
+
+function waitForIdle(panel) {
+    const { aceEditor, defaultContent } = codeTypes[panel];
+    const request = checkBackup(panel);
+    request.onsuccess = function(event) {
+        const backup = event.target.result.backup;
+        const hasBackup = backup !== "" && backup !== defaultContent;
+        if(window[aceEditor].getValue() && window[aceEditor].getValue() !== defaultContent && hasBackup) {
+            $("#clear-"+panel).removeClass("d-none");
+            $("#restore-"+panel).addClass("d-none");
+        } else {
+            $("#clear-"+panel).addClass("d-none");
+            $("#restore-"+panel).removeClass("d-none");
+        }
+    }
+
+    const wait = setTimeout( () => {checkForChanges(panel)}, 400 );
+    window[aceEditor].session.on("change", () => {
+        clearTimeout(wait);
+    })
+    return wait;
+}
+
+function checkForChanges(panel) {
+    if(panel == "html") {
+        if(editor.getValue().indexOf("Please reset!") !== -1) {
+            editor.setValue( editor.getValue().replace("Please reset!", "") );
+            hardReset();
+            return false;
+        } else {
+            updateHTML();
+        }
+    }
+    if(panel == "css") updateCSS();
+    if(panel == "text") updateText();
 }
 
 
@@ -490,22 +567,45 @@ function mobileSwitch() {
 
 function updateBackup() {
     const updatePanels = ["html", "blurb", "css", "text"];
-    console.log("Backing up " + updatePanels.join(", ") + "...");
+
     updatePanels.forEach( (panel) => {
-        const { storageName, defaultContent, backupName } = codeTypes[panel];
-        if(localStorage[storageName] &&  localStorage[storageName] !== defaultContent) {
-            localStorage[backupName] = localStorage[storageName];
-            console.log(panel+" backed up as localStorage."+backupName+".");
+        const { defaultContent } = codeTypes[panel];
+        const transaction = DB.transaction(["codes"], "readwrite");
+        const store = transaction.objectStore("codes");
+        const request = store.get(panel);
+        request.onsuccess = function(event) {
+            const data = event.target.result;
+            if(data.code && data.code !== defaultContent) {
+                data.backup = data.code;
+                store.put(data);
+                console.log(panel+" backed up.");
+            }
+            else console.log(panel+" is empty,  not backing up.");
         }
-        else console.log(panel+" is empty,  not backing up.");
     } );
+
 }
 
 function restoreBackup(panel) {
-    if(editor.isBlurb) panel = "blurb";
-    const { backupName, aceEditor } = codeTypes[panel];
+    if(editor.isBlurb && panel == "html") panel = "blurb";
+    const { aceEditor, defaultContent } = codeTypes[panel];
     const useEditor = window[aceEditor];
-    useEditor.setValue(localStorage[backupName]);
+    const transaction = DB.transaction(["codes"], "readonly");
+    const store = transaction.objectStore("codes");
+    const request = store.get(panel);
+    request.onsuccess = function(event) {
+        const backup = event.target.result.backup;
+        if(backup && backup !== defaultContent) {
+            useEditor.setValue(backup);
+        }
+    }
+}
+
+function checkBackup(panel) {
+    if(editor.isBlurb && panel == "html") panel = "blurb";
+    const transaction = DB.transaction(["codes"], "readonly");
+    const store = transaction.objectStore("codes");
+    return store.get(panel);
 }
 
 
@@ -516,44 +616,51 @@ function restoreBackup(panel) {
 function downloadFile(panel) {
     var thedate = new Date();
     let datestring = thedate.toLocaleDateString('en-GB')+"_"+thedate.toLocaleTimeString('en-GB');
-    const { storageName } = codeTypes[panel];
-    var file = new Blob([ localStorage[storageName] ], {type: "text/plain"});
-    var filesuffix = " " + panel.toUpperCase()+" "+datestring+".txt"
-        .replace(/\:|\//g, "-");
-
-    const projectname = prompt("Downloading "+panel+", project name:", localStorage.th_cj_projectname);
-    if(!projectname) return false;
-    localStorage.th_cj_projectname = projectname || "";
     
-    if (window.navigator.msSaveOrOpenBlob)
-        window.navigator.msSaveOrOpenBlob(file, (projectname || "THeditor") + filesuffix);
-    else {
-        var a = document.createElement("a")
-        var url = URL.createObjectURL(file);
-        a.href = url;
-        a.download = (projectname || "THeditor") + filesuffix;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);  
+    const transaction = DB.transaction(["codes"], "readonly");
+    const store = transaction.objectStore("codes");
+    const request = store.get(panel);
+    request.onsuccess = function(event) {
+        const { code } = event.target.result;
+        let file = new Blob([ code ], {type: "text/plain"});
+        const filesuffix = " " + panel.toUpperCase()+" "+datestring+".txt"
+            .replace(/\:|\//g, "-");
+
+        const projectname = prompt("Downloading "+panel+", project name:", localStorage.th_cj_projectname);
+        if(!projectname) return false;
+        localStorage.th_cj_projectname = projectname || "";
+        
+        if (window.navigator.msSaveOrOpenBlob)
+            window.navigator.msSaveOrOpenBlob(file, (projectname || "THeditor") + filesuffix);
+        else {
+            var a = document.createElement("a")
+            var url = URL.createObjectURL(file);
+            a.href = url;
+            a.download = (projectname || "THeditor") + filesuffix;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);  
+        }
+    
     }
 }
 
 function uploadFileDialogue(panel) {
-    // This function uses a dummy file input to element #fileupload to open upload dialogues for all 3 panels.
+    // This function uses a dummy file input element #fileupload to open upload dialogues for all 3 panels.
     $("#fileupload").data("target-panel", panel)
     $("#fileupload").click()
 }
 
 function uploadFile(){
-    const panel = $(this).data("target-panel");
-    const { aceEditor } = codeTypes[panel];
     $(this).on('change', function() {
+        const panel = $(this).data("target-panel");
+        const { aceEditor } = codeTypes[panel];
         const filereader = new FileReader(); 
+        filereader.readAsText(this.files[0]);
         filereader.onload = () => {
             window[aceEditor].setValue(filereader.result)
         }
-        filereader.readAsText(this.files[0]);
     });
 }
 
@@ -595,8 +702,7 @@ function renderProfileMeta(data) {
         frame.contentWindow.$("#sidebar a").prop("href", "#");
         
         frame.contentWindow.$(".blurb").addClass("ace-code-container-2");
-        localStorage.th_cj_blurb = $(data).find(".blurb").html() || "";
-        if(editor.isBlurb) editor.setValue(localStorage.th_cj_blurb);
+        if(editor.isBlurb) editor.setValue($(data).find(".blurb").html() || "");
 
 }
 
@@ -635,17 +741,25 @@ function switchTo(mode) {
     frame.contentWindow.switchTo(mode);
 }
 
-function toggleBlurb() {
-    if(editor.isBlurb) {
-        $("#html-tab").removeClass("text-dark");
-        $("#blurb-tab").addClass("text-dark");
-        editor.setValue(localStorage.th_cj);
+function toggleBlurb(mode) {
+    clearTimeout(lastRequest);
+    if(mode == "html") {
+        const request = requestFromDB("html");
+        request.onsuccess = (e) => {
+            $("#html-tab").removeClass("text-dark");
+            $("#blurb-tab").addClass("text-dark");
+            editor.setValue(e.target.result.code);
+            editor.isBlurb = !editor.isBlurb;
+        }
     } else {
-        $("#blurb-tab").removeClass("text-dark");
-        $("#html-tab").addClass("text-dark");
-        editor.setValue(localStorage.th_cj_blurb);
+        const request = requestFromDB("blurb");
+        request.onsuccess = (e) => {
+            $("#blurb-tab").removeClass("text-dark");
+            $("#html-tab").addClass("text-dark");
+            editor.setValue(e.target.result.code);
+            editor.isBlurb = !editor.isBlurb;
+        }
     }
-    editor.isBlurb = !editor.isBlurb;
 }
 
 function toggleHTMLPanel() {
@@ -741,14 +855,14 @@ function toggleUITheme(){
     localStorage.th_cj_lowContrast = $("#low-contrast").prop("checked");
 
     if($("#low-contrast").prop("checked")) { 
-        $("#theme-css").attr("href", "../src/site_night-forest.css");
+        $("#night-css").attr("href", "../src/site_night-forest.css");
         $(".bg-light").removeClass("bg-light").addClass("bg-dark");
         editor.setTheme("ace/theme/tomorrow_night");
         css_editor.setTheme("ace/theme/tomorrow_night");
         text_editor.setTheme("ace/theme/tomorrow_night");
 
     } else {
-        $("#theme-css").attr("href", "../src/site_black-forest.css")
+        $("#night-css").removeAttr("href");
         $(".bg-dark").removeClass("bg-dark").addClass("bg-light");
 
         editor.setTheme("ace/theme/monokai");
