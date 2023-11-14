@@ -60,28 +60,37 @@ $(window).on("load", function() {
 
     // Initialise database...everything hereafter needs to happen after database since it contains the stored code.
     const DBrequest = initDB();
-    DBrequest.onsuccess = function(event){
-        DB = event.target.result;
-        console.log("Database schema is up to date.");
-
-        // initEditors is called before loadLocalSettings so that editors are initialised before changing their appearance and contents.
+    if(typeof DBrequest !== "object" ) {
+        console.log("IndexedDB could not be initialised due to user permissions.");
         initEditors();
         loadLocalSettings();
-        
-        loadFromDB("html");
-        loadFromDB("css");
-        loadFromDB("text");
-
-        updateHTML();
-        updateCSS();
-
         switchTo(sessionSettings.activeMode);
         toggleTheme(sessionSettings.activeTheme);
-
         // Start backup cycle
         setInterval(updateBackup, 300000);
-    }
+    } else {    
+        DBrequest.onsuccess = function(event){
+            DB = event.target.result;
+            console.log("Database schema is up to date.");
 
+            // initEditors is called before loadLocalSettings so that editors are initialised before changing their appearance and contents.
+            initEditors();
+            loadLocalSettings();
+            
+            loadFromDB("html");
+            loadFromDB("css");
+            loadFromDB("text");
+
+            updateHTML();
+            updateCSS();
+
+            switchTo(sessionSettings.activeMode);
+            toggleTheme(sessionSettings.activeTheme);
+
+            // Start backup cycle
+            setInterval(updateBackup, 300000);
+        }
+    }
 
     // Init event listeners.
     $(window).resize(() => {
@@ -126,27 +135,26 @@ $(window).on("load", function() {
 
 function initDB() {
     // Check that indexed database for code storage is up to date with current schema.
-    const request = window.indexedDB.open("theditor", 1);
+    try {
+        const request = window.indexedDB.open("theditor", 1);
+        request.onupgradeneeded = function(event) {
+            DB = event.target.result;
+            const objectStore = DB.createObjectStore("codes", { keyPath: "id" });
+            objectStore.transaction.oncomplete = (event) => {
+                codeObjectStore = DB.transaction("codes", "readwrite")
+                    .objectStore("codes");
+                codeObjectStore.add({ "id": "html", "code": localStorage.th_cj, "backup": localStorage.th_cj_backup });
+                codeObjectStore.add({ "id": "blurb", "code": localStorage.th_cj_blurb, "backup": localStorage.th_cj_blurbbackup });
+                codeObjectStore.add({ "id": "css", "code": localStorage.th_cj_css, "backup": localStorage.th_cj_cssbackup });
+                codeObjectStore.add({ "id": "text", "code": localStorage.th_cj_text, "backup": localStorage.th_cj_textbackup });
+            }
+            console.log("Upgraded database to version 1.");
 
-    request.onerror = function(event){
-        console.error(`Database error: ${event.target.errorCode}`);
-    }
-
-    request.onupgradeneeded = function(event) {
-        DB = event.target.result;
-        const objectStore = DB.createObjectStore("codes", { keyPath: "id" });
-        objectStore.transaction.oncomplete = (event) => {
-            codeObjectStore = DB.transaction("codes", "readwrite")
-                .objectStore("codes");
-            codeObjectStore.add({ "id": "html", "code": localStorage.th_cj, "backup": localStorage.th_cj_backup });
-            codeObjectStore.add({ "id": "blurb", "code": localStorage.th_cj_blurb, "backup": localStorage.th_cj_blurbbackup });
-            codeObjectStore.add({ "id": "css", "code": localStorage.th_cj_css, "backup": localStorage.th_cj_cssbackup });
-            codeObjectStore.add({ "id": "text", "code": localStorage.th_cj_text, "backup": localStorage.th_cj_textbackup });
         }
-        console.log("Upgraded database to version 1.");
-
+        return request;
+    } catch(error) {
+        return null;
     }
-    return request;
 }
 
 
