@@ -1,7 +1,6 @@
 /**************************************
     vvv  Setup variables  vvv
 **************************************/
-// TODO: Put everything in sessionSettings object
 // TODO: better way to determine if device is mobile (specifically to target desktop Safari for weird flex sizing) or a more elegant fix for weird sizing
 const isSafari = navigator.userAgent.indexOf("Safari") > -1;
 const isMobile = typeof screen.orientation !== 'undefined';
