@@ -7,7 +7,7 @@ const isSafari = navigator.userAgent.indexOf("Safari") > -1;
 const isMobile = typeof screen.orientation !== 'undefined';
 var sessionSettings = { activeMode: "profile", activeTheme: "Default" };
 // DOM elements
-var editor, css_editor, text_editor, frame, DB;
+var editor, css_editor, text_editor, frame;
 const sass = new Sass();
 
 /**************************************
@@ -64,33 +64,20 @@ $(window).on("load", function() {
     
     // Import notes, changelog, version list etc.
     loadNotes();
+    
+    // initEditors is called before loadLocalSettings so that editors are initialised before changing their appearance and contents.
+    initEditors();
+    loadLocalSettings();
+    updateHTML();
+    updateCSS();
+    switchTo(sessionSettings.activeMode);
+    toggleTheme(sessionSettings.activeTheme);
 
-    // Initialise database...everything hereafter needs to happen after database since it contains the stored code.
-    const DBrequest = initDB();
-    DBrequest.onsuccess = function(event){
-        DB = event.target.result;
-        console.log("Database schema is up to date.");
+    
+    // Start backup cycle
+    setInterval(updateBackup, 300000);
 
-        // initEditors is called before loadLocalSettings so that editors are initialised before changing their appearance and contents.
-        initEditors();
-        loadLocalSettings();
-        
-        loadFromDB("html");
-        loadFromDB("css");
-        loadFromDB("text");
-
-        updateHTML();
-        updateCSS();
-
-        switchTo(sessionSettings.activeMode);
-        toggleTheme(sessionSettings.activeTheme);
-
-        // Start backup cycle
-        setInterval(updateBackup, 300000);
-    }
-
-
-    // Init event listeners.
+    // Init event listeners. Needs tidying and Safari compatibility
     $(window).resize(() => {
         resizeScreen();
         resizeEditors();
@@ -128,33 +115,7 @@ $(window).on("load", function() {
         resizeEditors();
         // Ugly solution, waiting .5 seconds before resizing the editors ensures they resize to fit the content after the content is loaded. Can we make this promise based?
     }, 500);
-
 });
-
-function initDB() {
-    // Check that indexed database for code storage is up to date with current schema.
-    const request = window.indexedDB.open("theditor", 1);
-
-    request.onerror = function(event){
-        console.error(`Database error: ${event.target.errorCode}`);
-    }
-
-    request.onupgradeneeded = function(event) {
-        DB = event.target.result;
-        const objectStore = DB.createObjectStore("codes", { keyPath: "id" });
-        objectStore.transaction.oncomplete = (event) => {
-            codeObjectStore = DB.transaction("codes", "readwrite")
-                .objectStore("codes");
-            codeObjectStore.add({ "id": "html", "code": localStorage.th_cj, "backup": localStorage.th_cj_backup });
-            codeObjectStore.add({ "id": "blurb", "code": localStorage.th_cj_blurb, "backup": localStorage.th_cj_blurbbackup });
-            codeObjectStore.add({ "id": "css", "code": localStorage.th_cj_css, "backup": localStorage.th_cj_cssbackup });
-            codeObjectStore.add({ "id": "text", "code": localStorage.th_cj_text, "backup": localStorage.th_cj_textbackup });
-        }
-        console.log("Upgraded database to version 1.");
-
-    }
-    return request;
-}
 
 
 function initEditors() {
@@ -164,7 +125,6 @@ function initEditors() {
     editor.session.setMode("ace/mode/html", () => {
         if($("#colorpicker").prop("checked")) toggleColorpicker();
     });
-    editor.setTheme("ace/theme/monokai");
     editor.setShowPrintMargin(false);
     editor.session.setUseWrapMode(true);
     editor.isBlurb = false;
@@ -185,7 +145,6 @@ function initEditors() {
     css_editor.session.setMode("ace/mode/scss", () => {
         if($("#colorpicker").prop("checked")) toggleColorpicker();
     });
-    css_editor.setTheme("ace/theme/monokai");
     css_editor.setShowPrintMargin(false);
     css_editor.session.setUseWrapMode(true);
     css_editor.session.on("change", () => {
@@ -202,7 +161,6 @@ function initEditors() {
     });
 
     text_editor = ace.edit("text-editor");
-    text_editor.setTheme("ace/theme/monokai");
     text_editor.setShowPrintMargin(false);
     text_editor.renderer.setShowGutter(false);
     text_editor.session.setUseWrapMode(true);
@@ -223,8 +181,15 @@ function initEditors() {
 
 
 function loadLocalSettings() {
-    // Extract the user's settings from local storage and update UI. Don't import code here since it is now using Indexed DB.
+    // Extract the user's settings and content from local storage and update UI + editors.
     // TODO: Use destructuring of localStorage object to tidy this up
+    editor.setValue( localStorage.th_cj ? localStorage.th_cj : defaultHTML );
+    css_editor.setValue( localStorage.th_cj_css ? localStorage.th_cj_css : defaultCSS );
+    text_editor.setValue( localStorage.th_cj_text ? localStorage.th_cj_text : defaultText );
+    if(localStorage.th_cj === defaultHTML) {
+        $("#clear-html").addClass("d-none");
+        $("#restore-html").removeClass("d-none");
+    }
     
     if(localStorage.th_cj_colorpicker) {
         $("#colorpicker").prop("checked", localStorage.th_cj_colorpicker == "true");
@@ -252,6 +217,10 @@ function loadLocalSettings() {
     if(localStorage.th_cj_lowContrast) {
         $("#low-contrast").prop("checked", localStorage.th_cj_lowContrast == "true");
         toggleUITheme();
+    } else {
+        editor.setTheme("ace/theme/monokai");
+        css_editor.setTheme("ace/theme/monokai");
+        text_editor.setTheme("ace/theme/monokai");
     }
     
     if(localStorage.th_cj_htmlpanel) {
@@ -321,114 +290,6 @@ function loadNotes() {
 }
 
 
-/*******************************************
-    vvv  Code load & store functions  vvv
-*******************************************/
-
-function loadFromDB(panel) {
-    const transaction = DB.transaction(["codes"], "readonly");
-    const store = transaction.objectStore("codes");
-    request = store.get(panel);
-    request.onsuccess = function(event) {
-        const data = event.target.result;
-        if(data === "" || data === codeTypes[panel].defaultContent) {
-            $("#clear-"+panel).addClass("d-none");
-            $("#restore-"+panel).removeClass("d-none");
-        }
-        window[ codeTypes[panel].aceEditor ].setValue(
-            data.code ? data.code : codeTypes[panel].defaultContent
-        );
-    }
-}
-
-function updateHTML(buttonTriggered=false){
-    let val = editor.getValue();
-    let updateEditor;
-
-    const transaction = DB.transaction(["codes"], "readwrite");
-    const store = transaction.objectStore("codes");
-
-    if(editor.isBlurb) {
-        //localStorage.th_cj_blurb = val || "";
-        const rq = store.get("blurb");
-        rq.onsuccess = (event) => {
-            const data = event.target.result;
-            data.code = val || "";
-            const update = store.put(data);
-        }
-        updateEditor = "ace-code-container-2";
-    } else {
-        //localStorage.th_cj = val;
-        rq = store.get("html");
-        rq.onsuccess = (event) => {
-            const data = event.target.result;
-            data.code = val;
-            const update = store.put(data);
-        }
-        updateEditor = "ace-code-container";
-    }
-
-    if($("#auto").prop("checked") || buttonTriggered) {
-        val = val.replace(/(<\/*)(script|style|head)(.*>)/g, "$1div$3");
-        frame.contentWindow.updateHTML(val, updateEditor);
-    }
-};
-
-function updateCSS(buttonTriggered=false) {
-
-    var raw_css = css_editor.getValue();
-
-    const transaction = DB.transaction(["codes"], "readwrite");
-    const store = transaction.objectStore("codes");
-    const rq = store.get("css");
-    rq.onsuccess = (event) => {
-        const data = event.target.result;
-        data.code = css_editor.getValue();
-        const update = store.put(data);
-    }
-
-    //localStorage.th_cj_css = raw_css;
-    
-    if($("#auto").prop("checked") || buttonTriggered) {
-        if(raw_css) {
-            sass.compile(raw_css, (result) => {
-                let css = result.text;
-                if(css) frame.contentWindow.updateCSS(css);
-                else frame.contentWindow.updateCSS(raw_css);
-            });
-        } else {
-            frame.contentWindow.updateCSS("");
-        }
-    }
-}
-
-function updateText() {
-    //localStorage.th_cj_text = text_editor.getValue();
-
-    const transaction = DB.transaction(["codes"], "readwrite");
-    const store = transaction.objectStore("codes");
-    const rq = store.get("text");
-    rq.onsuccess = (event) => {
-        const data = event.target.result;
-        data.code = text_editor.getValue();
-        const update = store.put(data);
-    }
-
-};
-
-function beautifyHTML() {
-    var beautifiedText = html_beautify(editor.getValue(), beautify_HTML_Options);
-    editor.setValue(beautifiedText);
-    editor.clearSelection();
-}
-
-function beautifyCSS() {
-    var beautifiedText = css_beautify(css_editor.getValue(), beautify_CSS_Options);
-    css_editor.setValue(beautifiedText);
-    css_editor.clearSelection();
-}
-
-
 /**************************************
     vvv  Code update functions  vvv
 **************************************/
@@ -469,6 +330,57 @@ function checkForChanges(panel) {
         updateText();
     }
 
+}
+
+function updateHTML(buttonTriggered=false){
+    let val = editor.getValue();
+    let updateEditor;
+    if(editor.isBlurb) {
+        localStorage.th_cj_blurb = val || "";
+        updateEditor = "ace-code-container-2";
+    } else {
+        localStorage.th_cj = val;
+        updateEditor = "ace-code-container";
+    }
+
+    if($("#auto").prop("checked") || buttonTriggered) {
+        val = val.replace(/(<\/*)(script|style|head)(.*>)/g, "$1div$3");
+        frame.contentWindow.updateHTML(val, updateEditor);
+    }
+};
+
+function updateCSS(buttonTriggered=false) {
+    //var sass = new Sass();
+    var raw_css = css_editor.getValue();
+    localStorage.th_cj_css = raw_css;
+    
+    if($("#auto").prop("checked") || buttonTriggered) {
+        if(raw_css) {
+            sass.compile(raw_css, (result) => {
+                let css = result.text;
+                if(css) frame.contentWindow.updateCSS(css);
+                else frame.contentWindow.updateCSS(raw_css);
+            });
+        } else {
+            frame.contentWindow.updateCSS("");
+        }
+    }
+}
+
+function updateText() {
+    localStorage.th_cj_text = text_editor.getValue();
+};
+
+function beautifyHTML() {
+    var beautifiedText = html_beautify(editor.getValue(), beautify_HTML_Options);
+    editor.setValue(beautifiedText);
+    editor.clearSelection();
+}
+
+function beautifyCSS() {
+    var beautifiedText = css_beautify(css_editor.getValue(), beautify_CSS_Options);
+    css_editor.setValue(beautifiedText);
+    css_editor.clearSelection();
 }
 
 
@@ -581,17 +493,11 @@ function updateBackup() {
     console.log("Backing up " + updatePanels.join(", ") + "...");
     updatePanels.forEach( (panel) => {
         const { storageName, defaultContent, backupName } = codeTypes[panel];
-        const transaction = DB.transaction(["codes"], "readwrite");
-        const store = transaction.objectStore("codes");
-        const request = store.get(panel);
-        request.onsuccess = function(event) {
-            const data = event.target.result;
-            if(data.code && data.code !== defaultContent) {
-                data.backup = data.code;
-                console.log(panel+" backed up.");
-            }
-            else console.log(panel+" is empty,  not backing up.");
+        if(localStorage[storageName] &&  localStorage[storageName] !== defaultContent) {
+            localStorage[backupName] = localStorage[storageName];
+            console.log(panel+" backed up as localStorage."+backupName+".");
         }
+        else console.log(panel+" is empty,  not backing up.");
     } );
 }
 
@@ -599,14 +505,7 @@ function restoreBackup(panel) {
     if(editor.isBlurb) panel = "blurb";
     const { backupName, aceEditor } = codeTypes[panel];
     const useEditor = window[aceEditor];
-    const transaction = DB.transaction(["codes"], "readonly");
-    const store = transaction.objectStore("codes");
-    const request = store.get(panel);
-    request.onsuccess = function(event) {
-        const data = event.target.result;
-        console.log(data);
-        useEditor.setValue(data.backup);
-    }
+    useEditor.setValue(localStorage[backupName]);
 }
 
 
