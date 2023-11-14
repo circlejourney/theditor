@@ -1,10 +1,10 @@
 <?php 
+    require_once("../phpQuery/phpQuery.php");
     header("Content-type: text/html");
 
     function sanitise($string) {
         return preg_replace("/\/\\\/", '', $string);
     }
-
 
     $profilePath = $_POST["profilePath"] ?? $_GET["profilePath"] ?? false;
     $profilePath = sanitise($profilePath);

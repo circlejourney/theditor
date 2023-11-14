@@ -87,7 +87,8 @@ if($haswarning) {
 curl_setopt($curlrequest, CURLOPT_URL, $ownerprofile);
 curl_setopt($curlrequest, CURLOPT_POST, 0);
 $profileresponse = curl_exec($curlrequest);
-$userglobalpermit = strpos($profileresponse, "allow-thcj-import-all") !== false;
+phpQuery::newDocumentHTML($profileresponse);
+$userglobalpermit = pq("#allow-thcj-import-all")->count() > 0;
 
 // Accept character warning if character
 if($ischaracter){
@@ -131,7 +132,7 @@ if(strpos($profileresponse, "user-content") === false) {
     die();
 
 } else if(strpos($profileresponse, "allow-thcj-import") === false && !$userglobalpermit) {
-    echo "<div><div class='user-content thcj-warn'>Security alert: You are attempting to import a profile that has not been set to allow code import. To allow code import, paste the line <code>&lt;span id='allow-thcj-import'>&lt;/span></code> anywhere in your code. Alternatively, paste the line <code>&lt;span id='allow-thcj-import-all'>&lt;/span></code> in your <b>user profile</b> to make <i>all</i> your codes importable.</div></div>";
+    echo "<div><div class='user-content thcj-warn'>Security alert: You are attempting to import a profile that has not been set to allow code import. To allow code import, paste the line <code>&lt;u id='allow-thcj-import'>&lt;/u></code> to teh front of your code. Alternatively, paste the line <code>&lt;u id='allow-thcj-import-all'>&lt;/u></code> in your <b>user profile</b> to make <i>all</i> your codes importable.</div></div>";
     die();
 } else {
     error_log("This profile has been set to allow import. Proceeding...");
