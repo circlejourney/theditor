@@ -36,7 +36,7 @@
         <link rel="stylesheet" href="/src/fontawesome-pro-6.0.0-beta3-web/css/all.min.css">
         <script src="/src/fontawesome-pro-6.0.0-beta3-web/js/all.min.js" crossorigin="anonymous"></script>
         
-        <script src="/build_<?php echo $latestBuild ?>/script.js?v=<?php echo $lastUpdate ?>" type="text/javascript"></script>
+        <script src="/build_<?php echo $latestBuild ?>/script.js?v=<?php echo filemtime($latestBuild."/script.js"); ?>" type="text/javascript"></script>
         <link rel="stylesheet" href="/build_<?php echo $latestBuild ?>/style.css?v=<?php echo $lastUpdate ?>">
             
     </head>
