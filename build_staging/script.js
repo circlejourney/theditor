@@ -53,6 +53,9 @@ $(window).on("load", function() {
     // Get frame and set frame's internal lastUpdate date to parent lastUpdate date
     frame = document.getElementById("frame");
     frame.contentWindow.lastUpdate = lastUpdate;
+    
+    // Update notes update date
+    updateDate();
 
     // Initialise database...everything hereafter needs to happen after database since it contains the stored code.
     const DBrequest = initDB();
@@ -121,10 +124,10 @@ $(window).on("load", function() {
     $(window).on("beforeunload", updateBackup);
     
     setTimeout(() => {
+        // Ugly solution, waiting .5 seconds before resizing the editors ensures they resize to fit the content after the content is loaded. Can we make this promise based?
         $("#loader").addClass("invisible");
         resizeScreen();
         resizeEditors();
-        // Ugly solution, waiting .5 seconds before resizing the editors ensures they resize to fit the content after the content is loaded. Can we make this promise based?
     }, 500);
 
 });
@@ -290,6 +293,16 @@ function loadLocalSettings() {
         $("#info-back").removeClass("d-none");
         localStorage.th_cj_lastUpdate = lastUpdate;
     }
+}
+
+
+function updateDate() {
+    // Update the date element.
+    // TODO: Do this in the backend?
+    let year = Math.floor(lastUpdate / 10000);
+    let month = months[Math.floor( (lastUpdate % 10000) / 100 ) - 1];
+    let day = lastUpdate % 100;
+    $("#notes #latest").text("Latest update: "+day+" "+month+" "+year);
 }
 
 
