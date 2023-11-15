@@ -1,4 +1,4 @@
-<?php $lastUpdate = 20231026; $latestBuild = "staging" ?>
+<?php $lastUpdate = 20231114; $latestBuild = "staging"; $slash = DIRECTORY_SEPARATOR; ?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -35,9 +35,8 @@
         <!-- FONT AWESOME -->
         <link rel="stylesheet" href="/src/fontawesome-pro-6.0.0-beta3-web/css/all.min.css">
         <script src="/src/fontawesome-pro-6.0.0-beta3-web/js/all.min.js" crossorigin="anonymous"></script>
-        
-        <script src="/build_<?php echo $latestBuild ?>/script.js?v=<?php echo filemtime($latestBuild."/script.js"); ?>" type="text/javascript"></script>
-        <link rel="stylesheet" href="/build_<?php echo $latestBuild ?>/style.css?v=<?php echo $lastUpdate ?>">
+        <script src="/build_<?php echo $latestBuild ?>/script.js?v=<?php echo filemtime(__DIR__ . $slash . "script.js"); ?>" type="text/javascript"></script>
+        <link rel="stylesheet" href="/build_<?php echo $latestBuild ?>/style.css?v=<?php echo filemtime(__DIR__ . $slash . "style.css") ?>">
             
     </head>
     <body>
@@ -59,7 +58,9 @@
             </div>
             
             <div id="info-main" class="card-block text-center">
-                <div id="notes"></div>
+                <div id="notes">
+                    <?php include __DIR__ . $slash . ".." . $slash . "notes.html"; ?>
+                </div>
                 
                 <a class="btn btn-primary" onclick="showInfo()">Got it!</a>
                 <a class="btn btn-secondary" data-toggle="collapse" data-target="#changelog">Changelog</a>
@@ -71,6 +72,7 @@
                     <div class="collapse" id="changelog" data-parent="#accordion">
                         <div class="card mt-2">
                             <div class="card-block" id="changelog-text">
+                                <?php echo file_get_contents(__DIR__ . $slash . ".." . $slash . "changelog.html"); ?>
                             </div>
                         </div>
                     </div>
@@ -78,6 +80,7 @@
                     <div class="collapse" id="issues" data-parent="#accordion">
                         <div class="card mt-2">
                             <div class="card-block" id="issues-text">
+                                <?php echo file_get_contents(__DIR__ . $slash  . ".." . $slash . "known-issues.html"); ?>
                             </div>
                         </div>
                     </div>
@@ -85,6 +88,7 @@
                     <div class="collapse" id="versions" data-parent="#accordion">
                         <div class="card mt-2">
                             <div class="card-block" id="versions-text">
+                                <?php echo file_get_contents(__DIR__ . $slash . ".." . $slash . "versions.html"); ?>
                             </div>
                         </div>
                     </div>

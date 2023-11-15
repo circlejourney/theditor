@@ -53,9 +53,6 @@ $(window).on("load", function() {
     // Get frame and set frame's internal lastUpdate date to parent lastUpdate date
     frame = document.getElementById("frame");
     frame.contentWindow.lastUpdate = lastUpdate;
-    
-    // Import notes, changelog, version list etc.
-    loadNotes();
 
     // Initialise database...everything hereafter needs to happen after database since it contains the stored code.
     const DBrequest = initDB();
@@ -293,31 +290,6 @@ function loadLocalSettings() {
         $("#info-back").removeClass("d-none");
         localStorage.th_cj_lastUpdate = lastUpdate;
     }
-}
-
-
-function loadNotes() {
-    // Get the current meta info and imports it into the info modal.
-    // TODO: Change this to promise-based
-
-    $.get("../known-issues.html?"+lastUpdate, (data) => {
-        $("#issues-text").html(data);
-    });
-    
-    $.get("../changelog.html?"+lastUpdate, function (data) {
-        $("#changelog-text").html(data);
-    });
-    
-    $.get("../notes.html?"+lastUpdate, (data) => {
-		let year = Math.floor( lastUpdate / 10000);
-		let month = months[Math.floor( (lastUpdate % 10000) / 100 ) - 1];
-		let day = lastUpdate % 100;
-        $("#notes").html(data).find("#latest").text("Latest update: "+day+" "+month+" "+year);
-    });
-    
-    $.get("../versions.html?"+lastUpdate, (data) => {
-        $("#versions-text").html(data);
-    });
 }
 
 

@@ -13,7 +13,7 @@ $(document).ready(function(){
  
 function switchTo(mode) {
 
-    $.get("../templates/"+mode+".html?"+lastUpdate, function(data) {
+    $.get("../templates/"+mode+".html", {"v": lastUpdate }, function(data) {
         $("#display-area").html(data);
         
         const requestHTML = parent.requestFromDB("html");
