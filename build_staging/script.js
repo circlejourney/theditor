@@ -649,6 +649,10 @@ function uploadFile(){
         const panel = $(this).data("target-panel");
         const { aceEditor } = codeTypes[panel];
         const filereader = new FileReader(); 
+        if(this.files[0].type.indexOf("text") !== 0) {
+            console.log("Invalid filetype for upload.");
+            return false;
+        }
         filereader.readAsText(this.files[0]);
         filereader.onload = () => {
             window[aceEditor].setValue(filereader.result)
