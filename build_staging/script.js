@@ -929,3 +929,17 @@ function toggleColorpicker() {
         css_editor.colorview = AceColorPicker.load(ace, css_editor);
     }
 }
+
+function toggleWYSIWYG() {
+    const wysiwygOn = $("#wysiwyg").prop("checked");
+    if(wysiwygOn) {
+        editor.setReadOnly(true);
+        $("#html-editor").addClass("disabled");
+    } else {
+        editor.setValue(frame.contentWindow.getWYSIWYG());
+        console.log("Setting read only false");
+        editor.setReadOnly(false);
+        $("#html-editor").removeClass("disabled");
+    }
+    frame.contentWindow.toggleWYSIWYG(wysiwygOn);
+}

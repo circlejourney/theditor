@@ -264,11 +264,15 @@
                 
 
                 <span class="checkbox-container">
-                    <input type="checkbox" id="auto" onchange="toggleAuto()" checked="true">&nbsp;<label for="auto">Auto update</label>
+                    <input type="checkbox" id="wysiwyg" onchange="toggleWYSIWYG()" autocomplete="off">&nbsp;<label for="wysiwyg">WYSIWYG</label>
                 </span>
 
                 <span class="checkbox-container">
-                    <input type="checkbox" class="hide-small" id="mobile" onchange="toggleMobilePreview()">&nbsp;<label for="mobile">Mobile view</label>
+                    <input type="checkbox" id="auto" onchange="toggleAuto()" checked="true">&nbsp;<label for="auto">Auto-update</label>
+                </span>
+
+                <span class="checkbox-container hide-small">
+                    <input type="checkbox" id="mobile" onchange="toggleMobilePreview()">&nbsp;<label for="mobile">Mobile view</label>
                 </span>
 
                 <div id="ui-options" class="dropdown d-sm-inline">

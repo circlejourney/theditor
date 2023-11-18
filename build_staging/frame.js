@@ -9,6 +9,9 @@ styles = {
 
 $(document).ready(function(){
     $("body").tooltip({ selector: '[data-toggle=tooltip]' });
+    $(".ace-code-container").on("change", function(){
+        getWYSIWYG();
+    });
 });
  
 function switchTo(mode) {
@@ -117,4 +120,13 @@ function toggleLitFont(fontFamily) {
 function toggleLitSize(delta) {
     if(delta) $(".literature-chapter-content").css("font-size", parseInt($(".literature-chapter-content").css("font-size")) + delta);
     else  $(".literature-chapter-content").css("font-size", "");
+}
+
+function toggleWYSIWYG(toState) {
+    if(!toState)  $(".ace-code-container").removeAttr("contenteditable");
+    else $(".ace-code-container").attr("contenteditable", true);
+}
+
+function getWYSIWYG() {
+    return $(".ace-code-container").html();
 }
