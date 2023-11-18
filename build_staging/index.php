@@ -1,4 +1,7 @@
-<?php $lastUpdate = 20231114; $latestBuild = "staging"; $slash = DIRECTORY_SEPARATOR; ?>
+<?php
+    $lastUpdate = 20231118; // Set to last update for cache busting + make the popup appear.
+    $latestBuild = "staging"; $slash = DIRECTORY_SEPARATOR; // Select the latest build to select the root directory for CSS, JS and frame files
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -35,6 +38,7 @@
         <!-- FONT AWESOME -->
         <link rel="stylesheet" href="/src/fontawesome-pro-6.0.0-beta3-web/css/all.min.css">
         <script src="/src/fontawesome-pro-6.0.0-beta3-web/js/all.min.js" crossorigin="anonymous"></script>
+
         <script src="/build_<?php echo $latestBuild ?>/script.js?v=<?php echo filemtime(__DIR__ . $slash . "script.js"); ?>" type="text/javascript"></script>
         <link rel="stylesheet" href="/build_<?php echo $latestBuild ?>/style.css?v=<?php echo filemtime(__DIR__ . $slash . "style.css") ?>">
             
