@@ -268,7 +268,7 @@
                 
 
                 <span class="checkbox-container">
-                    <input type="checkbox" id="wysiwyg" onchange="toggleWYSIWYG()" autocomplete="off">&nbsp;<label for="wysiwyg">WYSIWYG</label>
+                    <input type="checkbox" id="wysiwyg" onchange="toggleWYSIWYG(this.checked===true)" autocomplete="off">&nbsp;<label for="wysiwyg">WYSIWYG</label>
                 </span>
 
                 <span class="checkbox-container">

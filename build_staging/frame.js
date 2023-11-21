@@ -19,9 +19,9 @@ function switchTo(mode) {
     $.get("../templates/"+mode+".html", {"v": lastUpdate }, function(data) {
         $("#display-area").html(data);
         
-        const requestHTML = parent.requestFromDB("html");
-        const requestBlurb = parent.requestFromDB("blurb");
-        const requestCSS = parent.requestFromDB("css");
+        const requestHTML = requestFromDB("html");
+        const requestBlurb = requestFromDB("blurb");
+        const requestCSS = requestFromDB("css");
         
         requestHTML.onsuccess = function(e) {
             updateHTML(e.target.result.code, "ace-code-container");
@@ -34,7 +34,7 @@ function switchTo(mode) {
         }
 
         if(localStorage.th_cj_importedmeta) {
-            parent.renderProfileMeta(localStorage.th_cj_importedmeta);
+            renderProfileMeta(localStorage.th_cj_importedmeta);
         }
         
         if(mode == "world" || mode.indexOf("profile") != -1 || mode == "warning") {
@@ -78,8 +78,8 @@ function importProfile(profilePath, importType){
             
             localStorage["th_cj_imported"+importType] = data;
             
-            if(importType=="meta") parent.renderProfileMeta(data);
-            else if (importType=="code") parent.renderProfileCode(data);
+            if(importType=="meta") renderProfileMeta(data);
+            else if (importType=="code") renderProfileCode(data);
         });
     }
 }
@@ -123,8 +123,21 @@ function toggleLitSize(delta) {
 }
 
 function toggleWYSIWYG(toState) {
-    if(!toState)  $(".ace-code-container").removeAttr("contenteditable");
-    else $(".ace-code-container").attr("contenteditable", true);
+    if(toState === false) {
+        $(".ace-code-container").removeAttr("contenteditable").remove(".wysiwyg-placeholder");
+    }
+    else {
+        $(".ace-code-container").attr("contenteditable", true);
+        if($(".ace-code-container").text().trim() === "") {
+            const placeholder = $("<div class='wysiwyg-placeholder'>Start typing here. When you're done, click on the HTML panel or uncheck WYSIWYG to update the HTML!</div>").on("click", function(e){
+                $(e.target)
+                    .html("")
+                    .removeClass("wysiwyg-placeholder")
+                    .off("click");
+            });
+            $(".ace-code-container").empty().append(placeholder)
+        }
+    }
 }
 
 function getWYSIWYG() {

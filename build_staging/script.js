@@ -50,9 +50,10 @@ $(window).on("load", function() {
     // Web app is initialised here; code should only start running after all DOM elements are loaded.
     // TODO: Make this promise-based, i.e. upon loading all required files
 
-    // Get frame and set frame's internal lastUpdate date to parent lastUpdate date
+    // Get frame and pass parent functions to frame
     frame = document.getElementById("frame");
-    frame.contentWindow.lastUpdate = lastUpdate;
+    const passable = { "lastUpdate": lastUpdate, "renderProfileMeta": renderProfileMeta, "renderProfileCode": renderProfileCode, "requestFromDB": requestFromDB };
+    Object.assign(frame.contentWindow, passable);
     
     // Update notes update date
     updateDate();
@@ -558,6 +559,10 @@ function mobileSwitch() {
  ******************************************/
 
 function updateBackup() {
+    // Get the WYSIWYG content
+
+    if($("#wysiwyg").prop("checked")) toggleWYSIWYG(false);
+    
     const updatePanels = ["html", "blurb", "css", "text"];
 
     updatePanels.forEach( (panel) => {
@@ -930,16 +935,21 @@ function toggleColorpicker() {
     }
 }
 
-function toggleWYSIWYG() {
-    const wysiwygOn = $("#wysiwyg").prop("checked");
-    if(wysiwygOn) {
+function toggleWYSIWYG(toState) {
+    frame.contentWindow.toggleWYSIWYG(toState);
+    if(toState === true) {
         editor.setReadOnly(true);
         $("#html-editor").addClass("disabled");
+        $("#html-editor").on("click", null, function() {
+            $("#html-editor").off("click");
+            toggleWYSIWYG(false);
+        });
     } else {
         editor.setValue(frame.contentWindow.getWYSIWYG());
-        console.log("Setting read only false");
         editor.setReadOnly(false);
+        editor.clearSelection();
         $("#html-editor").removeClass("disabled");
     }
-    frame.contentWindow.toggleWYSIWYG(wysiwygOn);
+    if(toState) $("#wysiwyg").attr("checked", true);
+    else  $("#wysiwyg").removeAttr("checked");
 }
