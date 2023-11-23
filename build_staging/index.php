@@ -218,6 +218,11 @@
                     <a class="dropdown-item" onclick="switchTo('bulletin')">
                         Bulletin
                     </a>
+
+                    <a class="dropdown-item" onclick="switchTo('bulletin-nopoll')">
+                        Bulletin with no poll
+                    </a>
+
                     <a class="dropdown-item" onclick="switchTo('folder')">
                         Folder
                     </a>
