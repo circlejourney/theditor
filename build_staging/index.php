@@ -1,15 +1,13 @@
 <?php
-    $lastUpdate = 20231118; // Set to last update for cache busting + make the popup appear.
-    $latestBuild = "staging"; $slash = DIRECTORY_SEPARATOR; // Select the latest build to select the root directory for CSS, JS and frame files
+    $settings = parse_ini_file(__DIR__."/../../settings.conf");
+    $lastUpdate = (int)$settings["lastUpdate"]; // Set to last update to make the popup appear.
+    $latestBuild = $settings["latestBuild"]; // Set this to the latest build directory to select the directory for source files
+    $slash = DIRECTORY_SEPARATOR; 
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-last-update="<?php echo $lastUpdate ?>">
     <head>
-        <script>
-            const lastUpdate = '<?php echo $lastUpdate ?>';
-        </script>
-        
         <title>Circlejourney's Toyhouse Live Code Editor</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <meta name="description" content="An editor for live previewing Toyhouse code.">
@@ -142,7 +140,7 @@
                     </span>
                 </div>
                 <div class="field-title text-visible">
-                    Scratch pad
+                    Scratchpad
                     
                     <span class="panel-options" id="text-options">
                         <a class="edit-button" onclick="text_editor.undo()" data-toggle="tooltip" title="Undo"><i class="fas fa-undo-alt"></i></a>
@@ -166,7 +164,7 @@
                 <a class="btn btn-secondary" onclick="showInfo()"><i class="fa fa-info"></i></a>
     
                 <div id="themes" class="dropdown d-sm-inline">
-                  <a class="btn btn-secondary dropdown-toggle" id="dropdownbutton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <a class="btn btn-secondary dropdown-toggle" id="dropdownbutton" data-toggle="dropdown" data-trigger="focus" aria-haspopup="true" aria-expanded="false">
                     Theme 
                   </a>
                 
@@ -181,7 +179,7 @@
                 </div>
 
                 <div id="modes" class="dropdown d-sm-inline">
-                  <a class="btn btn-secondary dropdown-toggle" id="dropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <a class="btn btn-secondary dropdown-toggle" id="dropdown" data-toggle="dropdown" data-trigger="focus" aria-haspopup="true" aria-expanded="false">
                     Layout
                   </a>
                   <div class="dropdown-menu">
@@ -242,7 +240,7 @@
                 
     
                 <div id="import" class="dropdown d-sm-inline">
-                  <a class="btn btn-secondary dropdown-toggle" id="dropdownbutton2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <a class="btn btn-secondary dropdown-toggle" id="dropdownbutton2" data-toggle="dropdown" data-trigger="focus" aria-haspopup="true" aria-expanded="false">
                     Import from TH
                   </a>
                 
@@ -285,7 +283,7 @@
                 </span>
 
                 <div id="ui-options" class="dropdown d-sm-inline">
-                    <a class="btn btn-secondary dropdown-toggle" id="dropdownbutton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <a class="btn btn-secondary dropdown-toggle" id="dropdownbutton" data-toggle="dropdown" data-trigger="focus" aria-haspopup="true" aria-expanded="false">
                         UI options 
                     </a>
                     
@@ -319,8 +317,10 @@
                             <input type="checkbox" id="gutter" onchange="toggleGutter()" checked>&nbsp;<label for="gutter">Line numbers</label>
                         </span>
 
-                        <span class="checkbox-container">
-                            <input type="checkbox" id="low-contrast" onchange="toggleUITheme();">&nbsp;<label for="low-contrast">Low contrast</label>
+                        <span class="checkbox-container" id="ui-theme">
+                            <input type="radio" name="colour-mode" id="dark"  onchange="toggleUITheme();">&nbsp;<label for="dark">Dark mode</label>
+                            <input type="radio" name="colour-mode" id="low-contrast" onchange="toggleUITheme();">&nbsp;<label for="low-contrast">Low contrast</label>
+                            <input type="radio" name="colour-mode" id="light" onchange="toggleUITheme();">&nbsp;<label for="light">Light mode</label>
                         </span>
 
                         <span class="checkbox-container">

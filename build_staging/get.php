@@ -1,4 +1,5 @@
 <?php 
+    error_reporting(1);
     require_once("../phpQuery/phpQuery.php");
     header("Content-type: text/html");
 
@@ -10,11 +11,11 @@
     $profilePath = sanitise($profilePath);
     $getMeta = $_POST["getMeta"] ?? $_GET["getMeta"] ?? false;
     $profile = "https://toyhou.se/$profilePath";
-    $cookie = getcwd() . DIRECTORY_SEPARATOR . "cookie.txt";
-    if($ischaracter = preg_match("/[0-9]+/", $profilePath)) $profile = "$profile.";
+    if($ischaracter = preg_match("/^[0-9]+$/", $profilePath)) $profile = "$profile.";
     
     ob_start();
-    require("auth.php");
+    // require("auth.php");
+    require("noauth.php");
     $body = ob_get_clean();
     
     $config = array(

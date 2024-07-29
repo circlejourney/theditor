@@ -9,9 +9,10 @@
 require_once("../phpQuery/phpQuery.php");
 $homepage = "https://toyhou.se";
 $loginendpoint = "https://toyhou.se/~account/login";
-$settings = parse_ini_file("../../settings.conf");
+$settings = parse_ini_file(__DIR__."/../../settings.conf");
 $username = $settings["username"];
 $password = $settings["password"];
+$cookie = getcwd() . DIRECTORY_SEPARATOR . "cookie.txt";
 
 // Login CSRF handshake
 $curlrequest = curl_init();
@@ -21,7 +22,7 @@ curl_setopt($curlrequest, CURLOPT_COOKIEFILE, $cookie);
 curl_setopt($curlrequest, CURLOPT_RETURNTRANSFER, 1);
 $csrfresponse = curl_exec($curlrequest);
 phpQuery::newDocumentHTML($csrfresponse);
-$authed = pq("meta[name='csrf-token']")->count() === 0;
+$authed = $csrfresponse && pq("meta[name='csrf-token']")->count() === 0;
 
 if(!$authed) {
     error_log("Application currently not logged in. Logging in...");
@@ -35,6 +36,8 @@ if(!$authed) {
     );
     curl_setopt($curlrequest, CURLOPT_URL, $loginendpoint);
     curl_setopt($curlrequest, CURLOPT_POST, 1);
+    curl_setopt($curlrequest, CURLOPT_SSL_VERIFYHOST, 0);
+    curl_setopt($curlrequest, CURLOPT_SSL_VERIFYPEER, 0);
     curl_setopt($curlrequest, CURLOPT_RETURNTRANSFER, 1);
     curl_setopt($curlrequest, CURLOPT_FOLLOWLOCATION, 0);
     curl_setopt($curlrequest, CURLOPT_POSTFIELDS, http_build_query($loginheaders));
@@ -132,7 +135,7 @@ if(strpos($profileresponse, "user-content") === false) {
     die();
 
 } else if(strpos($profileresponse, "allow-thcj-import") === false && !$userglobalpermit) {
-    echo "<div><div class='user-content thcj-warn'>Security alert: You are attempting to import a profile that has not been set to allow code import. To allow code import, paste the line <code>&lt;u id='allow-thcj-import'>&lt;/u></code> to teh front of your code. Alternatively, paste the line <code>&lt;u id='allow-thcj-import-all'>&lt;/u></code> in your <b>user profile</b> to make <i>all</i> your codes importable.</div></div>";
+    echo "<div><div class='user-content thcj-warn'>Security alert: You are attempting to import a profile that has not been set to allow code import. To allow code import, paste the line <code>&lt;u id='allow-thcj-import'>&lt;/u></code> to the front of your code. Alternatively, paste the line <code>&lt;u id='allow-thcj-import-all'>&lt;/u></code> in your <b>user profile</b> to make <i>all</i> your codes importable.</div></div>";
     die();
 } else {
     error_log("This profile has been set to allow import. Proceeding...");

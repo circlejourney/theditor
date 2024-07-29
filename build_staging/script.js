@@ -8,7 +8,7 @@ var sessionSettings = { activeMode: "profile", activeTheme: "Default" };
 // DOM elements
 var editor, css_editor, text_editor, frame;
 const sass = new Sass();
-let DB, lastRequest;
+let DB, lastRequest, lastUpdate;
 
 /**************************************
     vvv  Constants  vvv
@@ -52,6 +52,7 @@ $(window).on("load", function() {
 
     // Get frame and pass parent functions to frame
     frame = document.getElementById("frame");
+    lastUpdate = +$("html").data("last-update")
     const passable = { "lastUpdate": lastUpdate, "renderProfileMeta": renderProfileMeta, "renderProfileCode": renderProfileCode, "requestFromDB": requestFromDB };
     Object.assign(frame.contentWindow, passable);
     
@@ -226,70 +227,81 @@ function initEditors() {
 function loadLocalSettings() {
     // Extract the user's settings from local storage and update UI. Don't import code here since it is now using Indexed DB.
     // TODO: Use destructuring of localStorage object to tidy this up
-    
-    if(localStorage.th_cj_colorpicker) {
-        $("#colorpicker").prop("checked", localStorage.th_cj_colorpicker == "true");
-        toggleColorpicker();
-    }
-    
-    if(localStorage.th_cj_mode) {
-        sessionSettings.activeMode = localStorage.th_cj_mode;
-    }
-    
-    if(localStorage.th_cj_theme) {
-        sessionSettings.activeTheme = localStorage.th_cj_theme;
-    }
-    
-    if(localStorage.th_cj_vertical) {
-        $("#vertical").prop("checked", localStorage.th_cj_vertical == "true");
-        toggleVertical();
-    }
-    
-    if(localStorage.th_cj_gutter) {
-        $("#gutter").prop("checked", localStorage.th_cj_gutter == "true");
-        toggleGutter();
-    }
-    
-    if(localStorage.th_cj_lowContrast) {
-        $("#low-contrast").prop("checked", localStorage.th_cj_lowContrast == "true");
+    localStorage.cj_uitheme = (localStorage.th_cj_lowContrast == "true" ? "low-contrast" : "dark");
+    localStorage.removeItem("th_cj_lowContrast");
+
+    const { cj_uitheme, th_cj_colorpicker,
+        th_cj_mode, th_cj_theme,
+        th_cj_vertical, th_cj_gutter,
+        th_cj_htmlpanel, th_cj_csspanel,
+        th_cj_textpanel, th_cj_bigtext,
+        th_cj_auto, th_cj_mobile,
+        th_cj_autocomplete, th_cj_lastUpdate
+    } = localStorage;
+
+    if(cj_uitheme) {
+        $("#"+cj_uitheme).prop("checked", true);
         toggleUITheme();
     }
     
-    if(localStorage.th_cj_htmlpanel) {
-        $("#html-panel").prop("checked", localStorage.th_cj_htmlpanel == "true");
+    if(th_cj_colorpicker) {
+        $("#colorpicker").prop("checked", th_cj_colorpicker == "true");
+        toggleColorpicker();
+    }
+    
+    if(th_cj_mode) {
+        sessionSettings.activeMode = th_cj_mode;
+    }
+    
+    if(th_cj_theme) {
+        sessionSettings.activeTheme = th_cj_theme;
+    }
+    
+    if(th_cj_vertical) {
+        $("#vertical").prop("checked", th_cj_vertical == "true");
+        toggleVertical();
+    }
+    
+    if(th_cj_gutter) {
+        $("#gutter").prop("checked", th_cj_gutter == "true");
+        toggleGutter();
+    }
+    
+    if(th_cj_htmlpanel) {
+        $("#html-panel").prop("checked", th_cj_htmlpanel == "true");
         toggleHTMLPanel();
     }
     
-    if(localStorage.th_cj_csspanel) {
-        $("#css-panel").prop("checked", localStorage.th_cj_csspanel == "true");
+    if(th_cj_csspanel) {
+        $("#css-panel").prop("checked", th_cj_csspanel == "true");
         toggleCSSPanel();
     }
     
-    if(localStorage.th_cj_textpanel) {
-        $("#text-panel").prop("checked", localStorage.th_cj_textpanel == "true");
+    if(th_cj_textpanel) {
+        $("#text-panel").prop("checked", th_cj_textpanel == "true");
         toggleTextPanel();
     }
     
-    if(localStorage.th_cj_bigtext) {
-        if(localStorage.th_cj_bigtext == "true") toggleBigText();
-        $("#big-text").prop("checked", localStorage.th_cj_bigtext == "true");
+    if(th_cj_bigtext) {
+        if(th_cj_bigtext == "true") toggleBigText();
+        $("#big-text").prop("checked", th_cj_bigtext == "true");
     }
     
-    if(localStorage.th_cj_auto) {
-        $("#auto").prop("checked", localStorage.th_cj_auto == "true");
+    if(th_cj_auto) {
+        $("#auto").prop("checked", th_cj_auto == "true");
     }
     
-    if(localStorage.th_cj_mobile) {
-        $("#mobile").prop("checked", localStorage.th_cj_mobile == "true");
+    if(th_cj_mobile) {
+        $("#mobile").prop("checked", th_cj_mobile == "true");
         toggleMobilePreview();
     }
     
-    if(localStorage.th_cj_autocomplete) {
-        $("#autocomplete").prop("checked", localStorage.th_cj_autocomplete == "true");
+    if(th_cj_autocomplete) {
+        $("#autocomplete").prop("checked", th_cj_autocomplete == "true");
         toggleAutocomplete();
     }
     
-    if(localStorage.th_cj_lastUpdate != lastUpdate && location.pathname.indexOf("/unstable") == -1) {
+    if(+th_cj_lastUpdate != lastUpdate && location.pathname.indexOf("/unstable") == -1) {
         $("#info").removeClass("d-none");
         $("#info-back").removeClass("d-none");
         localStorage.th_cj_lastUpdate = lastUpdate;
@@ -853,22 +865,30 @@ function toggleMobilePreview() {
 }
 
 function toggleUITheme(){
-    localStorage.th_cj_lowContrast = $("#low-contrast").prop("checked");
+    localStorage.th_cj_uitheme = $("#ui-theme input:checked").attr("id");
+    $(document.body).attr("class", localStorage.th_cj_uitheme);
 
-    if($("#low-contrast").prop("checked")) { 
-        $("#night-css").attr("href", "../src/site_night-forest.css");
-        $(".bg-light").removeClass("bg-light").addClass("bg-dark");
-        editor.setTheme("ace/theme/tomorrow_night");
-        css_editor.setTheme("ace/theme/tomorrow_night");
-        text_editor.setTheme("ace/theme/tomorrow_night");
-
-    } else {
-        $("#night-css").removeAttr("href");
-        $(".bg-dark").removeClass("bg-dark").addClass("bg-light");
-
-        editor.setTheme("ace/theme/monokai");
-        css_editor.setTheme("ace/theme/monokai");
-        text_editor.setTheme("ace/theme/monokai");
+    switch(localStorage.th_cj_uitheme) {
+        case "light":
+            $("#night-css").removeAttr("href");
+            $("#footer").removeClass("bg-dark").addClass("bg-light");
+            editor.setTheme("ace/theme/xcode");
+            css_editor.setTheme("ace/theme/xcode");
+            text_editor.setTheme("ace/theme/xcode");
+            break;
+        case "low-contrast":     
+            $("#night-css").attr("href", "../src/site_night-forest.css");
+            $("#footer").removeClass("bg-light").addClass("bg-dark");
+            editor.setTheme("ace/theme/tomorrow_night");
+            css_editor.setTheme("ace/theme/tomorrow_night");
+            text_editor.setTheme("ace/theme/tomorrow_night");
+            break;
+        default:
+            $("#night-css").removeAttr("href");
+            $("#footer").removeClass("bg-dark").addClass("bg-light");
+            editor.setTheme("ace/theme/monokai");
+            css_editor.setTheme("ace/theme/monokai");
+            text_editor.setTheme("ace/theme/monokai");
     }
 
 }

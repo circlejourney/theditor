@@ -229,7 +229,11 @@ a {
     -ms-flex-direction: column;
     -o-flex-direction: column;
     flex-direction: column;
-    background-color: black;
+    background-color: #333;
+}
+
+.light #editor {
+    background-color: #ddd;
 }
 
 #editor.vertical {
@@ -276,14 +280,10 @@ a {
     display: none;
 }
 
-#titles, .field-title {
+.field-title {
     color: white;
-    font-size: 16pt;
-    background-color: #2f3129;
-}
-
-#titles > div, .field-title {
     background-color: black;
+    font-size: 16pt;
     margin: 1px;
     padding: 3px;
     -webkit-flex-basis: 0;
@@ -300,6 +300,11 @@ a {
     
     justify-content: space-between;
     color: white;
+}
+
+.light .field-title {
+    color: black;
+    background-color: white;    
 }
 
 .panel-title-tabs {
