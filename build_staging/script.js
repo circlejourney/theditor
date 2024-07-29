@@ -865,10 +865,10 @@ function toggleMobilePreview() {
 }
 
 function toggleUITheme(){
-    localStorage.th_cj_uitheme = $("#ui-theme input:checked").attr("id");
-    $(document.body).attr("class", localStorage.th_cj_uitheme);
+    localStorage.cj_uitheme = $("#ui-theme input:checked").attr("id");
+    $(document.body).attr("class", localStorage.cj_uitheme);
 
-    switch(localStorage.th_cj_uitheme) {
+    switch(localStorage.cj_uitheme) {
         case "light":
             $("#night-css").removeAttr("href");
             $("#footer").removeClass("bg-dark").addClass("bg-light");
