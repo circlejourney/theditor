@@ -248,7 +248,7 @@
                       <div class="d-flex flex-column">
                           <div class="d-flex mb-1">
                             <input type="text" id="char-id" class="form-control mr-1 import-button" placeholder="Enter ID"></input>
-                             <abbr class="d-inline-block" title="The numerical ID (for a character profile, e.g. 1776660) or username (for a user profile). Profile must be public and contain the string allow-thcj-import." data-toggle="tooltip">
+                             <abbr class="d-inline-block" title="The numerical ID (for a character profile, e.g. 1776660) or username (for a user profile). Profile must be public and contain the string allow-thcj-import. You can also set all profiles on your account to be importable by adding allow-thcj-import-<b>all</b> to your user profile." data-toggle="tooltip" data-html="true">
                                  <i class="fa fa-question-circle"></i>
                              </abbr>
                          </div>
