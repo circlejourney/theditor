@@ -872,9 +872,9 @@ function toggleUITheme(){
         case "light":
             $("#night-css").removeAttr("href");
             $("#footer").removeClass("bg-dark").addClass("bg-light");
-            editor.setTheme("ace/theme/xcode");
-            css_editor.setTheme("ace/theme/xcode");
-            text_editor.setTheme("ace/theme/xcode");
+            editor.setTheme("ace/theme/tomorrow");
+            css_editor.setTheme("ace/theme/tomorrow");
+            text_editor.setTheme("ace/theme/tomorrow");
             break;
         case "low-contrast":     
             $("#night-css").attr("href", "../src/site_night-forest.css");
