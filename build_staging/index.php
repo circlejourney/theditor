@@ -1,5 +1,5 @@
 <?php
-    $settings = parse_ini_file(__DIR__."/../../settings.conf");
+    $settings = parse_ini_file(__DIR__."/../.env");
     $lastUpdate = (int)$settings["lastUpdate"]; // Set to last update to make the popup appear.
     $latestBuild = $settings["latestBuild"]; // Set this to the latest build directory to select the directory for source files
     $slash = DIRECTORY_SEPARATOR; 
