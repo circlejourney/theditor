@@ -227,8 +227,10 @@ function initEditors() {
 function loadLocalSettings() {
     // Extract the user's settings from local storage and update UI. Don't import code here since it is now using Indexed DB.
     // TODO: Use destructuring of localStorage object to tidy this up
-    localStorage.cj_uitheme = (localStorage.th_cj_lowContrast == "true" ? "low-contrast" : "dark");
-    localStorage.removeItem("th_cj_lowContrast");
+    if(localStorage.th_cj_lowContrast){
+        localStorage.cj_uitheme = localStorage.th_cj_lowContrast && (localStorage.th_cj_lowContrast == "true") ? "low-contrast" : "dark";
+        localStorage.removeItem("th_cj_lowContrast");
+    }
 
     const { cj_uitheme, th_cj_colorpicker,
         th_cj_mode, th_cj_theme,

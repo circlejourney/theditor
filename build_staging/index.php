@@ -318,7 +318,7 @@
                         </span>
 
                         <span class="checkbox-container" id="ui-theme">
-                            <input type="radio" name="colour-mode" id="dark"  onchange="toggleUITheme();">&nbsp;<label for="dark">Dark mode</label>
+                            <input type="radio" name="colour-mode" id="dark" onchange="toggleUITheme();">&nbsp;<label for="dark">Dark mode</label>
                             <input type="radio" name="colour-mode" id="low-contrast" onchange="toggleUITheme();">&nbsp;<label for="low-contrast">Low contrast</label>
                             <input type="radio" name="colour-mode" id="light" onchange="toggleUITheme();">&nbsp;<label for="light">Light mode</label>
                         </span>
