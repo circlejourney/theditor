@@ -64,7 +64,7 @@
                     <?php include __DIR__ . $slash . ".." . $slash . "notes.html"; ?>
                 </div>
                 
-                <a class="btn btn-primary" onclick="showInfo()">Got it!</a>
+                <a class="btn btn-primary text-white" onclick="showInfo()">Got it!</a>
                 <a class="btn btn-secondary" data-toggle="collapse" data-target="#changelog">Changelog</a>
                 <a class="btn btn-secondary" data-toggle="collapse" data-target="#issues">Known issues</a>
                 <a class="btn btn-secondary" data-toggle="collapse" data-target="#versions">Versions</a>
