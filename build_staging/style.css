@@ -357,7 +357,6 @@ a {
 }
 
 #footer {
-    display: flex;
     box-sizing: border-box;
     padding: 5px 10px;
     font-size: 12pt;
@@ -365,11 +364,6 @@ a {
     width: 100%;
     height: auto;
     bottom: 0;
-    
-    display: -webkit-box; 
-    display: -moz-box;
-    display: -ms-flexbox;
-    display: -webkit-flex; 
     display: flex;
     
     -webkit-flex-direction: row;

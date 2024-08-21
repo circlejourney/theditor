@@ -868,7 +868,8 @@ function toggleMobilePreview() {
 
 function toggleUITheme(){
     localStorage.cj_uitheme = $("#ui-theme input:checked").attr("id");
-    $(document.body).attr("class", localStorage.cj_uitheme);
+    $(document.body).removeClass("low-contrast light dark");
+    $(document.body).addClass(localStorage.cj_uitheme);
 
     switch(localStorage.cj_uitheme) {
         case "light":
