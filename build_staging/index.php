@@ -238,7 +238,7 @@
                 </div>
                 
     
-                <div id="import" class="dropdown d-sm-inline">
+                <!-- <div id="import" class="dropdown d-sm-inline">
                   <a class="btn btn-secondary dropdown-toggle" id="dropdownbutton2" data-toggle="dropdown" data-trigger="focus" aria-haspopup="true" aria-expanded="false">
                     Import from TH
                   </a>
@@ -258,7 +258,7 @@
                         </div>
                     </div>
                   </div>
-                </div>
+                </div> -->
                 
                 <a id="toggle-sidebar" class="btn btn-secondary" onclick="frame.contentWindow.toggleUI()">
                      <i id='sidebar-toggle-icon' class="fa fa-chevron-left"></i> Sidebar
