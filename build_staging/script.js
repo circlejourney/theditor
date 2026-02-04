@@ -723,7 +723,7 @@ function renderProfileMeta(data) {
 
 
 /**************************************
-    vvv  UI functionality  vvv
+ UI functionality
 **************************************/
 
 function showInfo() {
@@ -739,7 +739,7 @@ function hardReset() {
 }
 
 /**************************************
-    vvv  UI toggles  vvv
+ UI toggles
 **************************************/
 
 function toggleTheme(theme) {
@@ -757,8 +757,11 @@ function switchTo(mode) {
 }
 
 function toggleBlurb(mode) {
+    if( $("#wysiwyg").prop("checked") ) return;
     clearTimeout(lastRequest);
+
     if(mode == "html") {
+        $("#wysiwyg").prop("disabled", false);
         const request = requestFromDB("html");
         request.onsuccess = (e) => {
             $("#html-tab").removeClass("text-dark");
@@ -767,6 +770,7 @@ function toggleBlurb(mode) {
             editor.isBlurb = !editor.isBlurb;
         }
     } else {
+        $("#wysiwyg").prop("disabled", true);
         const request = requestFromDB("blurb");
         request.onsuccess = (e) => {
             $("#blurb-tab").removeClass("text-dark");
@@ -959,6 +963,9 @@ function toggleColorpicker() {
 }
 
 function toggleWYSIWYG(toState) {
+    // Don't allow WYSIWYG if currently on blurb
+    if( editor.isBlurb ) return;
+
     frame.contentWindow.toggleWYSIWYG(toState);
     if(toState === true) {
         editor.setReadOnly(true);
