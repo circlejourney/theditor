@@ -756,18 +756,20 @@ function switchTo(mode) {
     frame.contentWindow.switchTo(mode);
 }
 
-function toggleBlurb(mode) {
-    if( $("#wysiwyg").prop("checked") ) return;
+function toggleBlurb(toMode) {
     clearTimeout(lastRequest);
+    const currentMode = editor.isBlurb ? "blurb" : "html";
+    if(toMode == currentMode) return;
+    if( $("#wysiwyg").prop("checked") ) return;
 
-    if(mode == "html") {
+    if(toMode == "html") {
         $("#wysiwyg").prop("disabled", false);
         const request = requestFromDB("html");
         request.onsuccess = (e) => {
             $("#html-tab").removeClass("text-dark");
             $("#blurb-tab").addClass("text-dark");
             editor.setValue(e.target.result.code);
-            editor.isBlurb = !editor.isBlurb;
+            editor.isBlurb = false;
         }
     } else {
         $("#wysiwyg").prop("disabled", true);
@@ -776,7 +778,7 @@ function toggleBlurb(mode) {
             $("#blurb-tab").removeClass("text-dark");
             $("#html-tab").addClass("text-dark");
             editor.setValue(e.target.result.code);
-            editor.isBlurb = !editor.isBlurb;
+            editor.isBlurb = true;
         }
     }
 }
