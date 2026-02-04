@@ -1,8 +1,7 @@
 <?php
     $settings = parse_ini_file(__DIR__."/../.env");
-    $lastUpdate = (int)$settings["lastUpdate"]; // Set to last update to make the popup appear.
+    $lastUpdate = (int)$settings["lastUpdate"]; // Change latest update date to make the popup appear.
     $latestBuild = $settings["latestBuild"]; // Set this to the latest build directory to select the directory for source files
-    $slash = DIRECTORY_SEPARATOR; 
 ?>
 
 <!DOCTYPE html>
@@ -36,11 +35,11 @@
         <!-- FONT AWESOME -->
 		<script src="https://kit.fontawesome.com/0ddae54ad8.js" crossorigin="anonymous"></script>
 
-        <script src="/build_<?php echo $latestBuild ?>/script.js?v=<?php echo filemtime(__DIR__ . $slash . "script.js"); ?>" type="text/javascript"></script>
-        <link rel="stylesheet" href="/build_<?php echo $latestBuild ?>/style.css?v=<?php echo filemtime(__DIR__ . $slash . "style.css") ?>">
+        <script src="/build_<?php echo $latestBuild ?>/script.js?v=<?php echo filemtime(__DIR__ . DIRECTORY_SEPARATOR . "script.js"); ?>" type="text/javascript"></script>
+        <link rel="stylesheet" href="/build_<?php echo $latestBuild ?>/style.css?v=<?php echo filemtime(__DIR__ . DIRECTORY_SEPARATOR . "style.css") ?>">
             
     </head>
-    <body>
+    <body class="stackable">
     
     <div id="loader" style="text-align: center; display: flex; flex-direction: column; justify-content: center;">
         <div class="loader-inner">
@@ -98,65 +97,17 @@
          </div>
     </div>
     
-    <div id="main">
-        <iframe src="/build_<?php echo $latestBuild ?>/frame.php?2" id="frame" class="d-flex align-self-center">
+    <div id="main" class="stackable">
+        <iframe src="/build_<?php echo $latestBuild ?>/frame.php?2" id="frame" class="d-flex align-self-center stackable">
         </iframe>
         
-        <div id="adjustbar" class="progress-bar progress-bar-striped bg-secondary">
-            <button class="btn btn-primary" id="mobile-switch" onclick="mobileSwitch()">
+        <div id="adjustbar" class="progress-bar progress-bar-striped bg-secondary stackable">
+            <button class="btn btn-primary stackable" id="mobile-switch" onclick="mobileSwitch()">
                 <i class="mobile-switch-arrow fa fa-caret-down"></i>
             </button>
         </div>
         
-        <div id="editor">
-            
-            <div id="titles">
-                <div class="field-title html-visible">
-                    <div class="panel-title-tabs">
-                        <a class="nav-tab" id="html-tab" onclick="toggleBlurb('html')">HTML</a> &nbsp; <a class="nav-tab text-dark" id="blurb-tab" onclick="toggleBlurb('blurb')">Blurb</a>
-                    </div>
-                    <span class="panel-options" id="html-options">
-                        <a class="edit-button" onclick="editor.undo()" data-toggle="tooltip" title="Undo"><i class="fas fa-undo-alt"></i></a>
-                        <a class="edit-button" onclick="editor.redo()" data-toggle="tooltip" title="Redo"><i class="fas fa-redo-alt"></i></a>
-                        <a class="edit-button" onclick="editor.insert(loremipsum)" data-toggle="tooltip" title="Insert lorem ipsum"><i class="fas fa-text"></i></a>
-                        <a class="edit-button" onclick="beautifyHTML()" data-toggle="tooltip" title="Format HTML"><i class="fas fa-brackets-curly"></i></a>
-                        <a class="edit-button" onclick="uploadFileDialogue('html')" data-toggle="tooltip" title="Import file"><i class="fa fa-file-import"></i></a>                        
-                        <a class="edit-button" onclick="downloadFile('html')" data-toggle="tooltip" title="Save as file"><i class="fa fa-save"></i></a>
-                        <a class="edit-button clear-button" id="clear-html" onclick="editor.setValue('')" data-toggle="tooltip" title="Clear"><i class="fa fa-trash"></i></a>
-                        <a class="edit-button restore-button d-none" id="restore-html" onclick="restoreBackup('html')" data-toggle="tooltip" title="Restore backup"><i class="fa fa-trash-undo"></i></a>
-                    </span>
-                </div>
-                <div class="field-title css-visible">
-                    CSS
-                    <span class="panel-options" id="css-options">
-                        <a class="edit-button" onclick="css_editor.undo()" data-toggle="tooltip" title="Undo"><i class="fas fa-undo-alt"></i></a>
-                        <a class="edit-button" onclick="css_editor.redo()" data-toggle="tooltip" title="Redo"><i class="fas fa-redo-alt"></i></a>
-                        <a class="edit-button" onclick="beautifyCSS()" data-toggle="tooltip" title="Format CSS"><i class="fas fa-brackets-curly"></i></a>
-                        <a class="edit-button" onclick="uploadFileDialogue('css')" data-toggle="tooltip" title="Import file"><i class="fa fa-file-import"></i></a>
-                        <a class="edit-button" onclick="downloadFile('css')" data-toggle="tooltip" title="Save as file"><i class="fa fa-save"></i></a>
-                        <a class="edit-button clear-button" id="clear-css" onclick="css_editor.setValue('')" data-toggle="tooltip" title="Clear"><i class="fa fa-trash"></i></a>
-                        <a class="edit-button restore-button d-none" id="restore-css" onclick="restoreBackup('css')" data-toggle="tooltip" title="Restore backup"><i class="fa fa-trash-undo"></i></a>
-                    </span>
-                </div>
-                <div class="field-title text-visible">
-                    Scratchpad
-                    
-                    <span class="panel-options" id="text-options">
-                        <a class="edit-button" onclick="text_editor.undo()" data-toggle="tooltip" title="Undo"><i class="fas fa-undo-alt"></i></a>
-                        <a class="edit-button" onclick="text_editor.redo()" data-toggle="tooltip" title="Redo"><i class="fas fa-redo-alt"></i></a>
-                        <a class="edit-button clear-button" id="clear-text" onclick="text_editor.setValue('')" data-toggle="tooltip" title="Clear"><i class="fa fa-trash"></i></a>
-                        <a class="edit-button restore-button d-none" id="restore-text" onclick="restoreBackup('text')" data-toggle="tooltip" title="Restore backup"><i class="fa fa-trash-undo"></i></a>
-                    </span>
-                </div>
-            </div>
-            
-            <div id="fields">
-                <div class="html-visible editor-panel" id="html-editor"></div>
-                <div class="d-none blurb-visible editor-panel" id="blurb-editor"></div>
-                <div class="css-visible editor-panel" id="css-editor"></div>
-                <div class="text-visible editor-panel" id="text-editor"></div>
-            </div>
-        </div>
+        <?php include("editor.html") ?>
             
         <div id="footer" class="bg-light justify-content-between ">
             <div id="footer-left">
@@ -309,7 +260,9 @@
                         </span>
 
                         <span class="checkbox-container hide-small">
-                            <input type="checkbox" id="vertical" onchange="toggleVertical()">&nbsp;<label for="vertical" class="hide-small">Vertical view</label>
+                            <input class="stacking" type="radio" name="stacking" id="horizontal" value="horizontal" onchange="toggleVertical()">&nbsp;<label for="horizontal">Stack horizontal</label>
+                            <input class="stacking" type="radio" name="stacking" id="vertical" value="vertical" onchange="toggleVertical()">&nbsp;<label for="vertical">Stack vertical</label>
+                            <input class="stacking" type="radio" name="stacking" id="popout" value="popout" onchange="toggleVertical()">&nbsp;<label for="popout">Pop out</label>
                         </span>
 
                         <span class="checkbox-container hide-small">

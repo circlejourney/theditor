@@ -6,7 +6,7 @@ const isSafari = navigator.userAgent.indexOf("Safari") > -1;
 const isMobile = typeof screen.orientation !== 'undefined';
 var sessionSettings = { activeMode: "profile", activeTheme: "Default" };
 // DOM elements
-var editor, css_editor, text_editor, frame;
+var editor, css_editor, text_editor, frame, popoutWindow;
 const sass = new Sass();
 let DB, lastRequest, lastUpdate;
 
@@ -260,7 +260,7 @@ function loadLocalSettings() {
     }
     
     if(th_cj_vertical) {
-        $("#vertical").prop("checked", th_cj_vertical == "true");
+        $("#"+th_cj_vertical).prop("checked", true);
         toggleVertical();
     }
     
@@ -813,46 +813,34 @@ function toggleAuto() {
 }
 
 function toggleVertical() {
-    localStorage.th_cj_vertical = $("#vertical").prop("checked");
-    var codeheight, codewidth;
+    let codeheight, codewidth, stacking;
+    localStorage.th_cj_vertical = stacking = $(".stacking:checked").val();
     
-    if($("#vertical").prop("checked")) {
-        
-        $("#fields").append($(".html-visible"));
-        $("#fields").append($(".css-visible"));
-        $("#fields").append($(".text-visible"));
-        
-        // TODO: Tidy this up!  Too many things having the same classname toggled. Consider styling based on parent (body element?) with vertical class
-        $(document.body).addClass("vertical");
-        $("#main").addClass("vertical");
-        $("#frame").addClass("vertical");
-        $("#adjustbar").addClass("vertical");
-        $("#editor").addClass("vertical");
-        $("#titles").addClass("vertical");
-        $("#fields").addClass("vertical");
-        $("#mobile-switch").addClass("vertical")
-        
+    if(stacking == "vertical") {
+        $("#editor, #adjustbar").removeClass("vanish");
+        $("#fields").append([ $(".html-visible"), $(".css-visible"), $(".text-visible") ]);
+        $(".stackable").addClass("vertical");
         $(document.body).append($("#footer"));
     
         codewidth = localStorage.th_cj_width;
         codeheight = "100%";
         
-    } else {
-        
+    } else if(stacking == "horizontal") {
+        $("#editor, #adjustbar").removeClass("vanish");
         $("#titles").append($(".field-title"));
-
-        $(document.body).removeClass("vertical");
-        $("#main").removeClass("vertical");
-        $("#frame").removeClass("vertical");
-        $("#adjustbar").removeClass("vertical");
-        $("#editor").removeClass("vertical");
-        $("#titles").removeClass("vertical");
-        $("#fields").removeClass("vertical");
-        $("#mobile-switch").removeClass("vertical")
-        
+        $(".stackable").removeClass("vertical");
         $("#main").append($("#footer"));
     
         codeheight = localStorage.th_cj_height;
+        codewidth = "100%";
+    } else {
+        $("#editor, #adjustbar").addClass("vanish");
+        popoutWindow = window.open("/frame.php", "mozillaWindow", "popup");
+        Object.assign(popoutWindow, passable);
+        frame = {
+            contentWindow: popoutWindow
+        };
+        codeheight = "100%";
         codewidth = "100%";
     }
     

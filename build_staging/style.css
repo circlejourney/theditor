@@ -16,6 +16,10 @@ body.vertical {
     font-size: 1.2rem;
 }
 
+.vanish {
+    display: none !important;
+}
+
 a {
     cursor: pointer;
 }
