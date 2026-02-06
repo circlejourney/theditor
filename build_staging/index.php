@@ -19,7 +19,7 @@
         <script src="/src/sass.js-master/dist/sass.js"></script>
 
         
-        <!-- Ace Colorpicker -->
+        <!-- Ace Colorpicker -->    
         <link rel="stylesheet" href="/src/ace-colorpicker.css" />
         <script type="text/javascript" src="/src/ace-colorpicker.js?4" ></script>
 
@@ -259,9 +259,9 @@
                         </span>
 
                         <span class="checkbox-container hide-small">
-                            <input class="stacking" type="radio" name="stacking" id="horizontal" value="horizontal" onchange="toggleVertical()">&nbsp;<label for="horizontal">Stack horizontal</label>
-                            <input class="stacking" type="radio" name="stacking" id="vertical" value="vertical" onchange="toggleVertical()">&nbsp;<label for="vertical">Stack vertical</label>
-                            <input class="stacking" type="radio" name="stacking" id="popout" value="popout" onchange="toggleVertical()">&nbsp;<label for="popout">Pop out</label>
+                            <input class="stacking" type="radio" name="stacking" id="horizontal" value="horizontal" onchange="toggleLayout()" checked>&nbsp;<label for="horizontal">Stack horizontal</label>
+                            <input class="stacking" type="radio" name="stacking" id="vertical" value="vertical" onchange="toggleLayout()">&nbsp;<label for="vertical">Stack vertical</label>
+                            <input class="stacking" type="radio" name="stacking" id="popout" value="popout" onchange="toggleLayout()">&nbsp;<label for="popout">Pop out</label>
                         </span>
 
                         <span class="checkbox-container hide-small">

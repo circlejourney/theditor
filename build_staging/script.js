@@ -21,6 +21,7 @@ const months = ["January", "February", "March", "April", "May", "June", "July", 
 const beautify_HTML_Options = { "indent_size": "1", "indent_char": "\t", "max_preserve_newlines": "-1", "preserve_newlines": false, "keep_array_indentation": false, "break_chained_methods": false, "indent_scripts": "normal", "brace_style": "expand", "space_before_conditional": true, "unescape_strings": false, "jslint_happy": false, "end_with_newline": false, "wrap_line_length": "0", "indent_inner_html": false, "comma_first": false, "e4x": false, "indent_empty_lines": false }
 const beautify_CSS_Options = { "indent_size": "2", "indent_char": " ", "max_preserve_newlines": "-1", "preserve_newlines": false, "keep_array_indentation": false, "break_chained_methods": false, "indent_scripts": "normal", "brace_style": "collapse", "space_before_conditional": true, "unescape_strings": false, "jslint_happy": false, "end_with_newline": false, "wrap_line_length": "0", "indent_inner_html": false, "comma_first": false, "e4x": false, "indent_empty_lines": false };
 const storages = ["th_cj", "th_cj_mode", "th_cj_theme", "th_cj_css", "th_cj_text", "th_cj_vertical", "th_cj_htmlpanel", "th_cj_csspanel", "th_cj_textpanel", "th_cj_auto", "th_cj_mobile", "th_cj_gutter", "th_cj_lastUpdate", "th_cj_hidenotif", "th_cj_hidenotif2", "th_cj_projectname"];
+const passable = { "lastUpdate": lastUpdate, "renderProfileMeta": renderProfileMeta, "renderProfileCode": renderProfileCode, "requestFromDB": requestFromDB };
 const codeTypes = {
     "html": {
         aceEditor: "editor",
@@ -51,10 +52,9 @@ $(window).on("load", function() {
     // TODO: Make this promise-based, i.e. upon loading all required files
 
     // Get frame and pass parent functions to frame
-    frame = document.getElementById("frame");
-    lastUpdate = +$("html").data("last-update")
-    const passable = { "lastUpdate": lastUpdate, "renderProfileMeta": renderProfileMeta, "renderProfileCode": renderProfileCode, "requestFromDB": requestFromDB };
-    Object.assign(frame.contentWindow, passable);
+    lastUpdate = +$("html").data("last-update");
+    latestBuild = $("html").data("latest-build");
+    swapFrame(false);
     
     // Update notes update date
     updateDate();
@@ -261,7 +261,7 @@ function loadLocalSettings() {
     
     if(th_cj_vertical) {
         $("#"+th_cj_vertical).prop("checked", true);
-        toggleVertical();
+        toggleLayout();
     }
     
     if(th_cj_gutter) {
@@ -374,7 +374,14 @@ function updateHTML(buttonTriggered=false){
 
     if($("#auto").prop("checked") || buttonTriggered) {
         raw_html = raw_html.replace(/(<\/*)(script|style|head)(.*>)/g, "$1div$3");
-        frame.contentWindow.updateHTML(raw_html, updateEditor);
+        
+        // If using popout window, post message
+        if(popoutWindow) {
+            console.log("Posting HTML...");
+            popoutWindow.postMessage(["updateHTML", raw_html, updateEditor]);
+        }
+        // If using iframe, call the child function
+        else frame.contentWindow.updateHTML(raw_html, updateEditor);
     }
 };
 
@@ -394,11 +401,14 @@ function updateCSS(buttonTriggered=false) {
         if(raw_css) {
             sass.compile(raw_css, (result) => {
                 let css = result.text;
-                if(css) frame.contentWindow.updateCSS(css);
-                else frame.contentWindow.updateCSS(raw_css);
+                const resolvedCss = css || raw_css;
+                // If using popout, post message
+                if(popoutWindow) popoutWindow.postMessage(["updateCSS", resolvedCss]);
+                else frame.contentWindow.updateCSS(resolvedCss);
             });
         } else {
-            frame.contentWindow.updateCSS("");
+            if(popoutWindow) popoutWindow.postMessage(["updateCSS", ""]);
+            else frame.contentWindow.updateCSS("");
         }
     }
 }
@@ -472,8 +482,8 @@ function checkForChanges(panel) {
       vvv  Sizing functions  vvv
 **************************************/
 
+// This function resizes the main element (where preview window and Ace panels are located) after screen size changes e.g. rotating device.
 function resizeScreen() {
-    // This function resizes the main element (where preview window and Ace panels are located) after screen size changes e.g. rotating device.
     if(screen.width < 576) {
         if(!$("#main").hasClass("mobile-display")) {
             $("#main").addClass("mobile-display");
@@ -483,8 +493,8 @@ function resizeScreen() {
     }
 }
 
+// This function resizes the frame element, usually after the drag bar has been moved.
 function resizeFrame(newheight, newwidth) {
-    // This function resizes the frame element, usually after the drag bar has been moved.
     if(!newheight) {
         newheight = window.innerHeight*0.55;
     }
@@ -742,18 +752,41 @@ function hardReset() {
  UI toggles
 **************************************/
 
-function toggleTheme(theme) {
+function toggleTheme (theme) {
     sessionSettings.activeTheme = theme;
     localStorage.th_cj_theme = theme;
-    if(frame){
-        frame.contentWindow.toggleTheme(theme);
-    }
+    if(popoutWindow) popoutWindow.postMessage(['toggleTheme', theme]);
+    else if(frame) frame.contentWindow.toggleTheme(theme);
 }
 
-function switchTo(mode) {
+function switchTo (mode) {
     sessionSettings.activeMode = mode;
     localStorage.th_cj_mode = mode;
-    frame.contentWindow.switchTo(mode);
+    if(popoutWindow) popoutWindow.postMessage(['switchTo', mode]);
+    else frame.contentWindow.switchTo(mode);
+}
+
+function swapFrame (toPopout) {
+    if(toPopout) {
+        popoutWindow = window.open("./build_"+latestBuild+"/popout-frame.php", "mozillaWindow", "popup");
+        popoutWindow.document.addEventListener("load", ()=>{
+            setTimeout(()=>{
+                toggleTheme(sessionSettings.activeTheme);
+                switchTo(sessionSettings.activeMode);
+            });
+        }, false);
+    } else {
+        if(popoutWindow) {
+            popoutWindow.close();
+            setTimeout(()=>{popoutWindow = null});
+        }
+        frame = $('#frame')[0];
+        Object.assign(frame.contentWindow, passable);
+        setTimeout(()=>{
+            toggleTheme(sessionSettings.activeTheme);
+            switchTo(sessionSettings.activeMode);
+        });
+    }
 }
 
 function toggleBlurb(toMode) {
@@ -818,12 +851,15 @@ function toggleAuto() {
     }
 }
 
-function toggleVertical() {
+function toggleLayout() {
     let codeheight, codewidth, stacking;
-    localStorage.th_cj_vertical = stacking = $(".stacking:checked").val();
+    
+    stacking = localStorage.th_cj_vertical = $(".stacking:checked").val();
     
     if(stacking == "vertical") {
-        $("#editor, #adjustbar").removeClass("vanish");
+        swapFrame(false);
+
+        $("#adjustbar").removeClass("vanish");
         $("#fields").append([ $(".html-visible"), $(".css-visible"), $(".text-visible") ]);
         $(".stackable").addClass("vertical");
         $(document.body).append($("#footer"));
@@ -832,7 +868,9 @@ function toggleVertical() {
         codeheight = "100%";
         
     } else if(stacking == "horizontal") {
-        $("#editor, #adjustbar").removeClass("vanish");
+        swapFrame(false);
+
+        $("#adjustbar").removeClass("vanish");
         $("#titles").append($(".field-title"));
         $(".stackable").removeClass("vertical");
         $("#main").append($("#footer"));
@@ -840,14 +878,14 @@ function toggleVertical() {
         codeheight = localStorage.th_cj_height;
         codewidth = "100%";
     } else {
-        $("#editor, #adjustbar").addClass("vanish");
-        popoutWindow = window.open("/frame.php", "mozillaWindow", "popup");
-        Object.assign(popoutWindow, passable);
-        frame = {
-            contentWindow: popoutWindow
-        };
-        codeheight = "100%";
-        codewidth = "100%";
+        swapFrame(true);
+        $("#adjustbar").addClass("vanish");
+        $("#titles").append($(".field-title"));
+        $(".stackable").removeClass("vertical");
+        $("#main").append($("#footer"));
+        codeheight = "0";
+        // codeheight = localStorage.th_cj_height;
+        codewidth = "0";
     }
     
     resizeFrame(codeheight, codewidth);

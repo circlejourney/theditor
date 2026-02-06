@@ -18,10 +18,17 @@ function switchTo(mode) {
 
     $.get("../templates/"+mode+".html", {"v": lastUpdate }, function(data) {
         $("#display-area").html(data);
+        let requestHTML, requestBlurb, requestCSS;
         
-        const requestHTML = requestFromDB("html");
-        const requestBlurb = requestFromDB("blurb");
-        const requestCSS = requestFromDB("css");
+        if(window.opener) {
+            requestHTML = window.opener.requestFromDB("html");
+            requestBlurb = window.opener.requestFromDB("blurb");
+            requestCSS = window.opener.requestFromDB("css");
+        } else {
+            requestHTML = requestFromDB("html");
+            requestBlurb = requestFromDB("blurb");
+            requestCSS = requestFromDB("css");
+        }
         
         requestHTML.onsuccess = function(e) {
             updateHTML(e.target.result.code, "ace-code-container");
