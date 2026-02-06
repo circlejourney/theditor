@@ -134,6 +134,10 @@ $(window).on("load", function() {
 
 });
 
+$(window).on('beforeunload', function () {
+    if(popoutWindow) popoutWindow.close();
+})
+
 function initDB() {
     // Check that indexed database for code storage is up to date with current schema.
     try {
