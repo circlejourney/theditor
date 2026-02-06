@@ -65,8 +65,7 @@ $(window).on("load", function() {
         console.log("IndexedDB could not be initialised due to user permissions.");
         initEditors();
         loadLocalSettings();
-        switchTo(sessionSettings.activeMode);
-        toggleTheme(sessionSettings.activeTheme);
+        refreshDisplay();
         // Start backup cycle
         setInterval(updateBackup, 300000);
     } else {    
@@ -85,8 +84,7 @@ $(window).on("load", function() {
             updateHTML();
             updateCSS();
 
-            switchTo(sessionSettings.activeMode);
-            toggleTheme(sessionSettings.activeTheme);
+            refreshDisplay();
 
             // Start backup cycle
             setInterval(updateBackup, 300000);
@@ -770,13 +768,17 @@ function switchTo (mode) {
     else frame.contentWindow.switchTo(mode);
 }
 
+function refreshDisplay() {
+    toggleTheme( sessionSettings.activeTheme );
+    switchTo( sessionSettings.activeMode );
+}
+
 function swapFrame (toPopout) {
     if(toPopout) {
         popoutWindow = window.open("./build_"+latestBuild+"/popout-frame.php", "mozillaWindow", "popup");
         popoutWindow.document.addEventListener("load", ()=>{
             setTimeout(()=>{
-                toggleTheme(sessionSettings.activeTheme);
-                switchTo(sessionSettings.activeMode);
+                refreshDisplay();
             });
         }, false);
     } else {
@@ -787,8 +789,7 @@ function swapFrame (toPopout) {
         frame = $('#frame')[0];
         Object.assign(frame.contentWindow, passable);
         setTimeout(()=>{
-            toggleTheme(sessionSettings.activeTheme);
-            switchTo(sessionSettings.activeMode);
+            refreshDisplay();
         });
     }
 }
