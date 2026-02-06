@@ -10,3 +10,16 @@ window.addEventListener("message", (e) => {
     const [updateFunction, payload, className] = e.data;
     window[updateFunction]( payload, className );
 });
+
+window.addEventListener("beforeunload", toggleParentLayout);
+
+function toggleParentLayout() {
+    console.log(localStorage.th_cj_vertical);
+    window.opener.toggleLayout( false, localStorage.th_cj_vertical );
+    window.opener.refreshDisplay();
+}
+
+function closeWithoutLayoutChange() {
+    window.removeEventListener("beforeunload", toggleParentLayout);
+    window.close();
+}

@@ -133,7 +133,9 @@ $(window).on("load", function() {
 });
 
 $(window).on('beforeunload', function () {
-    if(popoutWindow) popoutWindow.close();
+    if(popoutWindow) {
+        popoutWindow.postMessage(["closeWithoutLayoutChange"]);
+    }
 })
 
 function initDB() {
