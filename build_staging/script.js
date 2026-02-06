@@ -8,7 +8,7 @@ var sessionSettings = { activeMode: "profile", activeTheme: "Default" };
 // DOM elements
 var editor, css_editor, text_editor, frame, popoutWindow;
 const sass = new Sass();
-let DB, lastRequest, lastUpdate;
+let DB, lastRequest, lastUpdate, latestBuild;
 
 /**************************************
     vvv  Constants  vvv

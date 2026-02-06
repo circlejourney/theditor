@@ -1,11 +1,10 @@
 <?php
-    $settings = parse_ini_file(__DIR__."/../.env");
-    $lastUpdate = (int)$settings["lastUpdate"]; // Change latest update date to make the popup appear.
-    $latestBuild = $settings["latestBuild"]; // Set this to the latest build directory to select the directory for source files
+    require(__DIR__.'/../parseIni.php');
+    $slash = DIRECTORY_SEPARATOR;
 ?>
 
 <!DOCTYPE html>
-<html lang="en" data-last-update="<?php echo $lastUpdate ?>">
+<html lang="en" data-last-update="<?php echo $lastUpdate ?>" data-latest-build="<?php echo $latestBuild ?>">
     <head>
         <title>Circlejourney's Toyhouse Live Code Editor</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
