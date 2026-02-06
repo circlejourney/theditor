@@ -234,13 +234,14 @@ function loadLocalSettings() {
         localStorage.removeItem("th_cj_lowContrast");
     }
 
-    const { cj_uitheme, th_cj_colorpicker,
+    let { cj_uitheme, th_cj_colorpicker,
         th_cj_mode, th_cj_theme,
         th_cj_vertical, th_cj_gutter,
         th_cj_htmlpanel, th_cj_csspanel,
         th_cj_textpanel, th_cj_bigtext,
         th_cj_auto, th_cj_mobile,
-        th_cj_autocomplete, th_cj_lastUpdate
+        th_cj_autocomplete, th_cj_lastUpdate,
+        th_cj_popout
     } = localStorage;
 
     if(cj_uitheme) {
@@ -260,10 +261,12 @@ function loadLocalSettings() {
     if(th_cj_theme) {
         sessionSettings.activeTheme = th_cj_theme;
     }
+
+    // Fix old schema where popout layout was stored on th_cj_vertical
+    if(th_cj_vertical == "popout") th_cj_vertical = localStorage.th_cj_vertical = "horizontal";
     
     if(th_cj_vertical) {
-        $("#"+th_cj_vertical).prop("checked", true);
-        toggleLayout();
+        toggleLayout( th_cj_popout == "true", th_cj_vertical );
     }
     
     if(th_cj_gutter) {
@@ -379,7 +382,6 @@ function updateHTML(buttonTriggered=false){
         
         // If using popout window, post message
         if(popoutWindow) {
-            console.log("Posting HTML...");
             popoutWindow.postMessage(["updateHTML", raw_html, updateEditor]);
         }
         // If using iframe, call the child function
@@ -758,7 +760,7 @@ function toggleTheme (theme) {
     sessionSettings.activeTheme = theme;
     localStorage.th_cj_theme = theme;
     if(popoutWindow) popoutWindow.postMessage(['toggleTheme', theme]);
-    else if(frame) frame.contentWindow.toggleTheme(theme);
+    else frame.contentWindow.toggleTheme(theme);
 }
 
 function switchTo (mode) {
@@ -856,10 +858,27 @@ function toggleAuto() {
     }
 }
 
-function toggleLayout() {
+function toggleLayout( popout = null, toLayout = null ) {
     let codeheight, codewidth, stacking;
     
-    stacking = localStorage.th_cj_vertical = $(".stacking:checked").val();
+    popout ??= $("#popout").prop("checked");
+    /**
+     * If popout is set / selected, toggle to popout view
+     */
+    localStorage.th_cj_popout = popout;
+    
+    if(popout) {
+        stacking = "popout";
+        $("#popout").prop("checked", true);
+    }
+    /**
+     * Else process as vertical or horizontal layout
+     */
+    else {
+        toLayout ??= $(".stacking:checked").val();
+        $("#"+toLayout).prop("checked", true);
+        stacking = localStorage.th_cj_vertical = toLayout;
+    }
     
     if(stacking == "vertical") {
         swapFrame(false);
@@ -889,7 +908,6 @@ function toggleLayout() {
         $(".stackable").removeClass("vertical");
         $("#main").append($("#footer"));
         codeheight = "0";
-        // codeheight = localStorage.th_cj_height;
         codewidth = "0";
     }
     
