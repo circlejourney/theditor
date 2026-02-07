@@ -20,7 +20,7 @@
     <script src="frame.js?v=<?php echo filemtime("frame.js"); ?>"></script>
 	<style id="custom-css" type="text/css"></style>
 </head>
-<body>
+<body class="frame">
     <div id="noconflict-main">
         <div id="noconflict-show">
             <nav class="navbar navbar-toggleable-sm navbar-inverse header" data-topbar="" role="navigation" id="header">

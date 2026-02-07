@@ -551,27 +551,55 @@ function resizeEditors() {
     text_editor.resize();
 }
 
+let writeSizeTimeout;
+
 function handleDrag(e) {
     e.stopPropagation();
     
-    if(!$("#vertical").prop("checked")) {
+    let newHeight, newWidth;
+    const direction = $(".stacking:checked").val();
+    // Horizontal drag
+    if(direction == "horizontal") {
         if(e.clientY) {
             newHeight = e.clientY-4;
         } else if(e.originalEvent.targetTouches) {
             newHeight = e.originalEvent.targetTouches[0].clientY-4;
         }
-        $("#frame").css("height", newHeight);
-        writeLocal("th_cj_height", newHeight);
-    } else {
+    } else if(direction == "vertical") {
         if(e.clientX) {
             newWidth = e.clientX-4;
         } else if(e.originalEvent.targetTouches) {
             newWidth = e.originalEvent.targetTouches[0].clientX-4;
         }
-        $("#frame").css("width", newWidth);
-        writeLocal("th_cj_width", newWidth);
+    } else if(direction == "vertical_left") {
+        let x;
+        if(e.clientX) {
+            x = e.clientX;
+        } else if(e.originalEvent.targetTouches) {
+            x = e.originalEvent.targetTouches[0].clientX;
+        }
+        // +editor's width if mouse is inside iframe, as clientX is not the same for parent and iframe in this case
+        if($(e.target.closest("body")).hasClass("frame")) x += $("#editor").width();
+        newWidth = innerWidth-x+4;
     }
     
+    if(newHeight) {
+        $("#frame").css("height", newHeight);
+        clearTimeout(writeSizeTimeout);
+        writeSizeTimeout = setTimeout( ()=>{
+            writeLocal("th_cj_height", newHeight);
+        }, 400 );
+        
+    }
+
+    if(newWidth) {
+        $("#frame").css("width", newWidth);
+        clearTimeout(writeSizeTimeout);
+        writeSizeTimeout = setTimeout( ()=>{
+            writeLocal("th_cj_width", newWidth);
+        }, 400 );
+    }
+
     resizeEditors();
 }
 
@@ -841,6 +869,19 @@ function toggleLayout( popout = null, toLayout = null ) {
         $("#adjustbar").removeClass("vanish");
         $("#fields").append([ $(".html-visible"), $(".css-visible"), $(".text-visible") ]);
         $(".stackable").addClass("vertical");
+        $("#main").removeClass("reverse-order");
+        $(document.body).append($("#footer"));
+    
+        codewidth = localStorage.th_cj_width;
+        codeheight = "100%";
+        
+    } else if(stacking == "vertical_left") {
+        swapFrame(false);
+
+        $("#adjustbar").removeClass("vanish");
+        $("#fields").append([ $(".html-visible"), $(".css-visible"), $(".text-visible") ]);
+        $(".stackable").addClass("vertical");
+        $("#main").addClass("reverse-order");
         $(document.body).append($("#footer"));
     
         codewidth = localStorage.th_cj_width;
@@ -852,7 +893,7 @@ function toggleLayout( popout = null, toLayout = null ) {
         $("#adjustbar").removeClass("vanish");
         $("#titles").append($(".field-title"));
         $(".stackable").removeClass("vertical");
-        $("#main").append($("#footer"));
+        $("#main").removeClass("reverse-order").append($("#footer"));
     
         codeheight = getLocal("th_cj_height");
         codewidth = "100%";
@@ -862,7 +903,7 @@ function toggleLayout( popout = null, toLayout = null ) {
         $("#adjustbar").addClass("vanish");
         $("#titles").append($(".field-title"));
         $(".stackable").removeClass("vertical");
-        $("#main").append($("#footer"));
+        $("#main").removeClass("reverse-order").append($("#footer"));
         codeheight = "0";
         codewidth = "0";
     }

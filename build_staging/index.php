@@ -242,21 +242,18 @@
 
                         
                         <span class="hide-small">
-                            <div class="dropdown-header">Editor Layout</div>
+                            <div class="dropdown-header">Editor position</div>
                             <span class="checkbox-container">
-                                <input class="stacking" type="radio" name="stacking" id="horizontal" value="horizontal" onchange="toggleLayout()" checked><label for="horizontal">Horizontal</label>
+                                <input class="stacking" type="radio" name="stacking" id="horizontal" value="horizontal" onchange="toggleLayout()" checked><label for="horizontal">Bottom</label>
                             </span>
                             <span class="checkbox-container">
-                        <span class="checkbox-container hide-small">
-                            <div class="dropdown-header">Editor layout</div>
-                            <span class="nowrap mr-1">
-                                <input class="stacking" type="radio" name="stacking" id="horizontal" value="horizontal" onchange="toggleLayout()" checked>&nbsp;<label for="horizontal">Stack horizontal</label>
+                                <input class="stacking" type="radio" name="stacking" id="vertical_left" value="vertical_left" onchange="toggleLayout()"><label for="vertical_left">Left</label>
                             </span>
                             <span class="checkbox-container">
-                                <input class="stacking" type="radio" name="stacking" id="vertical" value="vertical" onchange="toggleLayout()">&nbsp;<label for="vertical">Stack vertical</label>
+                                <input class="stacking" type="radio" name="stacking" id="vertical" value="vertical" onchange="toggleLayout()"><label for="vertical">Right</label>
                             </span>
                             <span class="checkbox-container">
-                                <input class="stacking" type="radio" name="stacking" id="popout" value="popout" onchange="toggleLayout()"><label for="popout">Pop out preview</label>
+                                <input class="stacking" type="radio" name="stacking" id="popout" value="popout" onchange="toggleLayout()"><label for="popout">Separate window</label>
                             </span>
                         </span>
                         

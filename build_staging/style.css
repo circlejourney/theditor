@@ -194,6 +194,18 @@ label {
     flex-direction: row;
 }
 
+#main.reverse-order #frame {
+    order: 2;
+}
+
+#main.reverse-order #adjustbar {
+    order: 1;
+}
+
+#main.reverse-order #editor {
+    order: 0;
+}
+
 #frame {
     border: none;
     width: 100%;
