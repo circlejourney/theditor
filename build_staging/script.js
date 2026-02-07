@@ -323,9 +323,10 @@ function loadLocalSettings() {
 function updateDate() {
     // TODO: Do this in the backend?
     const year = lastUpdate.substr(0, 4);
-    const monthNumber = lastUpdate.substr(2, 2);
-    const day = lastUpdate.substr(4, 2);
-    let month = months[+monthNumber - 1];
+    const monthNumber = +lastUpdate.substr(4, 2);
+    console.log(monthNumber);
+    const day = lastUpdate.substr(6, 2);
+    let month = months[monthNumber - 1];
     $("#notes #latest").text("Latest update: "+day+" "+month+" "+year);
 }
 
