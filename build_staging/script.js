@@ -62,7 +62,6 @@ $(window).on("load", function() {
         console.log("IndexedDB could not be initialised due to user permissions.");
         initEditors();
         loadLocalSettings();
-        refreshDisplay();
         // Start backup cycle
         setInterval(updateBackup, 300000);
     } else {    
@@ -268,7 +267,7 @@ function loadLocalSettings() {
         sessionSettings.activeTheme = th_cj_theme;
     }
     
-    if(th_cj_vertical) {
+    if(th_cj_popout == "true" || th_cj_vertical == "vertical") {
         toggleLayout( th_cj_popout == "true", th_cj_vertical );
     }
     

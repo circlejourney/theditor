@@ -7,7 +7,7 @@ $(document).ready(function(){
 });
 
 window.addEventListener("message", (e) => {
-    if(!e.data) return;
+    if(!e.data || !Array.isArray(e.data)) return;
     const [updateFunction, payload, className] = e.data;
     window[updateFunction]( payload, className );
 });
@@ -15,7 +15,6 @@ window.addEventListener("message", (e) => {
 window.addEventListener("beforeunload", toggleParentLayout);
 
 function toggleParentLayout() {
-    console.log(localStorage.th_cj_vertical);
     window.opener.toggleLayout( false, localStorage.th_cj_vertical );
     window.opener.refreshDisplay();
 }
