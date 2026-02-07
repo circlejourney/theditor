@@ -873,6 +873,8 @@ function toggleLayout( popout = null, toLayout = null ) {
     if(popout) {
         stacking = "popout";
         $("#popout").prop("checked", true);
+        toggleWYSIWYG( false );
+        $("#wysiwyg").prop("disabled", true);
     }
     /**
      * Else process as vertical or horizontal layout
@@ -881,6 +883,7 @@ function toggleLayout( popout = null, toLayout = null ) {
         toLayout ??= $(".stacking:checked").val();
         $("#"+toLayout).prop("checked", true);
         stacking = writeLocal("th_cj_vertical", toLayout);
+        $("#wysiwyg").prop("disabled", false);
     }
     
     if(stacking == "vertical") {
@@ -906,6 +909,7 @@ function toggleLayout( popout = null, toLayout = null ) {
         codewidth = "100%";
     } else {
         swapFrame(true);
+        
         $("#adjustbar").addClass("vanish");
         $("#titles").append($(".field-title"));
         $(".stackable").removeClass("vertical");
@@ -1019,8 +1023,11 @@ function toggleColorpicker() {
 function toggleWYSIWYG(toState) {
     // Don't allow WYSIWYG if currently on blurb
     if( editor.isBlurb ) return;
+    // Don't allow WYSIWYG if using popout window mode
+    if(popoutWindow && toState) return;
 
-    frame.contentWindow.toggleWYSIWYG(toState);
+    else frame.contentWindow.toggleWYSIWYG(toState);
+
     if(toState === true) {
         editor.setReadOnly(true);
         $("#html-editor").addClass("disabled");
