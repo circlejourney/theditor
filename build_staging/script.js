@@ -436,14 +436,15 @@ function updateHTML(buttonTriggered=false){
         updateEditor = "ace-code-container";
     }
 
-    if($("#auto").prop("checked") || buttonTriggered) {
-        raw_html = raw_html.replace(/(<\/*)(script|style|head)(.*>)/g, "$1div$3");
-        
-        // If using popout window, post message
-        if(popoutWindow) popoutWindow.postMessage(["updateHTML", raw_html, updateEditor]);
-        // If using iframe, call the child function
-        else frame.contentWindow.updateHTML(raw_html, updateEditor);
-    }
+    // If update is not required, do not render CSS in preview
+    if( !$("#auto").prop("checked") && !buttonTriggered ) return;
+    
+    raw_html = raw_html.replace(/(<\/*)(script|style|head)(.*>)/g, "$1div$3");
+    
+    // If using popout window, trigger update with postMessage
+    if(popoutWindow) popoutWindow.postMessage(["updateHTML", raw_html, updateEditor]);
+    // If using iframe, call the child function
+    else frame.contentWindow.updateHTML(raw_html, updateEditor);
 };
 
 // Update the stored CSS values in DB; update preview if needed
@@ -458,20 +459,21 @@ function updateCSS(buttonTriggered=false) {
         data.code = css_editor.getValue();
         const update = store.put(data);
     }
+
+    // If update not required, do not render CSS in preview
+    if( !$("#auto").prop("checked") && !buttonTriggered ) return;
     
-    if($("#auto").prop("checked") || buttonTriggered) {
-        if(raw_css) {
-            sass.compile(raw_css, (result) => {
-                let css = result.text;
-                const resolvedCss = css || raw_css;
-                // If using popout, post message
-                if(popoutWindow) popoutWindow.postMessage(["updateCSS", resolvedCss]);
-                else frame.contentWindow.updateCSS(resolvedCss);
-            });
-        } else {
-            if(popoutWindow) popoutWindow.postMessage(["updateCSS", ""]);
-            else frame.contentWindow.updateCSS("");
-        }
+    if(raw_css) {
+        sass.compile(raw_css, (result) => {
+            let css = result.text;
+            const resolvedCss = css || raw_css;
+            // If using popout, post message
+            if(popoutWindow) popoutWindow.postMessage(["updateCSS", resolvedCss]);
+            else frame.contentWindow.updateCSS(resolvedCss);
+        });
+    } else {
+        if(popoutWindow) popoutWindow.postMessage(["updateCSS", ""]);
+        else frame.contentWindow.updateCSS("");
     }
 }
 
