@@ -279,17 +279,17 @@ function loadLocalSettings() {
     
     if(th_cj_htmlpanel) {
         $("#html-panel").prop("checked", th_cj_htmlpanel == "true");
-        toggleHTMLPanel();
+        togglePanel("html");
     }
     
     if(th_cj_csspanel) {
         $("#css-panel").prop("checked", th_cj_csspanel == "true");
-        toggleCSSPanel();
+        togglePanel("css");
     }
     
     if(th_cj_textpanel) {
         $("#text-panel").prop("checked", th_cj_textpanel == "true");
-        toggleTextPanel();
+        togglePanel("text");
     }
     
     if(th_cj_bigtext) {
@@ -796,30 +796,12 @@ function swapFrame(toPopout) {
     }
 }
 
-function toggleHTMLPanel() {
-    htmlPanel = $("#html-panel").prop("checked");
-    if(htmlPanel){
-        $(".html-visible").removeClass("d-none");
-    } else $(".html-visible").addClass("d-none");
-    writeLocal("th_cj_htmlpanel", htmlPanel);
-    resizeEditors();
-}
-
-function toggleCSSPanel() {
-    if( $("#css-panel").prop("checked") ){
-        $(".css-visible").removeClass("d-none");
-    } else $(".css-visible").addClass("d-none");
-    writeLocal("th_cj_csspanel", $("#css-panel").prop("checked"));
-    resizeEditors();
-}
-
-function toggleTextPanel() {
-    if( $("#text-panel").prop("checked") ){
-        $(".text-visible").removeClass("d-none");
-    } else {
-        $(".text-visible").addClass("d-none");
-    }
-    writeLocal("th_cj_textpanel", $("#text-panel").prop("checked"));
+function togglePanel(panel) {
+    const panelOpen = $("#"+panel+"-panel").prop("checked");
+    const panelElement = $("."+panel+"-visible");
+    panelElement.toggleClass("d-none", !panelOpen);
+    
+    writeLocal("th_cj_"+panel+"panel", panelOpen);
     resizeEditors();
 }
  

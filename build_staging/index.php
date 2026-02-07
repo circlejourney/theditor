@@ -239,19 +239,19 @@
                     <div class="dropdown-menu ui-options px-2" aria-labelledby="dropdownbutton">
 
                         <span class="checkbox-container">
-                            <input type="checkbox" id="html-panel" onclick="toggleHTMLPanel();" checked="true">&nbsp;<label for="html-panel">HTML</label>
+                            <input type="checkbox" id="html-panel" onclick="togglePanel('html')" checked="true">&nbsp;<label for="html-panel">HTML</label>
                         </span>
 
                         <span class="checkbox-container">
-                            <input type="checkbox" id="css-panel" onclick="toggleCSSPanel();" checked="true">&nbsp;<label for="css-panel">CSS</label>
+                            <input type="checkbox" id="css-panel" onclick="togglePanel('css')" checked="true">&nbsp;<label for="css-panel">CSS</label>
                         </span>
 
                         <span class="checkbox-container">
-                            <input type="checkbox" id="text-panel" onclick="toggleTextPanel();" checked="true">&nbsp;<label for="text-panel">Scratchpad</label>
+                            <input type="checkbox" id="text-panel" onclick="togglePanel('text')" checked="true">&nbsp;<label for="text-panel">Scratchpad</label>
                         </span>
 
                         <span class="checkbox-container">
-                            <input type="checkbox" id="autocomplete" onclick="toggleAutocomplete();"> <label for="autocomplete">Autocomplete</label>
+                            <input type="checkbox" id="autocomplete" onclick="toggleAutocomplete()"> <label for="autocomplete">Autocomplete</label>
                         </span>
 
                         <span class="checkbox-container hide-small">
