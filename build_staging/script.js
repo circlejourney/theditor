@@ -1,7 +1,7 @@
 /**************************************
-    vvv  Setup variables  vvv
+ Setup variables
 **************************************/
-// TODO: better way to determine if device is mobile (specifically to target desktop Safari for weird flex sizing) or a more elegant fix for weird sizing
+// TODO: better way to determine if device is mobile (specifically to target desktop Safari for unusual flex sizing) or a more elegant fix for unusual sizing
 const isSafari = navigator.userAgent.indexOf("Safari") > -1;
 const isMobile = typeof screen.orientation !== 'undefined';
 var sessionSettings = { activeMode: "profile", activeTheme: "Default" };
@@ -11,11 +11,8 @@ const sass = new Sass();
 let DB, lastRequest, lastUpdate, latestBuild;
 
 /**************************************
-    vvv  Constants  vvv
+ Constants
 **************************************/
-const defaultHTML = "\<!-- Enter HTML here... --\>";
-const defaultCSS = "\/* Enter CSS here... *\/";
-const defaultText =  "Paste drafts and snippets here...";
 const loremipsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sollicitudin elit sed tellus blandit viverra sed eget odio. Donec accumsan tempor lacus, et venenatis elit feugiat non. Duis porta eros et velit blandit dapibus. Curabitur ac finibus eros. Duis placerat velit vitae massa sodales, eget mattis nibh pellentesque.";
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const beautify_HTML_Options = { "indent_size": "1", "indent_char": "\t", "max_preserve_newlines": "-1", "preserve_newlines": false, "keep_array_indentation": false, "break_chained_methods": false, "indent_scripts": "normal", "brace_style": "expand", "space_before_conditional": true, "unescape_strings": false, "jslint_happy": false, "end_with_newline": false, "wrap_line_length": "0", "indent_inner_html": false, "comma_first": false, "e4x": false, "indent_empty_lines": false }
@@ -25,26 +22,26 @@ const passable = { "lastUpdate": lastUpdate, "renderProfileMeta": renderProfileM
 const codeTypes = {
     "html": {
         aceEditor: "editor",
-        defaultContent: defaultHTML
+        defaultContent: "\<!-- Enter HTML here... --\>",
     },
     "blurb": {
         aceEditor: "editor",
-        defaultContent: defaultHTML
+        defaultContent: "\<!-- Enter HTML here... --\>"
     },
     "css": {
         backupName: "th_cj_cssbackup",
         aceEditor: "css_editor",
-        defaultContent: defaultCSS
+        defaultContent: "\/* Enter CSS here... *\/"
     },
     "text": {
         aceEditor: "text_editor",
-        defaultContent: defaultText
+        defaultContent: "Paste drafts and snippets here..."
     }
 }
 
 
 /**************************************
-    vvv  Window events  vvv
+ Window events
 **************************************/
 
 $(window).on("load", function() {
@@ -52,7 +49,7 @@ $(window).on("load", function() {
     // TODO: Make this promise-based, i.e. upon loading all required files
 
     // Get frame and pass parent functions to frame
-    lastUpdate = +$("html").data("last-update");
+    lastUpdate = ""+$("html").data("last-update");
     latestBuild = $("html").data("latest-build");
     swapFrame(false);
     
@@ -132,14 +129,19 @@ $(window).on("load", function() {
 
 });
 
+// When closing this window, first close the popup window without triggering a layout change
 $(window).on('beforeunload', function () {
     if(popoutWindow) {
         popoutWindow.postMessage(["closeWithoutLayoutChange"]);
     }
 })
 
+
+/**************************************
+ Initialisers
+**************************************/
+// Check that indexed database for code storage is up to date with current schema.
 function initDB() {
-    // Check that indexed database for code storage is up to date with current schema.
     try {
         const request = window.indexedDB.open("theditor", 1);
         request.onupgradeneeded = function(event) {
@@ -148,10 +150,10 @@ function initDB() {
             objectStore.transaction.oncomplete = (event) => {
                 codeObjectStore = DB.transaction("codes", "readwrite")
                     .objectStore("codes");
-                codeObjectStore.add({ "id": "html", "code": localStorage.th_cj, "backup": localStorage.th_cj_backup });
-                codeObjectStore.add({ "id": "blurb", "code": localStorage.th_cj_blurb, "backup": localStorage.th_cj_blurbbackup });
-                codeObjectStore.add({ "id": "css", "code": localStorage.th_cj_css, "backup": localStorage.th_cj_cssbackup });
-                codeObjectStore.add({ "id": "text", "code": localStorage.th_cj_text, "backup": localStorage.th_cj_textbackup });
+                codeObjectStore.add({ "id": "html", "code": getLocal("th_cj"), "backup": getLocal("th_cj_backup") });
+                codeObjectStore.add({ "id": "blurb", "code": getLocal("th_cj_blurb"), "backup": getLocal("th_cj_blurbbackup") });
+                codeObjectStore.add({ "id": "css", "code": getLocal("th_cj_css"), "backup": getLocal("th_cj_cssbackup") });
+                codeObjectStore.add({ "id": "text", "code": getLocal("th_cj_text"), "backup": getLocal("th_cj_textbackup") });
             }
             console.log("Upgraded database to version 1.");
 
@@ -162,10 +164,8 @@ function initDB() {
     }
 }
 
-
+// Initialise the three Ace editors on the page.
 function initEditors() {
-    // Initialise the three Ace editors on the page with initial settings.
-        
     editor = ace.edit("html-editor");
     editor.session.setMode("ace/mode/html", () => {
         if($("#colorpicker").prop("checked")) toggleColorpicker();
@@ -178,7 +178,7 @@ function initEditors() {
         lastRequest = waitForIdle("html");
     });
     editor.on("focus", () => {
-        if(editor.getValue()==defaultHTML) editor.setValue("");
+        if(editor.getValue()==codeTypes.html.defaultContent) editor.setValue("");
     });
     $(editor.container).on("keydown", (e) => {
         if(e.ctrlKey && e.key=="s") {
@@ -198,7 +198,7 @@ function initEditors() {
         lastRequest = waitForIdle("css");
     });
     css_editor.on("focus", () => {
-        if(css_editor.getValue()==defaultCSS) css_editor.setValue("");
+        if(css_editor.getValue()==codeTypes.css.defaultContent) css_editor.setValue("");
     })
     $(css_editor.container).on("keydown", (e) => {
         if(e.ctrlKey && e.key=="s") {
@@ -216,7 +216,7 @@ function initEditors() {
         lastRequest = waitForIdle("text");
     });
     text_editor.on("focus", () => {
-        if(text_editor.getValue()==defaultText) text_editor.setValue("");
+        if(text_editor.getValue()==codeTypes.blurb.defaultContent) text_editor.setValue("");
     })
     $(text_editor.container).on("keydown", (e) => {
         if(e.ctrlKey && e.key=="s") {
@@ -228,13 +228,17 @@ function initEditors() {
 }
 
 
+// Extract the user's settings from local storage and update UI. Don't import code content here since it is now using Indexed DB.
 function loadLocalSettings() {
-    // Extract the user's settings from local storage and update UI. Don't import code here since it is now using Indexed DB.
-    // TODO: Use destructuring of localStorage object to tidy this up
-    if(localStorage.th_cj_lowContrast){
-        localStorage.cj_uitheme = localStorage.th_cj_lowContrast && (localStorage.th_cj_lowContrast == "true") ? "low-contrast" : "dark";
+    
+    // Migrate from old schema with only 2 UI themes
+    if(getLocal("th_cj_lowContrast")){
+        writeLocal("cj_uitheme", getLocal("th_cj_lowContrast") == "true" ? "low-contrast" : "dark");
         localStorage.removeItem("th_cj_lowContrast");
     }
+
+    // Migrate from old schema where popout layout was stored on th_cj_vertical
+    if(getLocal("th_cj_vertical") == "popout") writeLocal("th_cj_vertical", "horizontal");
 
     let { cj_uitheme, th_cj_colorpicker,
         th_cj_mode, th_cj_theme,
@@ -263,9 +267,6 @@ function loadLocalSettings() {
     if(th_cj_theme) {
         sessionSettings.activeTheme = th_cj_theme;
     }
-
-    // Fix old schema where popout layout was stored on th_cj_vertical
-    if(th_cj_vertical == "popout") th_cj_vertical = localStorage.th_cj_vertical = "horizontal";
     
     if(th_cj_vertical) {
         toggleLayout( th_cj_popout == "true", th_cj_vertical );
@@ -313,23 +314,24 @@ function loadLocalSettings() {
     if(+th_cj_lastUpdate != lastUpdate && location.pathname.indexOf("/unstable") == -1) {
         $("#info").removeClass("d-none");
         $("#info-back").removeClass("d-none");
-        localStorage.th_cj_lastUpdate = lastUpdate;
+        writeLocal("th_cj_lastUpdate", lastUpdate);
     }
 }
 
 
+// Update the date element to display a human-readable date.
 function updateDate() {
-    // Update the date element.
     // TODO: Do this in the backend?
-    let year = Math.floor(lastUpdate / 10000);
-    let month = months[Math.floor( (lastUpdate % 10000) / 100 ) - 1];
-    let day = lastUpdate % 100;
+    const year = lastUpdate.substr(0, 4);
+    const monthNumber = lastUpdate.substr(2, 2);
+    const day = lastUpdate.substr(4, 2);
+    let month = months[+monthNumber - 1];
     $("#notes #latest").text("Latest update: "+day+" "+month+" "+year);
 }
 
 
 /*******************************************
-    vvv  Code load & store functions  vvv
+ Code load & store functions
 *******************************************/
 
 function loadFromDB(panel) {
@@ -353,6 +355,11 @@ function requestFromDB(panel) {
     const store = transaction.objectStore("codes");
     return store.get(panel);
 }
+
+
+/**************************************
+ Code update functions
+**************************************/
 
 function updateHTML(buttonTriggered=false){
     let raw_html = editor.getValue();
@@ -383,9 +390,7 @@ function updateHTML(buttonTriggered=false){
         raw_html = raw_html.replace(/(<\/*)(script|style|head)(.*>)/g, "$1div$3");
         
         // If using popout window, post message
-        if(popoutWindow) {
-            popoutWindow.postMessage(["updateHTML", raw_html, updateEditor]);
-        }
+        if(popoutWindow) popoutWindow.postMessage(["updateHTML", raw_html, updateEditor]);
         // If using iframe, call the child function
         else frame.contentWindow.updateHTML(raw_html, updateEditor);
     }
@@ -441,11 +446,6 @@ function beautifyCSS() {
     css_editor.setValue(beautifiedText);
     css_editor.clearSelection();
 }
-
-
-/**************************************
-    vvv  Code update functions  vvv
-**************************************/
 
 function waitForIdle(panel) {
     const { aceEditor, defaultContent } = codeTypes[panel];
@@ -540,7 +540,7 @@ function dragHandler(e) {
             newHeight = e.originalEvent.targetTouches[0].clientY-4;
         }
         $("#frame").css("height", newHeight);
-        localStorage.th_cj_height = newHeight;
+        writeLocal("th_cj_height", newHeight);
     } else {
         if(e.clientX) {
             newWidth = e.clientX-4;
@@ -548,7 +548,7 @@ function dragHandler(e) {
             newWidth = e.originalEvent.targetTouches[0].clientX-4;
         }
         $("#frame").css("width", newWidth);
-        localStorage.th_cj_width = newWidth;
+        writeLocal("th_cj_width", newWidth);
     }
     
     resizeEditors();
@@ -637,7 +637,7 @@ function checkBackup(panel) {
 
 
 /*************************************************
-    vvv  Local file upload/download functions  vvv
+ Local file upload/download functions
  *************************************************/
 
 function downloadFile(panel) {
@@ -653,9 +653,9 @@ function downloadFile(panel) {
         const filesuffix = " " + panel.toUpperCase()+" "+datestring+".txt"
             .replace(/\:|\//g, "-");
 
-        const projectname = prompt("Downloading "+panel+", project name:", localStorage.th_cj_projectname);
+        const projectname = prompt("Downloading "+panel+", project name:", getLocal("th_cj_projectname"));
         if(!projectname) return false;
-        localStorage.th_cj_projectname = projectname || "";
+        writeLocal("th_cj_projectname", projectname || "");
         
         if (window.navigator.msSaveOrOpenBlob)
             window.navigator.msSaveOrOpenBlob(file, (projectname || "THeditor") + filesuffix);
@@ -673,8 +673,8 @@ function downloadFile(panel) {
     }
 }
 
+// This function uses a dummy file input element #fileupload to open upload dialogues for all 3 panels.
 function uploadFileDialogue(panel) {
-    // This function uses a dummy file input element #fileupload to open upload dialogues for all 3 panels.
     $("#fileupload").data("target-panel", panel)
     $("#fileupload").click()
 }
@@ -743,7 +743,7 @@ function renderProfileMeta(data) {
 **************************************/
 
 function showInfo() {
-    localStorage.th_cj_hidenotif2 = "true";
+    writeLocal("th_cj_hidenotif2", "true");
     $("#info").toggleClass("d-none");
 }
 
@@ -759,19 +759,20 @@ function hardReset() {
 **************************************/
 
 function toggleTheme (theme) {
-    sessionSettings.activeTheme = theme;
-    localStorage.th_cj_theme = theme;
+    sessionSettings.activeTheme = writeLocal("th_cj_theme", theme);
     if(popoutWindow) popoutWindow.postMessage(['toggleTheme', theme]);
     else frame.contentWindow.toggleTheme(theme);
 }
 
 function switchTo (mode) {
-    sessionSettings.activeMode = mode;
-    localStorage.th_cj_mode = mode;
+    sessionSettings.activeMode = writeLocal("th_cj_mode", mode);
     if(popoutWindow) popoutWindow.postMessage(['switchTo', mode]);
     else frame.contentWindow.switchTo(mode);
 }
 
+/**
+ * Reload theme and layout with the same content, usually called on startup or after changing vertical/horizontal/popout display
+ */
 function refreshDisplay() {
     toggleTheme( sessionSettings.activeTheme );
     switchTo( sessionSettings.activeMode );
@@ -830,7 +831,7 @@ function toggleHTMLPanel() {
     if(htmlPanel){
         $(".html-visible").removeClass("d-none");
     } else $(".html-visible").addClass("d-none");
-    localStorage.th_cj_htmlpanel = htmlPanel;
+    writeLocal("th_cj_htmlpanel", htmlPanel);
     resizeEditors();
 }
 
@@ -838,7 +839,7 @@ function toggleCSSPanel() {
     if( $("#css-panel").prop("checked") ){
         $(".css-visible").removeClass("d-none");
     } else $(".css-visible").addClass("d-none");
-    localStorage.th_cj_csspanel = $("#css-panel").prop("checked");
+    writeLocal("th_cj_csspanel", $("#css-panel").prop("checked"));
     resizeEditors();
 }
 
@@ -848,12 +849,12 @@ function toggleTextPanel() {
     } else {
         $(".text-visible").addClass("d-none");
     }
-    localStorage.th_cj_textpanel = $("#text-panel").prop("checked");
+    writeLocal("th_cj_textpanel", $("#text-panel").prop("checked"));
     resizeEditors();
 }
  
 function toggleAuto() {
-    localStorage.th_cj_auto = $("#auto").prop("checked");
+    writeLocal("th_cj_auto", $("#auto").prop("checked"));
     if($("#auto").prop("checked")) {
         updateHTML();
         updateCSS();
@@ -867,7 +868,7 @@ function toggleLayout( popout = null, toLayout = null ) {
     /**
      * If popout is set / selected, toggle to popout view
      */
-    localStorage.th_cj_popout = popout;
+    writeLocal("th_cj_popout", popout);
     
     if(popout) {
         stacking = "popout";
@@ -879,7 +880,7 @@ function toggleLayout( popout = null, toLayout = null ) {
     else {
         toLayout ??= $(".stacking:checked").val();
         $("#"+toLayout).prop("checked", true);
-        stacking = localStorage.th_cj_vertical = toLayout;
+        stacking = writeLocal("th_cj_vertical", toLayout);
     }
     
     if(stacking == "vertical") {
@@ -901,7 +902,7 @@ function toggleLayout( popout = null, toLayout = null ) {
         $(".stackable").removeClass("vertical");
         $("#main").append($("#footer"));
     
-        codeheight = localStorage.th_cj_height;
+        codeheight = getLocal("th_cj_height");
         codewidth = "100%";
     } else {
         swapFrame(true);
@@ -917,18 +918,18 @@ function toggleLayout( popout = null, toLayout = null ) {
 }
 
 function toggleMobilePreview() {
-    localStorage.th_cj_mobile = $("#mobile").prop("checked");
+    writeLocal("th_cj_mobile", $("#mobile").prop("checked"));
     if($("#mobile").prop("checked")) $("#frame").addClass("mobile-preview");
     else $("#frame").removeClass("mobile-preview");
     resizeEditors();
 }
 
 function toggleUITheme(){
-    localStorage.cj_uitheme = $("#ui-theme input:checked").attr("id");
+    writeLocal("cj_uitheme", $("#ui-theme input:checked").attr("id"));
     $(document.body).removeClass("low-contrast light dark");
-    $(document.body).addClass(localStorage.cj_uitheme);
+    $(document.body).addClass(getLocal("cj_uitheme"));
 
-    switch(localStorage.cj_uitheme) {
+    switch(getLocal("cj_uitheme")) {
         case "light":
             $("#night-css").removeAttr("href");
             $("#footer").removeClass("bg-dark").addClass("bg-light");
@@ -954,13 +955,13 @@ function toggleUITheme(){
 }
 
 function toggleBigText() {
-    localStorage.th_cj_bigtext = $("#big-text").prop("checked");
+    writeLocal("th_cj_bigtext", $("#big-text").prop("checked"));
     if($("#big-text").prop("checked")) $(".ace_editor").addClass("big-text");
     else  $(".ace_editor").removeClass("big-text");
 }
 
 function toggleGutter() {
-    localStorage.th_cj_gutter = $("#gutter").prop("checked");
+    writeLocal("th_cj_gutter", $("#gutter").prop("checked"));
 
     if($("#gutter").prop("checked")) { 
         editor.renderer.setShowGutter(true);
@@ -974,7 +975,7 @@ function toggleGutter() {
 }
 
 function toggleAutocomplete() {
-    localStorage.th_cj_autocomplete = $("#autocomplete").prop("checked");
+    writeLocal("th_cj_autocomplete", $("#autocomplete").prop("checked"));
     if($("#autocomplete").prop("checked")) {
         editor.setOptions({behavioursEnabled: true});
         css_editor.setOptions({behavioursEnabled: true});
@@ -985,7 +986,7 @@ function toggleAutocomplete() {
 }
 
 function toggleColorpicker() {
-    localStorage.th_cj_colorpicker = $("#colorpicker").prop("checked");
+    writeLocal("th_cj_colorpicker", $("#colorpicker").prop("checked"));
 
     if( !$("#colorpicker").prop("checked") ) {
         [editor.session, css_editor.session].forEach((session) => {
@@ -1040,4 +1041,17 @@ function toggleWYSIWYG(toState) {
 function toggleSidebar() {
     if(popoutWindow) popoutWindow.postMessage(['toggleSidebar']);
     else frame.contentWindow.toggleSidebar();
+}
+
+/******************************
+ * Local storage functions
+ ******************************/
+
+function getLocal(key) {
+    return localStorage[key];
+}
+
+function writeLocal(key, value) {
+    localStorage[key] = value;
+    return value;
 }
