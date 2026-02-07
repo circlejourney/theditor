@@ -133,9 +133,21 @@ a {
     justify-content: center;
 }
 
-.ui-options .checkbox-container {
-    flex-basis: 0;
-    flex-grow: 1;
+.checkbox-container {
+    white-space: nowrap;
+    margin-right: 0.75rem;
+}
+
+.checkbox-container input {
+    margin-right: 0.25rem;
+}
+
+.checkbox-container input, .checkbox-container label {
+    vertical-align: middle;
+}
+
+label {
+    margin: 0;
 }
 
 .checkbox-compact label {
@@ -442,6 +454,7 @@ a {
 
 .dropdown-header {
     padding: 0;
+    margin-top: 0.25rem;
 }
 
 .disclaimer {
