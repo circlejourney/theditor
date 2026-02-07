@@ -140,6 +140,7 @@ $(window).on('beforeunload', function () {
 /**************************************
  Initialisers
 **************************************/
+
 // Check that indexed database for code storage is up to date with current schema.
 function initDB() {
     try {
@@ -330,7 +331,7 @@ function updateDate() {
 
 
 /*******************************************
- Code load & store functions
+ Indexed DB loading & storing
 *******************************************/
 
 function loadFromDB(panel) {
@@ -355,9 +356,21 @@ function requestFromDB(panel) {
     return store.get(panel);
 }
 
+/******************************
+ * Local storage
+ ******************************/
+
+function getLocal(key) {
+    return localStorage[key];
+}
+
+function writeLocal(key, value) {
+    localStorage[key] = value;
+    return value;
+}
 
 /**************************************
- Code update functions
+ Code update
 **************************************/
 
 function waitForIdle(panel) {
@@ -382,7 +395,7 @@ function waitForIdle(panel) {
     return wait;
 }
 
-// Check if any content needs updating after the panels have been idle for set amount of time
+// Check if any content needs updating, called when panels reach idle threshold
 function checkForChanges(panel) {
     if(panel == "html") {
         if(editor.getValue().indexOf("Please reset!") !== -1) {
@@ -589,7 +602,7 @@ function mobileSwitch() {
 
 
 /******************************************
-    vvv  Backup functions  vvv
+ Backup functions
  ******************************************/
 
 function updateBackup() {
@@ -641,7 +654,7 @@ function checkBackup(panel) {
 
 
 /*************************************************
- Local file upload/download functions
+ Local file upload/download
  *************************************************/
 
 function downloadFile(panel) {
@@ -700,7 +713,7 @@ function uploadFile(){
 }
 
 /**************************************
-    vvv  TH import functions  vvv
+ Import from TH (deprecated)
 **************************************/
 
 function startImport(importType){
@@ -1051,17 +1064,4 @@ function toggleBlurb(toMode) {
 function toggleSidebar() {
     if(popoutWindow) popoutWindow.postMessage(['toggleSidebar']);
     else frame.contentWindow.toggleSidebar();
-}
-
-/******************************
- * Local storage functions
- ******************************/
-
-function getLocal(key) {
-    return localStorage[key];
-}
-
-function writeLocal(key, value) {
-    localStorage[key] = value;
-    return value;
 }
