@@ -872,9 +872,19 @@ function toggleLayout( popout = null, toLayout = null ) {
 }
 
 function toggleMobilePreview() {
-    writeLocal("th_cj_mobile", $("#mobile").prop("checked"));
-    if($("#mobile").prop("checked")) $("#frame").addClass("mobile-preview");
-    else $("#frame").removeClass("mobile-preview");
+    const toMobile = $("#mobile").prop("checked");
+    writeLocal("th_cj_mobile", toMobile);
+    
+    if(toMobile) {
+        $("#frame").addClass("mobile-preview");
+    } else {
+        $("#frame").removeClass("mobile-preview");
+    }
+    
+    if(popoutWindow) {
+        popoutWindow.postMessage(['toggleMobilePreview', toMobile]);
+    }
+    
     resizeEditors();
 }
 
