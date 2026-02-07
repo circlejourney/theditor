@@ -154,9 +154,9 @@ function initDB() {
             }
             console.log("Upgraded database to version 1.");
             
-        } catch(error) {
+        } catch (error) {
             showError(error);
-            return null;
+            throw error;
         }
     }
     return request;
@@ -783,8 +783,9 @@ function swapFrame(toPopout) {
             popoutWindow.addEventListener("load", ()=>{
                 setTimeout( refreshDisplay );
             }, false);
-        } catch (err) {
+        } catch (error) {
             showError("Please allow popups on this page in order to display the preview window. ("+err+")");
+            throw error;
         }
     } else {
         if(popoutWindow) {
