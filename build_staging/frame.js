@@ -93,7 +93,7 @@ function importProfile(profilePath, importType){
 
 // Page interactivity functions
 
-function toggleUI (){
+function toggleSidebar() {
     $(".hide-ui-label").toggleClass("hide");
     
     if(localStorage.thcj_hideUI == "true") {

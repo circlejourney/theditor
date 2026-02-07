@@ -210,7 +210,7 @@
                   </div>
                 </div> -->
                 
-                <a id="toggle-sidebar" class="btn btn-secondary" onclick="frame.contentWindow.toggleUI()">
+                <a id="toggle-sidebar" class="btn btn-secondary" onclick="toggleSidebar()">
                      <i id='sidebar-toggle-icon' class="fa fa-chevron-left"></i> Sidebar
                 </a>
                         

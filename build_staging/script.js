@@ -1036,3 +1036,8 @@ function toggleWYSIWYG(toState) {
     if(toState) $("#wysiwyg").attr("checked", true);
     else  $("#wysiwyg").removeAttr("checked");
 }
+
+function toggleSidebar() {
+    if(popoutWindow) popoutWindow.postMessage(['toggleSidebar']);
+    else frame.contentWindow.toggleSidebar();
+}
