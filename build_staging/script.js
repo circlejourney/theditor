@@ -95,8 +95,8 @@ $(window).on("load", function() {
     });
 
     $("#adjustbar").mousedown(() => {
-        $(window).mousemove(dragHandler);
-        $(frame.contentWindow).mousemove(dragHandler);
+        $(window).mousemove(handleDrag);
+        $(frame.contentWindow).mousemove(handleDrag);
         
         $(window).mouseup(cancelDrag);
         $(frame.contentWindow).mouseup(cancelDrag);
@@ -105,8 +105,8 @@ $(window).on("load", function() {
     $("#adjustbar").on("touchstart", (e) => {
         e.stopPropagation();
         
-        $(window).on("touchmove", dragHandler);
-        $(frame.contentWindow).on("touchmove", dragHandler);
+        $(window).on("touchmove", handleDrag);
+        $(frame.contentWindow).on("touchmove", handleDrag);
         
         $(frame.contentWindow).on("touchend", cancelDrag);
         $(window).on("touchend", cancelDrag);
@@ -227,7 +227,6 @@ function initEditors() {
 
 }
 
-
 // Extract the user's settings from local storage and update UI. Don't import code content here since it is now using Indexed DB.
 function loadLocalSettings() {
     
@@ -319,7 +318,7 @@ function loadLocalSettings() {
 }
 
 
-// Update the date element to display a human-readable date.
+// Update the date element to display a human-readable date
 function updateDate() {
     // TODO: Do this in the backend?
     const year = lastUpdate.substr(0, 4);
@@ -361,6 +360,44 @@ function requestFromDB(panel) {
  Code update functions
 **************************************/
 
+function waitForIdle(panel) {
+    const { aceEditor, defaultContent } = codeTypes[panel];
+    const request = checkBackup(panel);
+    request.onsuccess = function(event) {
+        const backup = event.target.result.backup;
+        const hasBackup = backup !== "" && backup !== defaultContent;
+        if(window[aceEditor].getValue() && window[aceEditor].getValue() !== defaultContent && hasBackup) {
+            $("#clear-"+panel).removeClass("d-none");
+            $("#restore-"+panel).addClass("d-none");
+        } else {
+            $("#clear-"+panel).addClass("d-none");
+            $("#restore-"+panel).removeClass("d-none");
+        }
+    }
+
+    const wait = setTimeout( () => {checkForChanges(panel)}, 400 );
+    window[aceEditor].session.on("change", () => {
+        clearTimeout(wait);
+    })
+    return wait;
+}
+
+// Check if any content needs updating after the panels have been idle for set amount of time
+function checkForChanges(panel) {
+    if(panel == "html") {
+        if(editor.getValue().indexOf("Please reset!") !== -1) {
+            editor.setValue( editor.getValue().replace("Please reset!", "") );
+            hardReset();
+            return false;
+        } else {
+            updateHTML();
+        }
+    }
+    if(panel == "css") updateCSS();
+    if(panel == "text") updateText();
+}
+
+// Update the stored HTML values in DB; update preview if needed
 function updateHTML(buttonTriggered=false){
     let raw_html = editor.getValue();
     let updateEditor;
@@ -396,6 +433,7 @@ function updateHTML(buttonTriggered=false){
     }
 };
 
+// Update the stored CSS values in DB; update preview if needed
 function updateCSS(buttonTriggered=false) {
     var raw_css = css_editor.getValue();
 
@@ -424,6 +462,7 @@ function updateCSS(buttonTriggered=false) {
     }
 }
 
+// Update the stored scratchpad values in DB
 function updateText() {
     const transaction = DB.transaction(["codes"], "readwrite");
     const store = transaction.objectStore("codes");
@@ -447,48 +486,12 @@ function beautifyCSS() {
     css_editor.clearSelection();
 }
 
-function waitForIdle(panel) {
-    const { aceEditor, defaultContent } = codeTypes[panel];
-    const request = checkBackup(panel);
-    request.onsuccess = function(event) {
-        const backup = event.target.result.backup;
-        const hasBackup = backup !== "" && backup !== defaultContent;
-        if(window[aceEditor].getValue() && window[aceEditor].getValue() !== defaultContent && hasBackup) {
-            $("#clear-"+panel).removeClass("d-none");
-            $("#restore-"+panel).addClass("d-none");
-        } else {
-            $("#clear-"+panel).addClass("d-none");
-            $("#restore-"+panel).removeClass("d-none");
-        }
-    }
-
-    const wait = setTimeout( () => {checkForChanges(panel)}, 400 );
-    window[aceEditor].session.on("change", () => {
-        clearTimeout(wait);
-    })
-    return wait;
-}
-
-function checkForChanges(panel) {
-    if(panel == "html") {
-        if(editor.getValue().indexOf("Please reset!") !== -1) {
-            editor.setValue( editor.getValue().replace("Please reset!", "") );
-            hardReset();
-            return false;
-        } else {
-            updateHTML();
-        }
-    }
-    if(panel == "css") updateCSS();
-    if(panel == "text") updateText();
-}
-
 
 /**************************************
-      vvv  Sizing functions  vvv
+ UI resizing functions
 **************************************/
 
-// This function resizes the main element (where preview window and Ace panels are located) after screen size changes e.g. rotating device.
+// Resize the #main element (where preview window and Ace panels are located) after screen size changes e.g. rotating device.
 function resizeScreen() {
     if(screen.width < 576) {
         if(!$("#main").hasClass("mobile-display")) {
@@ -499,7 +502,7 @@ function resizeScreen() {
     }
 }
 
-// This function resizes the frame element, usually after the drag bar has been moved.
+// Resize the frame element, usually after the drag bar has been moved or when switching layouts
 function resizeFrame(newheight, newwidth) {
     if(!newheight) {
         newheight = window.innerHeight*0.55;
@@ -515,8 +518,9 @@ function resizeFrame(newheight, newwidth) {
     if(editor) resizeEditors();
 }
 
+// Resize the Ace editors to fill the space left by the preview window, e.g. after preview window has changed size.
+// On Safari, which handles flex differently, this forcibly sets the width/height of the editors.
 function resizeEditors() {
-    // This function resizes the Ace editors to fill the space left by the preview window, useful after preview window has changed size. On Safari, which handles flex differently, this includes forcibly setting the width/height of the editors.
     if(isSafari && !isMobile) {
         if(! $("#vertical").prop("checked")) {
             $(".ace_editor").css("height", window.innerHeight - $("#frame").height() - $("#adjustbar").height() - $("#footer").height() - $("#titles").height());
@@ -530,7 +534,7 @@ function resizeEditors() {
     text_editor.resize();
 }
 
-function dragHandler(e) {
+function handleDrag(e) {
     e.stopPropagation();
     
     if(!$("#vertical").prop("checked")) {
@@ -755,30 +759,10 @@ function hardReset() {
 }
 
 /**************************************
- UI toggles
+ Editor UI toggles
 **************************************/
 
-function toggleTheme (theme) {
-    sessionSettings.activeTheme = writeLocal("th_cj_theme", theme);
-    if(popoutWindow) popoutWindow.postMessage(['toggleTheme', theme]);
-    else frame.contentWindow.toggleTheme(theme);
-}
-
-function switchTo (mode) {
-    sessionSettings.activeMode = writeLocal("th_cj_mode", mode);
-    if(popoutWindow) popoutWindow.postMessage(['switchTo', mode]);
-    else frame.contentWindow.switchTo(mode);
-}
-
-/**
- * Reload theme and layout with the same content, usually called on startup or after changing vertical/horizontal/popout display
- */
-function refreshDisplay() {
-    toggleTheme( sessionSettings.activeTheme );
-    switchTo( sessionSettings.activeMode );
-}
-
-function swapFrame (toPopout) {
+function swapFrame(toPopout) {
     if(toPopout) {
         popoutWindow = window.open("./build_"+latestBuild+"/popout-frame.php", "mozillaWindow", "popup");
         popoutWindow.document.addEventListener("load", ()=>{
@@ -796,33 +780,6 @@ function swapFrame (toPopout) {
         setTimeout(()=>{
             refreshDisplay();
         });
-    }
-}
-
-function toggleBlurb(toMode) {
-    clearTimeout(lastRequest);
-    const currentMode = editor.isBlurb ? "blurb" : "html";
-    if(toMode == currentMode) return;
-    if( $("#wysiwyg").prop("checked") ) return;
-
-    if(toMode == "html") {
-        $("#wysiwyg").prop("disabled", false);
-        const request = requestFromDB("html");
-        request.onsuccess = (e) => {
-            $("#html-tab").removeClass("text-dark");
-            $("#blurb-tab").addClass("text-dark");
-            editor.setValue(e.target.result.code);
-            editor.isBlurb = false;
-        }
-    } else {
-        $("#wysiwyg").prop("disabled", true);
-        const request = requestFromDB("blurb");
-        request.onsuccess = (e) => {
-            $("#blurb-tab").removeClass("text-dark");
-            $("#html-tab").addClass("text-dark");
-            editor.setValue(e.target.result.code);
-            editor.isBlurb = true;
-        }
     }
 }
 
@@ -865,20 +822,16 @@ function toggleLayout( popout = null, toLayout = null ) {
     let codeheight, codewidth, stacking;
     
     popout ??= $("#popout").prop("checked");
-    /**
-     * If popout is set / selected, toggle to popout view
-     */
     writeLocal("th_cj_popout", popout);
     
+    // If popout is set / selected, toggle to popout view
     if(popout) {
         stacking = "popout";
         $("#popout").prop("checked", true);
         toggleWYSIWYG( false );
         $("#wysiwyg").prop("disabled", true);
     }
-    /**
-     * Else process as vertical or horizontal layout
-     */
+    // Else process as vertical or horizontal layout
     else {
         toLayout ??= $(".stacking:checked").val();
         $("#"+toLayout).prop("checked", true);
@@ -909,7 +862,7 @@ function toggleLayout( popout = null, toLayout = null ) {
         codewidth = "100%";
     } else {
         swapFrame(true);
-        
+
         $("#adjustbar").addClass("vanish");
         $("#titles").append($(".field-title"));
         $(".stackable").removeClass("vertical");
@@ -928,7 +881,7 @@ function toggleMobilePreview() {
     resizeEditors();
 }
 
-function toggleUITheme(){
+function toggleUITheme() {
     writeLocal("cj_uitheme", $("#ui-theme input:checked").attr("id"));
     $(document.body).removeClass("low-contrast light dark");
     $(document.body).addClass(getLocal("cj_uitheme"));
@@ -1043,6 +996,56 @@ function toggleWYSIWYG(toState) {
     }
     if(toState) $("#wysiwyg").attr("checked", true);
     else  $("#wysiwyg").removeAttr("checked");
+}
+
+
+/**************************************
+ Preview frame UI toggles
+**************************************/
+
+function toggleTheme(theme) {
+    sessionSettings.activeTheme = writeLocal("th_cj_theme", theme);
+    if(popoutWindow) popoutWindow.postMessage(['toggleTheme', theme]);
+    else frame.contentWindow.toggleTheme(theme);
+}
+
+function switchTo(mode) {
+    sessionSettings.activeMode = writeLocal("th_cj_mode", mode);
+    if(popoutWindow) popoutWindow.postMessage(['switchTo', mode]);
+    else frame.contentWindow.switchTo(mode);
+}
+
+// Reload theme and layout with the same content, usually called on init or after changing vertical/horizontal/popout display
+function refreshDisplay() {
+    toggleTheme( sessionSettings.activeTheme );
+    switchTo( sessionSettings.activeMode );
+}
+
+function toggleBlurb(toMode) {
+    clearTimeout(lastRequest);
+    const currentMode = editor.isBlurb ? "blurb" : "html";
+    if(toMode == currentMode) return;
+    if( $("#wysiwyg").prop("checked") ) return;
+
+    if(toMode == "html") {
+        $("#wysiwyg").prop("disabled", false);
+        const request = requestFromDB("html");
+        request.onsuccess = (e) => {
+            $("#html-tab").removeClass("text-dark");
+            $("#blurb-tab").addClass("text-dark");
+            editor.setValue(e.target.result.code);
+            editor.isBlurb = false;
+        }
+    } else {
+        $("#wysiwyg").prop("disabled", true);
+        const request = requestFromDB("blurb");
+        request.onsuccess = (e) => {
+            $("#blurb-tab").removeClass("text-dark");
+            $("#html-tab").addClass("text-dark");
+            editor.setValue(e.target.result.code);
+            editor.isBlurb = true;
+        }
+    }
 }
 
 function toggleSidebar() {
