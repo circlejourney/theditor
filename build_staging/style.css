@@ -20,6 +20,10 @@ body.vertical {
     display: none !important;
 }
 
+.text-danger {
+    color: darkred !important;
+}
+
 a {
     cursor: pointer;
 }

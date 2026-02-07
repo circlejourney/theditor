@@ -778,10 +778,14 @@ function hardReset() {
 
 function swapFrame(toPopout) {
     if(toPopout) {
-        popoutWindow = window.open("./build_"+latestBuild+"/popout-frame.php", "mozillaWindow", "popup");
-        popoutWindow.addEventListener("load", ()=>{
-            setTimeout( refreshDisplay );
-        }, false);
+        try {
+            popoutWindow = window.open("./build_"+latestBuild+"/popout-frame.php", "mozillaWindow", "popup");
+            popoutWindow.addEventListener("load", ()=>{
+                setTimeout( refreshDisplay );
+            }, false);
+        } catch (err) {
+            showError("Please allow popups on this page in order to display the preview window. ("+err+")");
+        }
     } else {
         if(popoutWindow) {
             popoutWindow.close();
@@ -1055,5 +1059,7 @@ function toggleSidebar() {
 }
 
 function showError(error) {
+    $("#error-wrapper").removeClass("d-none");
+    $("#error-message").text(error);
     console.error(error);
 }
