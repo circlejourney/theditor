@@ -219,36 +219,64 @@
             <div id="footer-right">
                 
 
-                <span class="checkbox-container">
-                    <input type="checkbox" id="wysiwyg" onchange="toggleWYSIWYG(this.checked===true)" autocomplete="off">&nbsp;<label for="wysiwyg">WYSIWYG</label>
+                <span class="checkbox-container checkbox-compact">
+                    <input type="checkbox" id="wysiwyg" onchange="toggleWYSIWYG(this.checked===true)" autocomplete="off">&nbsp;<label for="wysiwyg"><i class="indicator fa"></i> WYSIWYG</label>
                 </span>
 
-                <span class="checkbox-container">
-                    <input type="checkbox" id="auto" onchange="toggleAuto()" checked="true">&nbsp;<label for="auto">Auto-update</label>
+                <span class="checkbox-container checkbox-compact">
+                    <input type="checkbox" id="auto" onchange="toggleAuto()" checked="true">&nbsp;<label for="auto"><i class="indicator fa"></i> Auto-update</label>
                 </span>
 
-                <span class="checkbox-container hide-small">
-                    <input type="checkbox" id="mobile" onchange="toggleMobilePreview()">&nbsp;<label for="mobile">Mobile view</label>
+                <span class="checkbox-container hide-small checkbox-compact">
+                    <input type="checkbox" id="mobile" onchange="toggleMobilePreview()">&nbsp;<label for="mobile"><i class="indicator fa"></i> <i class="fa fa-mobile"></i> Mobile</label>
                 </span>
 
                 <div id="ui-options" class="dropdown d-sm-inline">
                     <a class="btn btn-secondary dropdown-toggle" id="dropdownbutton" data-toggle="dropdown" data-trigger="focus" aria-haspopup="true" aria-expanded="false">
-                        UI options 
+                        Editor options 
                     </a>
                     
                     <div class="dropdown-menu ui-options px-2" aria-labelledby="dropdownbutton">
 
-                        <span class="checkbox-container">
-                            <input type="checkbox" id="html-panel" onclick="togglePanel('html')" checked="true">&nbsp;<label for="html-panel">HTML</label>
+                        
+                        <span class="checkbox-container hide-small">
+                            <div class="dropdown-header">Editor layout</div>
+                            <span class="nowrap mr-1">
+                                <input class="stacking" type="radio" name="stacking" id="horizontal" value="horizontal" onchange="toggleLayout()" checked>&nbsp;<label for="horizontal">Stack horizontal</label>
+                            </span>
+                            <span class="nowrap mr-1">
+                                <input class="stacking" type="radio" name="stacking" id="vertical" value="vertical" onchange="toggleLayout()">&nbsp;<label for="vertical">Stack vertical</label>
+                            </span>
+                            <span class="nowrap mr-1">
+                                <input class="stacking" type="radio" name="stacking" id="popout" value="popout" onchange="toggleLayout()">&nbsp;<label for="popout">Pop out</label>
+                            </span>
+                        </span>
+                        
+
+                        <div class="dropdown-header">Editor theme</div>
+
+                        <span class="checkbox-container" id="ui-theme">
+                            <input type="radio" name="colour-mode" id="dark" onchange="toggleUITheme();">&nbsp;<label for="dark">Dark mode</label>
+                            <input type="radio" name="colour-mode" id="low-contrast" onchange="toggleUITheme();">&nbsp;<label for="low-contrast">Low contrast</label>
+                            <input type="radio" name="colour-mode" id="light" onchange="toggleUITheme();">&nbsp;<label for="light">Light mode</label>
                         </span>
 
+
+                        <div class="dropdown-header">Panels</div>
+                        
                         <span class="checkbox-container">
-                            <input type="checkbox" id="css-panel" onclick="togglePanel('css')" checked="true">&nbsp;<label for="css-panel">CSS</label>
+                            <span class="nowrap mr-1">
+                                <input type="checkbox" id="html-panel" onclick="togglePanel('html')" checked="true">&nbsp;<label for="html-panel">HTML</label>
+                            </span>
+                            <span class="nowrap mr-1">
+                                <input type="checkbox" id="css-panel" onclick="togglePanel('css')" checked="true">&nbsp;<label for="css-panel">CSS</label>
+                            </span>
+                            <span class="nowrap mr-1">
+                                <input type="checkbox" id="text-panel" onclick="togglePanel('text')" checked="true">&nbsp;<label for="text-panel">Scratchpad</label>
+                            </span>
                         </span>
 
-                        <span class="checkbox-container">
-                            <input type="checkbox" id="text-panel" onclick="togglePanel('text')" checked="true">&nbsp;<label for="text-panel">Scratchpad</label>
-                        </span>
+                        <div class="dropdown-divider"></div>
 
                         <span class="checkbox-container">
                             <input type="checkbox" id="autocomplete" onclick="toggleAutocomplete()"> <label for="autocomplete">Autocomplete</label>
@@ -259,19 +287,7 @@
                         </span>
 
                         <span class="checkbox-container hide-small">
-                            <input class="stacking" type="radio" name="stacking" id="horizontal" value="horizontal" onchange="toggleLayout()" checked>&nbsp;<label for="horizontal">Stack horizontal</label>
-                            <input class="stacking" type="radio" name="stacking" id="vertical" value="vertical" onchange="toggleLayout()">&nbsp;<label for="vertical">Stack vertical</label>
-                            <input class="stacking" type="radio" name="stacking" id="popout" value="popout" onchange="toggleLayout()">&nbsp;<label for="popout">Pop out</label>
-                        </span>
-
-                        <span class="checkbox-container hide-small">
                             <input type="checkbox" id="gutter" onchange="toggleGutter()" checked>&nbsp;<label for="gutter">Line numbers</label>
-                        </span>
-
-                        <span class="checkbox-container" id="ui-theme">
-                            <input type="radio" name="colour-mode" id="dark" onchange="toggleUITheme();">&nbsp;<label for="dark">Dark mode</label>
-                            <input type="radio" name="colour-mode" id="low-contrast" onchange="toggleUITheme();">&nbsp;<label for="low-contrast">Low contrast</label>
-                            <input type="radio" name="colour-mode" id="light" onchange="toggleUITheme();">&nbsp;<label for="light">Light mode</label>
                         </span>
 
                         <span class="checkbox-container">

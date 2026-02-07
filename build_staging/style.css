@@ -8,7 +8,7 @@ body.vertical {
     flex-direction: column;
 }
 
-.checkbox-container {
+.nowrap {
     white-space: nowrap;
 }
 
@@ -132,6 +132,28 @@ a {
 .ui-options .checkbox-container {
     flex-basis: 0;
     flex-grow: 1;
+}
+
+.checkbox-compact label {
+    display: inline-block;
+    border-radius: 0.5rem;
+    padding: 5px;
+}
+
+.checkbox-compact label .indicator {
+  --fa:"\f204";
+  --fa--fa:"\f204\f204";
+  opacity: 0.5;
+}
+
+.checkbox-compact input[type=checkbox] {
+    width: 0;
+}
+
+.checkbox-compact input[type=checkbox]:checked ~ label .indicator {  
+  --fa:"\f205";
+  --fa--fa:"\f205\f205";
+  opacity: 1;
 }
 
 
@@ -382,10 +404,6 @@ a {
     line-height: 2.1rem;
 }
 
-#footer span {
-    margin-right: 1em;
-}
-
 #footer-left {
     -webkit-flex-grow: 2;
     -moz-flex-grow: 2;
@@ -412,6 +430,10 @@ a {
 .dropdown-menu {
     z-index: 1000;
     line-height: 1.6rem;
+}
+
+.dropdown-header {
+    padding: 0;
 }
 
 .disclaimer {
