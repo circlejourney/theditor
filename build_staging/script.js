@@ -779,7 +779,7 @@ function hardReset() {
 function swapFrame(toPopout) {
     if(toPopout) {
         popoutWindow = window.open("./build_"+latestBuild+"/popout-frame.php", "mozillaWindow", "popup");
-        popoutWindow.document.addEventListener("load", ()=>{
+        popoutWindow.addEventListener("load", ()=>{
             setTimeout( refreshDisplay );
         }, false);
     } else {
