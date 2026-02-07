@@ -51,39 +51,43 @@ $(window).on("load", function() {
     // Get frame and pass parent functions to frame
     lastUpdate = ""+$("html").data("last-update");
     latestBuild = $("html").data("latest-build");
-    swapFrame(false);
     
     // Update notes update date
     updateDate();
 
-    // Initialise database...everything hereafter needs to happen after database since it contains the stored code.
+    // Initialise database and retrieve stored code
     const DBrequest = initDB();
     if(typeof DBrequest !== "object" ) {
-        console.log("IndexedDB could not be initialised due to user permissions.");
-        initEditors();
-        loadLocalSettings();
-        // Start backup cycle
-        setInterval(updateBackup, 300000);
-    } else {    
+        showError("IndexedDB could not be initialised due to user permissions.");
+    } else {  
         DBrequest.onsuccess = function(event){
-            DB = event.target.result;
             console.log("Database schema is up to date.");
+            DB = event.target.result;
 
-            // initEditors is called before loadLocalSettings so that editors are initialised before changing their appearance and contents.
+            // Initialise editors before loading settings and code so that editors are ready
             initEditors();
-            loadLocalSettings();
             
-            loadFromDB("html");
-            loadFromDB("css");
-            loadFromDB("text");
+            // Load code from database, then update code panels and previews
+            Promise.all([loadFromDB("html"), loadFromDB("css"), loadFromDB("text")]).then( function(data) {
+                loadLocalSettings();
+                const panels = ["html", "css", "text"];
 
-            updateHTML();
-            updateCSS();
+                for(let i in panels) {
+                    const panel = panels[i];
+                    const {code} = data[i];
+                    setEditorContent( panel, code || codeTypes[panel].defaultContent );
+                }
 
-            refreshDisplay();
+                updateHTMLPreview();
+                updateCSSPreview();
 
-            // Start backup cycle
-            setInterval(updateBackup, 300000);
+                // Start backup cycle
+                setInterval(updateBackup, 300000);
+
+                resizeScreen();
+                resizeEditors();
+                $("#loader").addClass("invisible");
+            } );
         }
     }
 
@@ -118,13 +122,6 @@ $(window).on("load", function() {
     $("#fileupload").click(uploadFile);
 
     $(window).on("beforeunload", updateBackup);
-    
-    setTimeout(() => {
-        // Ugly solution, waiting .5 seconds before resizing the editors ensures they resize to fit the content after the content is loaded. Can we make this promise based?
-        $("#loader").addClass("invisible");
-        resizeScreen();
-        resizeEditors();
-    }, 500);
 
 });
 
@@ -142,9 +139,9 @@ $(window).on('beforeunload', function () {
 
 // Check that indexed database for code storage is up to date with current schema.
 function initDB() {
-    try {
-        const request = window.indexedDB.open("theditor", 1);
-        request.onupgradeneeded = function(event) {
+    const request = window.indexedDB.open("theditor", 1);
+    request.onupgradeneeded = function(event) {
+        try {
             DB = event.target.result;
             const objectStore = DB.createObjectStore("codes", { keyPath: "id" });
             objectStore.transaction.oncomplete = (event) => {
@@ -156,12 +153,13 @@ function initDB() {
                 codeObjectStore.add({ "id": "text", "code": getLocal("th_cj_text"), "backup": getLocal("th_cj_textbackup") });
             }
             console.log("Upgraded database to version 1.");
-
+            
+        } catch(error) {
+            showError(error);
+            return null;
         }
-        return request;
-    } catch(error) {
-        return null;
     }
+    return request;
 }
 
 // Initialise the three Ace editors on the page.
@@ -178,7 +176,7 @@ function initEditors() {
         lastRequest = waitForIdle("html");
     });
     editor.on("focus", () => {
-        if(editor.getValue()==codeTypes.html.defaultContent) editor.setValue("");
+        if(editor.getValue()==codeTypes.html.defaultContent) setEditorContent("html", "");
     });
     $(editor.container).on("keydown", (e) => {
         if(e.ctrlKey && e.key=="s") {
@@ -198,7 +196,7 @@ function initEditors() {
         lastRequest = waitForIdle("css");
     });
     css_editor.on("focus", () => {
-        if(css_editor.getValue()==codeTypes.css.defaultContent) css_editor.setValue("");
+        if(css_editor.getValue()==codeTypes.css.defaultContent) setEditorContent("css", "");
     })
     $(css_editor.container).on("keydown", (e) => {
         if(e.ctrlKey && e.key=="s") {
@@ -216,7 +214,7 @@ function initEditors() {
         lastRequest = waitForIdle("text");
     });
     text_editor.on("focus", () => {
-        if(text_editor.getValue()==codeTypes.blurb.defaultContent) text_editor.setValue("");
+        if(text_editor.getValue()==codeTypes.text.defaultContent) setEditorContent("text", "");
     })
     $(text_editor.container).on("keydown", (e) => {
         if(e.ctrlKey && e.key=="s") {
@@ -267,9 +265,7 @@ function loadLocalSettings() {
         sessionSettings.activeTheme = th_cj_theme;
     }
     
-    if(th_cj_popout == "true" || th_cj_vertical == "vertical") {
-        toggleLayout( th_cj_popout == "true", th_cj_vertical );
-    }
+    toggleLayout( th_cj_popout == "true", th_cj_vertical );
     
     if(th_cj_gutter) {
         $("#gutter").prop("checked", th_cj_gutter == "true");
@@ -323,7 +319,6 @@ function updateDate() {
     // TODO: Do this in the backend?
     const year = lastUpdate.substr(0, 4);
     const monthNumber = +lastUpdate.substr(4, 2);
-    console.log(monthNumber);
     const day = lastUpdate.substr(6, 2);
     let month = months[monthNumber - 1];
     $("#notes #latest").text("Latest update: "+day+" "+month+" "+year);
@@ -338,16 +333,13 @@ function loadFromDB(panel) {
     const transaction = DB.transaction(["codes"], "readonly");
     const store = transaction.objectStore("codes");
     request = store.get(panel);
-    request.onsuccess = function(event) {
-        const data = event.target.result;
-        if(data.code === "" || data.code === codeTypes[panel].defaultContent) {
-            $("#clear-"+panel).addClass("d-none");
-            $("#restore-"+panel).removeClass("d-none");
+    const promise = new Promise( function(resolve, reject) {
+        request.onsuccess = function(event) {
+            const data = event.target.result;
+            resolve(data);
         }
-        window[ codeTypes[panel].aceEditor ].setValue(
-            data.code ? data.code : codeTypes[panel].defaultContent
-        );
-    }
+    } );
+    return promise;
 }
 
 function requestFromDB(panel) {
@@ -374,20 +366,7 @@ function writeLocal(key, value) {
 **************************************/
 
 function waitForIdle(panel) {
-    const { aceEditor, defaultContent } = codeTypes[panel];
-    const request = checkBackup(panel);
-    request.onsuccess = function(event) {
-        const backup = event.target.result.backup;
-        const hasBackup = backup !== "" && backup !== defaultContent;
-        if(window[aceEditor].getValue() && window[aceEditor].getValue() !== defaultContent && hasBackup) {
-            $("#clear-"+panel).removeClass("d-none");
-            $("#restore-"+panel).addClass("d-none");
-        } else {
-            $("#clear-"+panel).addClass("d-none");
-            $("#restore-"+panel).removeClass("d-none");
-        }
-    }
-
+    const { aceEditor } = codeTypes[ panel ];
     const wait = setTimeout( () => {checkForChanges(panel)}, 400 );
     window[aceEditor].session.on("change", () => {
         clearTimeout(wait);
@@ -399,19 +378,42 @@ function waitForIdle(panel) {
 function checkForChanges(panel) {
     if(panel == "html") {
         if(editor.getValue().indexOf("Please reset!") !== -1) {
-            editor.setValue( editor.getValue().replace("Please reset!", "") );
+            setEditorContent(editor.getValue().replace("Please reset!", ""));
             hardReset();
             return false;
         } else {
-            updateHTML();
+            updateHTMLPreview();
         }
     }
-    if(panel == "css") updateCSS();
+    if(panel == "css") updateCSSPreview();
     if(panel == "text") updateText();
 }
 
+// Update the content of an editor without input
+function setEditorContent(panel, content) {
+    const { aceEditor, defaultContent } = codeTypes[ panel ];
+    window[aceEditor].setValue( content );
+    refreshBackupButton(panel);
+}
+
+function refreshBackupButton(panel) {
+    const request = checkBackup(panel);
+    request.onsuccess = function(event) {
+        const { aceEditor, defaultContent } = codeTypes[panel];
+        const backup = event.target.result.backup;
+        const hasBackup = backup && backup !== defaultContent;
+        if(window[aceEditor].getValue() && window[aceEditor].getValue() !== defaultContent && hasBackup) {
+            $("#clear-"+panel).removeClass("d-none");
+            $("#restore-"+panel).addClass("d-none");
+        } else {
+            $("#clear-"+panel).addClass("d-none");
+            $("#restore-"+panel).removeClass("d-none");
+        }
+    }
+}
+
 // Update the stored HTML values in DB; update preview if needed
-function updateHTML(buttonTriggered=false){
+function updateHTMLPreview(buttonTriggered=false){
     let raw_html = editor.getValue();
     let updateEditor;
 
@@ -448,7 +450,7 @@ function updateHTML(buttonTriggered=false){
 };
 
 // Update the stored CSS values in DB; update preview if needed
-function updateCSS(buttonTriggered=false) {
+function updateCSSPreview(buttonTriggered=false) {
     var raw_css = css_editor.getValue();
 
     const transaction = DB.transaction(["codes"], "readwrite");
@@ -491,13 +493,13 @@ function updateText() {
 
 function beautifyHTML() {
     var beautifiedText = html_beautify(editor.getValue(), beautify_HTML_Options);
-    editor.setValue(beautifiedText);
+    setEditorContent(beautifiedText);
     editor.clearSelection();
 }
 
 function beautifyCSS() {
     var beautifiedText = css_beautify(css_editor.getValue(), beautify_CSS_Options);
-    css_editor.setValue(beautifiedText);
+    setEditorContent(beautifiedText);
     css_editor.clearSelection();
 }
 
@@ -621,7 +623,7 @@ function updateBackup() {
         const request = store.get(panel);
         request.onsuccess = function(event) {
             const data = event.target.result;
-            if(data.code && data.code !== defaultContent) {
+            if(data.code.replace(/\s+/, "") && data.code !== defaultContent) {
                 data.backup = data.code;
                 store.put(data);
                 console.log(panel+" backed up.");
@@ -635,14 +637,13 @@ function updateBackup() {
 function restoreBackup(panel) {
     if(editor.isBlurb && panel == "html") panel = "blurb";
     const { aceEditor, defaultContent } = codeTypes[panel];
-    const useEditor = window[aceEditor];
     const transaction = DB.transaction(["codes"], "readonly");
     const store = transaction.objectStore("codes");
     const request = store.get(panel);
     request.onsuccess = function(event) {
         const backup = event.target.result.backup;
         if(backup && backup !== defaultContent) {
-            useEditor.setValue(backup);
+            setEditorContent(panel, backup);
         }
     }
 }
@@ -709,7 +710,7 @@ function uploadFile(){
         }
         filereader.readAsText(this.files[0]);
         filereader.onload = () => {
-            window[aceEditor].setValue(filereader.result)
+            setEditorContent(panel, filereader.result);
         }
     });
 }
@@ -730,11 +731,9 @@ function renderProfileCode(data) {
         }
 
         if(editor.isBlurb) toggleBlurb();
-        editor.setValue(
-            $(data).find(".user-content:not(.blurb)").html()
-        );
+        setEditorContent("html", $(data).find(".user-content:not(.blurb)").html());
         
-        if(customCSS) css_editor.setValue(customCSS);
+        if(customCSS) setEditorContent("css", customCSS);
 }
 
 function renderProfileMeta(data) {
@@ -752,7 +751,7 @@ function renderProfileMeta(data) {
         frame.contentWindow.$("#sidebar a").prop("href", "#");
         
         frame.contentWindow.$(".blurb").addClass("ace-code-container-2");
-        if(editor.isBlurb) editor.setValue($(data).find(".blurb").html() || "");
+        if(editor.isBlurb) setEditorContent($(data).find(".blurb").html() || "");
 
 }
 
@@ -781,9 +780,7 @@ function swapFrame(toPopout) {
     if(toPopout) {
         popoutWindow = window.open("./build_"+latestBuild+"/popout-frame.php", "mozillaWindow", "popup");
         popoutWindow.document.addEventListener("load", ()=>{
-            setTimeout(()=>{
-                refreshDisplay();
-            });
+            setTimeout( refreshDisplay );
         }, false);
     } else {
         if(popoutWindow) {
@@ -792,9 +789,7 @@ function swapFrame(toPopout) {
         }
         frame = $('#frame')[0];
         Object.assign(frame.contentWindow, passable);
-        setTimeout(()=>{
-            refreshDisplay();
-        });
+        setTimeout( refreshDisplay );
     }
 }
 
@@ -810,8 +805,8 @@ function togglePanel(panel) {
 function toggleAuto() {
     writeLocal("th_cj_auto", $("#auto").prop("checked"));
     if($("#auto").prop("checked")) {
-        updateHTML();
-        updateCSS();
+        updateHTMLPreview();
+        updateCSSPreview();
     }
 }
 
@@ -825,7 +820,7 @@ function toggleLayout( popout = null, toLayout = null ) {
     if(popout) {
         stacking = "popout";
         $("#popout").prop("checked", true);
-        toggleWYSIWYG( false );
+        if( $("#wysiwyg").prop("checked") ) toggleWYSIWYG( false );
         $("#wysiwyg").prop("disabled", true);
     }
     // Else process as vertical or horizontal layout
@@ -984,9 +979,8 @@ function toggleWYSIWYG(toState) {
     // Don't allow WYSIWYG if currently on blurb
     if( editor.isBlurb ) return;
     // Don't allow WYSIWYG if using popout window mode
-    if(popoutWindow && toState) return;
-
-    else frame.contentWindow.toggleWYSIWYG(toState);
+    if(popoutWindow || toState) return;
+    frame.contentWindow.toggleWYSIWYG(toState);
 
     if(toState === true) {
         editor.setReadOnly(true);
@@ -996,13 +990,13 @@ function toggleWYSIWYG(toState) {
             toggleWYSIWYG(false);
         });
     } else {
-        editor.setValue(frame.contentWindow.getWYSIWYG());
+        setEditorContent("html", frame.contentWindow.getWYSIWYG());
         editor.setReadOnly(false);
         editor.clearSelection();
         $("#html-editor").removeClass("disabled");
     }
-    if(toState) $("#wysiwyg").attr("checked", true);
-    else  $("#wysiwyg").removeAttr("checked");
+    if(toState) $("#wysiwyg").prop("checked", true);
+    else  $("#wysiwyg").prop("checked", false);
 }
 
 
@@ -1040,7 +1034,7 @@ function toggleBlurb(toMode) {
         request.onsuccess = (e) => {
             $("#html-tab").removeClass("text-dark");
             $("#blurb-tab").addClass("text-dark");
-            editor.setValue(e.target.result.code);
+            setEditorContent("html", e.target.result.code);
             editor.isBlurb = false;
         }
     } else {
@@ -1049,7 +1043,7 @@ function toggleBlurb(toMode) {
         request.onsuccess = (e) => {
             $("#blurb-tab").removeClass("text-dark");
             $("#html-tab").addClass("text-dark");
-            editor.setValue(e.target.result.code);
+            setEditorContent("html", e.target.result.code);
             editor.isBlurb = true;
         }
     }
@@ -1058,4 +1052,8 @@ function toggleBlurb(toMode) {
 function toggleSidebar() {
     if(popoutWindow) popoutWindow.postMessage(['toggleSidebar']);
     else frame.contentWindow.toggleSidebar();
+}
+
+function showError(error) {
+    console.error(error);
 }
