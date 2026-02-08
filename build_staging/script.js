@@ -617,7 +617,7 @@ function cancelDrag(e) {
     $(frame.contentWindow).off("touchend");
 }
 
-function mobileSwitch(e) {
+function togglePanelVisibility(e) {
     e.stopPropagation();
     if(!$("#editor").hasClass("d-none")) {
         $("#editor").addClass("d-none");

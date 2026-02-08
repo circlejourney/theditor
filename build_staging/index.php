@@ -104,7 +104,7 @@
         </iframe>
         
         <div id="adjustbar" class="progress-bar progress-bar-striped bg-secondary stackable">
-            <button class="btn btn-primary stackable" id="mobile-switch" onclick="mobileSwitch()">
+            <button class="btn btn-primary stackable" id="mobile-switch" onclick="togglePanelVisibility(event)">
                 <i class="mobile-switch-arrow fa fa-caret-down"></i>
             </button>
         </div>
