@@ -8,12 +8,20 @@ body.vertical {
     flex-direction: column;
 }
 
-.checkbox-container {
+.nowrap {
     white-space: nowrap;
 }
 
 .big-text {
     font-size: 1.2rem;
+}
+
+.vanish {
+    display: none !important;
+}
+
+.text-danger {
+    color: darkred !important;
 }
 
 a {
@@ -125,9 +133,43 @@ a {
     justify-content: center;
 }
 
-.ui-options .checkbox-container {
-    flex-basis: 0;
-    flex-grow: 1;
+.checkbox-container {
+    white-space: nowrap;
+    margin-right: 0.75rem;
+}
+
+.checkbox-container input {
+    margin-right: 0.25rem;
+}
+
+.checkbox-container input, .checkbox-container label {
+    vertical-align: middle;
+}
+
+label {
+    margin: 0;
+}
+
+.checkbox-compact label {
+    display: inline-block;
+    border-radius: 0.5rem;
+    padding: 5px;
+}
+
+.checkbox-compact label .indicator {
+  --fa:"\f204";
+  --fa--fa:"\f204\f204";
+  opacity: 0.5;
+}
+
+.checkbox-compact input[type=checkbox] {
+    width: 0;
+}
+
+.checkbox-compact input[type=checkbox]:checked ~ label .indicator {  
+  --fa:"\f205";
+  --fa--fa:"\f205\f205";
+  opacity: 1;
 }
 
 
@@ -152,6 +194,18 @@ a {
     flex-direction: row;
 }
 
+#main.reverse-order #frame {
+    order: 2;
+}
+
+#main.reverse-order #adjustbar {
+    order: 1;
+}
+
+#main.reverse-order #editor {
+    order: 0;
+}
+
 #frame {
     border: none;
     width: 100%;
@@ -174,6 +228,10 @@ a {
 
 /*.mobile-display */#frame.expanded {
     height: 100% !important;
+}
+
+.vertical.mobile-preview ~ #adjustbar {
+    display: none;
 }
 
 #frame.expanded.vertical {
@@ -378,10 +436,6 @@ a {
     line-height: 2.1rem;
 }
 
-#footer span {
-    margin-right: 1em;
-}
-
 #footer-left {
     -webkit-flex-grow: 2;
     -moz-flex-grow: 2;
@@ -408,6 +462,11 @@ a {
 .dropdown-menu {
     z-index: 1000;
     line-height: 1.6rem;
+}
+
+.dropdown-header {
+    padding: 0;
+    margin-top: 0.25rem;
 }
 
 .disclaimer {

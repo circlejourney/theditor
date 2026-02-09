@@ -1,12 +1,10 @@
 <?php
-    $settings = parse_ini_file(__DIR__."/../.env");
-    $lastUpdate = (int)$settings["lastUpdate"]; // Set to last update to make the popup appear.
-    $latestBuild = $settings["latestBuild"]; // Set this to the latest build directory to select the directory for source files
-    $slash = DIRECTORY_SEPARATOR; 
+    require(__DIR__.'/../parseIni.php');
+    $slash = DIRECTORY_SEPARATOR;
 ?>
 
 <!DOCTYPE html>
-<html lang="en" data-last-update="<?php echo $lastUpdate ?>">
+<html lang="en" data-last-update="<?php echo $lastUpdate ?>" data-latest-build="<?php echo $latestBuild ?>">
     <head>
         <title>Circlejourney's Toyhouse Live Code Editor</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -21,7 +19,7 @@
         <script src="/src/sass.js-master/dist/sass.js"></script>
 
         
-        <!-- Ace Colorpicker -->
+        <!-- Ace Colorpicker -->    
         <link rel="stylesheet" href="/src/ace-colorpicker.css" />
         <script type="text/javascript" src="/src/ace-colorpicker.js?4" ></script>
 
@@ -36,17 +34,20 @@
         <!-- FONT AWESOME -->
 		<script src="https://kit.fontawesome.com/0ddae54ad8.js" crossorigin="anonymous"></script>
 
-        <script src="/build_<?php echo $latestBuild ?>/script.js?v=<?php echo filemtime(__DIR__ . $slash . "script.js"); ?>" type="text/javascript"></script>
-        <link rel="stylesheet" href="/build_<?php echo $latestBuild ?>/style.css?v=<?php echo filemtime(__DIR__ . $slash . "style.css") ?>">
+        <script src="/build_<?php echo $latestBuild ?>/script.js?v=<?php echo filemtime(__DIR__ . DIRECTORY_SEPARATOR . "script.js"); ?>" type="text/javascript"></script>
+        <link rel="stylesheet" href="/build_<?php echo $latestBuild ?>/style.css?v=<?php echo filemtime(__DIR__ . DIRECTORY_SEPARATOR . "style.css") ?>">
             
     </head>
-    <body>
+    <body class="stackable">
     
     <div id="loader" style="text-align: center; display: flex; flex-direction: column; justify-content: center;">
         <div class="loader-inner">
             <img src="https://media0.giphy.com/media/3oEjI6SIIHBdRxXI40/giphy.gif" style="margin: -50px 0;">
+            <p id="error-wrapper" class="text-danger font-weight-bold d-none">
+                Error: <span id="error-message"></span>
+            </p>
             <p style="font-size: 20pt;">Stuck on the loading screen? <a href="https://toyhou.se/~forums/26275.feedback-bugs-suggestions/298364.stuck-on-the-loading-screen-error">Post a bug report on our Toyhouse world</a> or try a <a href="/versions.html" target="_blank">legacy version</a>.</p>
-            <p style="font-size: 20pt;">If you suspect your code has crashed the editor, <a href="#" onclick="hardReset()">click here</a> to download your code as text files and hard reset the editor.</p>
+            <p style="font-size: 20pt;">If you suspect your code has crashed the editor, <a class="btn btn-primary btn-lg" href="#" onclick="hardReset()">click here</a> to download your code as text files and hard reset the editor.</p>
             <p>Fun fact! You can also hard reset by typing <code>Please reset!</code> in the HTML panel.</p>
         </div>
     </div>
@@ -98,65 +99,17 @@
          </div>
     </div>
     
-    <div id="main">
-        <iframe src="/build_<?php echo $latestBuild ?>/frame.php?2" id="frame" class="d-flex align-self-center">
+    <div id="main" class="stackable">
+        <iframe src="/build_<?php echo $latestBuild ?>/frame.php?2" id="frame" class="d-flex align-self-center stackable">
         </iframe>
         
-        <div id="adjustbar" class="progress-bar progress-bar-striped bg-secondary">
-            <button class="btn btn-primary" id="mobile-switch" onclick="mobileSwitch()">
+        <div id="adjustbar" class="progress-bar progress-bar-striped bg-secondary stackable">
+            <button class="btn btn-primary stackable" id="mobile-switch" onclick="togglePanelVisibility(event)">
                 <i class="mobile-switch-arrow fa fa-caret-down"></i>
             </button>
         </div>
         
-        <div id="editor">
-            
-            <div id="titles">
-                <div class="field-title html-visible">
-                    <div class="panel-title-tabs">
-                        <a class="nav-tab" id="html-tab" onclick="toggleBlurb('html')">HTML</a> &nbsp; <a class="nav-tab text-dark" id="blurb-tab" onclick="toggleBlurb('blurb')">Blurb</a>
-                    </div>
-                    <span class="panel-options" id="html-options">
-                        <a class="edit-button" onclick="editor.undo()" data-toggle="tooltip" title="Undo"><i class="fas fa-undo-alt"></i></a>
-                        <a class="edit-button" onclick="editor.redo()" data-toggle="tooltip" title="Redo"><i class="fas fa-redo-alt"></i></a>
-                        <a class="edit-button" onclick="editor.insert(loremipsum)" data-toggle="tooltip" title="Insert lorem ipsum"><i class="fas fa-text"></i></a>
-                        <a class="edit-button" onclick="beautifyHTML()" data-toggle="tooltip" title="Format HTML"><i class="fas fa-brackets-curly"></i></a>
-                        <a class="edit-button" onclick="uploadFileDialogue('html')" data-toggle="tooltip" title="Import file"><i class="fa fa-file-import"></i></a>                        
-                        <a class="edit-button" onclick="downloadFile('html')" data-toggle="tooltip" title="Save as file"><i class="fa fa-save"></i></a>
-                        <a class="edit-button clear-button" id="clear-html" onclick="editor.setValue('')" data-toggle="tooltip" title="Clear"><i class="fa fa-trash"></i></a>
-                        <a class="edit-button restore-button d-none" id="restore-html" onclick="restoreBackup('html')" data-toggle="tooltip" title="Restore backup"><i class="fa fa-trash-undo"></i></a>
-                    </span>
-                </div>
-                <div class="field-title css-visible">
-                    CSS
-                    <span class="panel-options" id="css-options">
-                        <a class="edit-button" onclick="css_editor.undo()" data-toggle="tooltip" title="Undo"><i class="fas fa-undo-alt"></i></a>
-                        <a class="edit-button" onclick="css_editor.redo()" data-toggle="tooltip" title="Redo"><i class="fas fa-redo-alt"></i></a>
-                        <a class="edit-button" onclick="beautifyCSS()" data-toggle="tooltip" title="Format CSS"><i class="fas fa-brackets-curly"></i></a>
-                        <a class="edit-button" onclick="uploadFileDialogue('css')" data-toggle="tooltip" title="Import file"><i class="fa fa-file-import"></i></a>
-                        <a class="edit-button" onclick="downloadFile('css')" data-toggle="tooltip" title="Save as file"><i class="fa fa-save"></i></a>
-                        <a class="edit-button clear-button" id="clear-css" onclick="css_editor.setValue('')" data-toggle="tooltip" title="Clear"><i class="fa fa-trash"></i></a>
-                        <a class="edit-button restore-button d-none" id="restore-css" onclick="restoreBackup('css')" data-toggle="tooltip" title="Restore backup"><i class="fa fa-trash-undo"></i></a>
-                    </span>
-                </div>
-                <div class="field-title text-visible">
-                    Scratchpad
-                    
-                    <span class="panel-options" id="text-options">
-                        <a class="edit-button" onclick="text_editor.undo()" data-toggle="tooltip" title="Undo"><i class="fas fa-undo-alt"></i></a>
-                        <a class="edit-button" onclick="text_editor.redo()" data-toggle="tooltip" title="Redo"><i class="fas fa-redo-alt"></i></a>
-                        <a class="edit-button clear-button" id="clear-text" onclick="text_editor.setValue('')" data-toggle="tooltip" title="Clear"><i class="fa fa-trash"></i></a>
-                        <a class="edit-button restore-button d-none" id="restore-text" onclick="restoreBackup('text')" data-toggle="tooltip" title="Restore backup"><i class="fa fa-trash-undo"></i></a>
-                    </span>
-                </div>
-            </div>
-            
-            <div id="fields">
-                <div class="html-visible editor-panel" id="html-editor"></div>
-                <div class="d-none blurb-visible editor-panel" id="blurb-editor"></div>
-                <div class="css-visible editor-panel" id="css-editor"></div>
-                <div class="text-visible editor-panel" id="text-editor"></div>
-            </div>
-        </div>
+        <?php include("editor.html") ?>
             
         <div id="footer" class="bg-light justify-content-between ">
             <div id="footer-left">
@@ -237,89 +190,92 @@
                     </div>
                 </div>
                 
-    
-                <!-- <div id="import" class="dropdown d-sm-inline">
-                  <a class="btn btn-secondary dropdown-toggle" id="dropdownbutton2" data-toggle="dropdown" data-trigger="focus" aria-haspopup="true" aria-expanded="false">
-                    Import from TH
-                  </a>
-                
-                  <div class="dropdown-menu px-2" aria-labelledby="dropdownbutton2" onclick="event.stopPropagation()">
-                      <div class="d-flex flex-column">
-                          <div class="d-flex mb-1">
-                            <input type="text" id="char-id" class="form-control mr-1 import-button" placeholder="Enter ID"></input>
-                             <abbr class="d-inline-block" title="The numerical ID (for a character profile, e.g. 1776660) or username (for a user profile). Profile must be public and contain the string allow-thcj-import. You can also set all profiles on your account to be importable by adding allow-thcj-import-<b>all</b> to your user profile." data-toggle="tooltip" data-html="true">
-                                 <i class="fa fa-question-circle"></i>
-                             </abbr>
-                         </div>
-                         <div class="d-flex">
-                        <button class="btn btn-primary mr-1 import-button" id="import-meta" onclick="startImport('meta')">Import meta</button>
-                        <button class="btn btn-primary mr-1 import-button" id="import-html" onclick="startImport('code')">Import HTML</button>
-                        <button class="btn btn-primary" onclick="importedmeta=null; importedcode=null; localStorage.removeItem('th_cj_importedmeta'); localStorage.removeItem('th_cj_importedcode'); switchTo(activeMode);">Reset</button>
-                        </div>
-                    </div>
-                  </div>
-                </div> -->
-                
-                <a id="toggle-sidebar" class="btn btn-secondary" onclick="frame.contentWindow.toggleUI()">
+                <a id="toggle-sidebar" class="btn btn-secondary" onclick="toggleSidebar()">
                      <i id='sidebar-toggle-icon' class="fa fa-chevron-left"></i> Sidebar
                 </a>
                         
             </div>
             
             <div id="footer-right">
-                
 
                 <span class="checkbox-container">
-                    <input type="checkbox" id="wysiwyg" onchange="toggleWYSIWYG(this.checked===true)" autocomplete="off">&nbsp;<label for="wysiwyg">WYSIWYG</label>
+                    <input type="checkbox" id="wysiwyg" onchange="toggleWYSIWYG(this.checked===true)" autocomplete="off"><label for="wysiwyg"><i class="indicator fa"></i> WYSIWYG</label>
                 </span>
 
                 <span class="checkbox-container">
-                    <input type="checkbox" id="auto" onchange="toggleAuto()" checked="true">&nbsp;<label for="auto">Auto-update</label>
+                    <input type="checkbox" id="auto" onchange="toggleAuto()" checked="true"><label for="auto"><i class="indicator fa"></i> Auto-update</label>
                 </span>
 
                 <span class="checkbox-container hide-small">
-                    <input type="checkbox" id="mobile" onchange="toggleMobilePreview()">&nbsp;<label for="mobile">Mobile view</label>
+                    <input type="checkbox" id="mobile" onchange="toggleMobilePreview()"><label for="mobile"><i class="indicator fa"></i> <i class="fa fa-mobile"></i> Mobile</label>
                 </span>
 
                 <div id="ui-options" class="dropdown d-sm-inline">
                     <a class="btn btn-secondary dropdown-toggle" id="dropdownbutton" data-toggle="dropdown" data-trigger="focus" aria-haspopup="true" aria-expanded="false">
-                        UI options 
+                        Editor options 
                     </a>
                     
                     <div class="dropdown-menu ui-options px-2" aria-labelledby="dropdownbutton">
 
-                        <span class="checkbox-container">
-                            <input type="checkbox" id="html-panel" onclick="toggleHTMLPanel();" checked="true">&nbsp;<label for="html-panel">HTML</label>
+                        
+                        <span class="hide-small">
+                            <div class="dropdown-header">Editor position</div>
+                            <span class="checkbox-container">
+                                <input class="stacking" type="radio" name="stacking" id="horizontal" value="horizontal" onchange="toggleLayout()" checked><label for="horizontal">Bottom</label>
+                            </span>
+                            <span class="checkbox-container">
+                                <input class="stacking" type="radio" name="stacking" id="vertical_left" value="vertical_left" onchange="toggleLayout()"><label for="vertical_left">Left</label>
+                            </span>
+                            <span class="checkbox-container">
+                                <input class="stacking" type="radio" name="stacking" id="vertical" value="vertical" onchange="toggleLayout()"><label for="vertical">Right</label>
+                            </span>
+                            <span class="checkbox-container">
+                                <input class="stacking" type="radio" name="stacking" id="popout" value="popout" onchange="toggleLayout()"><label for="popout">Separate window</label>
+                            </span>
+                        </span>
+                        
+
+                        <div class="dropdown-header">Editor theme</div>
+
+                        <span id="ui-theme">
+                            <span class="checkbox-container">
+                                <input type="radio" name="colour-mode" id="dark" onchange="toggleUITheme();"><label for="dark">Dark mode</label>
+                            </span>
+                            <span class="checkbox-container">
+                                <input type="radio" name="colour-mode" id="low-contrast" onchange="toggleUITheme();"><label for="low-contrast">Low contrast</label>
+                            </span>
+                            <span class="checkbox-container">
+                                <input type="radio" name="colour-mode" id="light" onchange="toggleUITheme();"><label for="light">Light mode</label>
+                            </span>
                         </span>
 
-                        <span class="checkbox-container">
-                            <input type="checkbox" id="css-panel" onclick="toggleCSSPanel();" checked="true">&nbsp;<label for="css-panel">CSS</label>
+
+                        <div class="dropdown-header">Panels</div>
+                        
+                        <span>
+                            <span class="checkbox-container">
+                                <input type="checkbox" id="html-panel" onclick="togglePanel('html')" checked="true"><label for="html-panel">HTML</label>
+                            </span>
+                            <span class="checkbox-container">
+                                <input type="checkbox" id="css-panel" onclick="togglePanel('css')" checked="true"><label for="css-panel">CSS</label>
+                            </span>
+                            <span class="checkbox-container">
+                                <input type="checkbox" id="text-panel" onclick="togglePanel('text')" checked="true"><label for="text-panel">Scratchpad</label>
+                            </span>
                         </span>
 
-                        <span class="checkbox-container">
-                            <input type="checkbox" id="text-panel" onclick="toggleTextPanel();" checked="true">&nbsp;<label for="text-panel">Scratchpad</label>
-                        </span>
+                        <div class="dropdown-divider"></div>
 
                         <span class="checkbox-container">
-                            <input type="checkbox" id="autocomplete" onclick="toggleAutocomplete();"> <label for="autocomplete">Autocomplete</label>
+                            <input type="checkbox" id="autocomplete" onclick="toggleAutocomplete()"> <label for="autocomplete">Autocomplete</label>
                         </span>
 
                         <span class="checkbox-container hide-small">
-                            <input type="checkbox" id="colorpicker" onchange="toggleColorpicker()" checked="true">&nbsp;<label for="colorpicker">Colorpicker</label>
+                            <input type="checkbox" id="colorpicker" onchange="toggleColorpicker()" checked="true"><label for="colorpicker">Colorpicker</label>
                         </span>
 
                         <span class="checkbox-container hide-small">
-                            <input type="checkbox" id="vertical" onchange="toggleVertical()">&nbsp;<label for="vertical" class="hide-small">Vertical view</label>
-                        </span>
-
-                        <span class="checkbox-container hide-small">
-                            <input type="checkbox" id="gutter" onchange="toggleGutter()" checked>&nbsp;<label for="gutter">Line numbers</label>
-                        </span>
-
-                        <span class="checkbox-container" id="ui-theme">
-                            <input type="radio" name="colour-mode" id="dark" onchange="toggleUITheme();">&nbsp;<label for="dark">Dark mode</label>
-                            <input type="radio" name="colour-mode" id="low-contrast" onchange="toggleUITheme();">&nbsp;<label for="low-contrast">Low contrast</label>
-                            <input type="radio" name="colour-mode" id="light" onchange="toggleUITheme();">&nbsp;<label for="light">Light mode</label>
+                            <input type="checkbox" id="gutter" onchange="toggleGutter()" checked><label for="gutter">Line numbers</label>
                         </span>
 
                         <span class="checkbox-container">

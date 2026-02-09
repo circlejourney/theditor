@@ -1,3 +1,6 @@
+isPopout = typeof isPopout != "undefined";
+if(isPopout) parent = window.opener;
+
 styles = {
     "Default": "../src/site_bootstrap.css",
     "Night": "../src/site_night.css",
@@ -9,19 +12,20 @@ styles = {
 
 $(document).ready(function(){
     $("body").tooltip({ selector: '[data-toggle=tooltip]' });
-    $(".ace-code-container").on("change", function(){
-        getWYSIWYG();
-    });
+    switchTo(localStorage.th_cj_mode);
+    toggleTheme(localStorage.th_cj_theme);
+    if(localStorage.th_cj_mobile == "true") toggleMobilePreview(true);
 });
  
 function switchTo(mode) {
 
-    $.get("../templates/"+mode+".html", {"v": lastUpdate }, function(data) {
+    $.get("../templates/"+mode+".html", {"v": $("html").data("last-update") }, function(data) {
         $("#display-area").html(data);
+        let requestHTML, requestBlurb, requestCSS;
         
-        const requestHTML = requestFromDB("html");
-        const requestBlurb = requestFromDB("blurb");
-        const requestCSS = requestFromDB("css");
+        requestHTML = parent.requestFromDB("html");
+        requestBlurb = parent.requestFromDB("blurb");
+        requestCSS = parent.requestFromDB("css");
         
         requestHTML.onsuccess = function(e) {
             updateHTML(e.target.result.code, "ace-code-container");
@@ -31,16 +35,6 @@ function switchTo(mode) {
         }
         requestCSS.onsuccess = function(e) {
             updateCSS(e.target.result.code);
-        }
-
-        if(localStorage.th_cj_importedmeta) {
-            renderProfileMeta(localStorage.th_cj_importedmeta);
-        }
-        
-        if(mode == "world" || mode.indexOf("profile") != -1 || mode == "warning") {
-            parent.$("#import-meta").prop("disabled", false);
-        } else {
-            parent.$("#import-meta").prop("disabled", true);
         }
         
         if(localStorage.thcj_hideUI == "true") {
@@ -71,22 +65,9 @@ function updateHTML(newHTML, className) {
     });
 }
 
-function importProfile(profilePath, importType){
-    if(confirm("Import from Toyhouse? This will overwrite existing "+importType+".")) {
-        $.post("get.php", { "profilePath": profilePath, "getMeta": importType=="meta" }, function(data){ 
-            switchTo(parent.sessionSettings.activeMode);
-            
-            localStorage["th_cj_imported"+importType] = data;
-            
-            if(importType=="meta") renderProfileMeta(data);
-            else if (importType=="code") renderProfileCode(data);
-        });
-    }
-}
-
 // Page interactivity functions
 
-function toggleUI (){
+function toggleSidebar() {
     $(".hide-ui-label").toggleClass("hide");
     
     if(localStorage.thcj_hideUI == "true") {
@@ -125,6 +106,8 @@ function toggleLitSize(delta) {
 function toggleWYSIWYG(toState) {
     if(toState === false) {
         $(".ace-code-container").removeAttr("contenteditable").remove(".wysiwyg-placeholder");
+        // Handle updating parent editor content
+        endWYSIWYG();
     }
     else {
         $(".ace-code-container").attr("contenteditable", true);
@@ -140,6 +123,8 @@ function toggleWYSIWYG(toState) {
     }
 }
 
-function getWYSIWYG() {
-    return $(".ace-code-container").html();
+// Handle updating parent editor content
+function endWYSIWYG() {
+    const html = $(".ace-code-container").html();
+    parent.endWYSIWYG( html );
 }

@@ -1,49 +1,46 @@
 /**************************************
-    vvv  Setup variables  vvv
+ Setup variables
 **************************************/
-// TODO: better way to determine if device is mobile (specifically to target desktop Safari for weird flex sizing) or a more elegant fix for weird sizing
+// TODO: better way to determine if device is mobile (specifically to target desktop Safari for unusual flex sizing) or a more elegant fix for unusual sizing
 const isSafari = navigator.userAgent.indexOf("Safari") > -1;
 const isMobile = typeof screen.orientation !== 'undefined';
 var sessionSettings = { activeMode: "profile", activeTheme: "Default" };
 // DOM elements
-var editor, css_editor, text_editor, frame;
+var editor, css_editor, text_editor, frame, popoutWindow;
 const sass = new Sass();
-let DB, lastRequest, lastUpdate;
+let DB, lastRequest, lastUpdate, latestBuild;
 
 /**************************************
-    vvv  Constants  vvv
+ Constants
 **************************************/
-const defaultHTML = "\<!-- Enter HTML here... --\>";
-const defaultCSS = "\/* Enter CSS here... *\/";
-const defaultText =  "Paste drafts and snippets here...";
 const loremipsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sollicitudin elit sed tellus blandit viverra sed eget odio. Donec accumsan tempor lacus, et venenatis elit feugiat non. Duis porta eros et velit blandit dapibus. Curabitur ac finibus eros. Duis placerat velit vitae massa sodales, eget mattis nibh pellentesque.";
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const beautify_HTML_Options = { "indent_size": "1", "indent_char": "\t", "max_preserve_newlines": "-1", "preserve_newlines": false, "keep_array_indentation": false, "break_chained_methods": false, "indent_scripts": "normal", "brace_style": "expand", "space_before_conditional": true, "unescape_strings": false, "jslint_happy": false, "end_with_newline": false, "wrap_line_length": "0", "indent_inner_html": false, "comma_first": false, "e4x": false, "indent_empty_lines": false }
 const beautify_CSS_Options = { "indent_size": "2", "indent_char": " ", "max_preserve_newlines": "-1", "preserve_newlines": false, "keep_array_indentation": false, "break_chained_methods": false, "indent_scripts": "normal", "brace_style": "collapse", "space_before_conditional": true, "unescape_strings": false, "jslint_happy": false, "end_with_newline": false, "wrap_line_length": "0", "indent_inner_html": false, "comma_first": false, "e4x": false, "indent_empty_lines": false };
-const storages = ["th_cj", "th_cj_mode", "th_cj_theme", "th_cj_css", "th_cj_text", "th_cj_vertical", "th_cj_htmlpanel", "th_cj_csspanel", "th_cj_textpanel", "th_cj_auto", "th_cj_mobile", "th_cj_gutter", "th_cj_lastUpdate", "th_cj_hidenotif", "th_cj_hidenotif2", "th_cj_projectname"];
+const storages = ["th_cj", "th_cj_mode", "th_cj_theme", "th_cj_css", "th_cj_text", "th_cj_vertical", "th_cj_htmlpanel", "th_cj_csspanel", "th_cj_textpanel", "th_cj_auto", "th_cj_mobile", "th_cj_gutter", "th_cj_lastUpdate", "th_cj_hidenotif", "th_cj_hidenotif2", "th_cj_projectname", "th_cj_popout"];
 const codeTypes = {
     "html": {
         aceEditor: "editor",
-        defaultContent: defaultHTML
+        defaultContent: "\<!-- Enter HTML here... --\>",
     },
     "blurb": {
         aceEditor: "editor",
-        defaultContent: defaultHTML
+        defaultContent: "\<!-- Enter HTML here... --\>"
     },
     "css": {
         backupName: "th_cj_cssbackup",
         aceEditor: "css_editor",
-        defaultContent: defaultCSS
+        defaultContent: "\/* Enter CSS here... *\/"
     },
     "text": {
         aceEditor: "text_editor",
-        defaultContent: defaultText
+        defaultContent: "Paste drafts and snippets here..."
     }
 }
 
 
 /**************************************
-    vvv  Window events  vvv
+ Window events
 **************************************/
 
 $(window).on("load", function() {
@@ -51,45 +48,45 @@ $(window).on("load", function() {
     // TODO: Make this promise-based, i.e. upon loading all required files
 
     // Get frame and pass parent functions to frame
-    frame = document.getElementById("frame");
-    lastUpdate = +$("html").data("last-update")
-    const passable = { "lastUpdate": lastUpdate, "renderProfileMeta": renderProfileMeta, "renderProfileCode": renderProfileCode, "requestFromDB": requestFromDB };
-    Object.assign(frame.contentWindow, passable);
+    lastUpdate = ""+$("html").data("last-update");
+    latestBuild = $("html").data("latest-build");
     
     // Update notes update date
     updateDate();
 
-    // Initialise database...everything hereafter needs to happen after database since it contains the stored code.
+    // Initialise database and retrieve stored code
     const DBrequest = initDB();
     if(typeof DBrequest !== "object" ) {
-        console.log("IndexedDB could not be initialised due to user permissions.");
-        initEditors();
-        loadLocalSettings();
-        switchTo(sessionSettings.activeMode);
-        toggleTheme(sessionSettings.activeTheme);
-        // Start backup cycle
-        setInterval(updateBackup, 300000);
-    } else {    
+        showError("IndexedDB could not be initialised due to user permissions.");
+    } else {  
         DBrequest.onsuccess = function(event){
-            DB = event.target.result;
             console.log("Database schema is up to date.");
+            DB = event.target.result;
 
-            // initEditors is called before loadLocalSettings so that editors are initialised before changing their appearance and contents.
+            // Initialise editors before loading settings and code so that editors are ready
             initEditors();
-            loadLocalSettings();
             
-            loadFromDB("html");
-            loadFromDB("css");
-            loadFromDB("text");
+            // Load code from database, then update code panels and previews
+            Promise.all([loadFromDB("html"), loadFromDB("css"), loadFromDB("text")]).then( function(data) {
+                loadLocalSettings();
+                const panels = ["html", "css", "text"];
 
-            updateHTML();
-            updateCSS();
+                for(let i in panels) {
+                    const panel = panels[i];
+                    const {code} = data[i];
+                    setEditorContent( panel, code || codeTypes[panel].defaultContent );
+                }
 
-            switchTo(sessionSettings.activeMode);
-            toggleTheme(sessionSettings.activeTheme);
+                updateHTMLPreview();
+                updateCSSPreview();
 
-            // Start backup cycle
-            setInterval(updateBackup, 300000);
+                // Start backup cycle
+                setInterval(updateBackup, 300000);
+
+                resizeScreen();
+                resizeEditors();
+                $("#loader").addClass("invisible");
+            } );
         }
     }
 
@@ -100,8 +97,8 @@ $(window).on("load", function() {
     });
 
     $("#adjustbar").mousedown(() => {
-        $(window).mousemove(dragHandler);
-        $(frame.contentWindow).mousemove(dragHandler);
+        $(window).mousemove(handleDrag);
+        $(frame.contentWindow).mousemove(handleDrag);
         
         $(window).mouseup(cancelDrag);
         $(frame.contentWindow).mouseup(cancelDrag);
@@ -110,8 +107,8 @@ $(window).on("load", function() {
     $("#adjustbar").on("touchstart", (e) => {
         e.stopPropagation();
         
-        $(window).on("touchmove", dragHandler);
-        $(frame.contentWindow).on("touchmove", dragHandler);
+        $(window).on("touchmove", handleDrag);
+        $(frame.contentWindow).on("touchmove", handleDrag);
         
         $(frame.contentWindow).on("touchend", cancelDrag);
         $(window).on("touchend", cancelDrag);
@@ -124,44 +121,48 @@ $(window).on("load", function() {
     $("#fileupload").click(uploadFile);
 
     $(window).on("beforeunload", updateBackup);
-    
-    setTimeout(() => {
-        // Ugly solution, waiting .5 seconds before resizing the editors ensures they resize to fit the content after the content is loaded. Can we make this promise based?
-        $("#loader").addClass("invisible");
-        resizeScreen();
-        resizeEditors();
-    }, 500);
 
 });
 
+// When closing this window, first close the popup window without triggering a layout change
+$(window).on('beforeunload', function () {
+    if(popoutWindow) {
+        popoutWindow.postMessage(["closeWithoutLayoutChange"]);
+    }
+})
+
+
+/**************************************
+ Initialisers
+**************************************/
+
+// Check that indexed database for code storage is up to date with current schema.
 function initDB() {
-    // Check that indexed database for code storage is up to date with current schema.
-    try {
-        const request = window.indexedDB.open("theditor", 1);
-        request.onupgradeneeded = function(event) {
+    const request = window.indexedDB.open("theditor", 1);
+    request.onupgradeneeded = function(event) {
+        try {
             DB = event.target.result;
             const objectStore = DB.createObjectStore("codes", { keyPath: "id" });
             objectStore.transaction.oncomplete = (event) => {
                 codeObjectStore = DB.transaction("codes", "readwrite")
                     .objectStore("codes");
-                codeObjectStore.add({ "id": "html", "code": localStorage.th_cj, "backup": localStorage.th_cj_backup });
-                codeObjectStore.add({ "id": "blurb", "code": localStorage.th_cj_blurb, "backup": localStorage.th_cj_blurbbackup });
-                codeObjectStore.add({ "id": "css", "code": localStorage.th_cj_css, "backup": localStorage.th_cj_cssbackup });
-                codeObjectStore.add({ "id": "text", "code": localStorage.th_cj_text, "backup": localStorage.th_cj_textbackup });
+                codeObjectStore.add({ "id": "html", "code": getLocal("th_cj"), "backup": getLocal("th_cj_backup") });
+                codeObjectStore.add({ "id": "blurb", "code": getLocal("th_cj_blurb"), "backup": getLocal("th_cj_blurbbackup") });
+                codeObjectStore.add({ "id": "css", "code": getLocal("th_cj_css"), "backup": getLocal("th_cj_cssbackup") });
+                codeObjectStore.add({ "id": "text", "code": getLocal("th_cj_text"), "backup": getLocal("th_cj_textbackup") });
             }
             console.log("Upgraded database to version 1.");
-
+            
+        } catch (error) {
+            showError(error);
+            return null;
         }
-        return request;
-    } catch(error) {
-        return null;
     }
+    return request;
 }
 
-
+// Initialise the three Ace editors on the page.
 function initEditors() {
-    // Initialise the three Ace editors on the page with initial settings.
-        
     editor = ace.edit("html-editor");
     editor.session.setMode("ace/mode/html", () => {
         if($("#colorpicker").prop("checked")) toggleColorpicker();
@@ -174,7 +175,7 @@ function initEditors() {
         lastRequest = waitForIdle("html");
     });
     editor.on("focus", () => {
-        if(editor.getValue()==defaultHTML) editor.setValue("");
+        if(editor.getValue()==codeTypes.html.defaultContent) setEditorContent("html", "");
     });
     $(editor.container).on("keydown", (e) => {
         if(e.ctrlKey && e.key=="s") {
@@ -194,7 +195,7 @@ function initEditors() {
         lastRequest = waitForIdle("css");
     });
     css_editor.on("focus", () => {
-        if(css_editor.getValue()==defaultCSS) css_editor.setValue("");
+        if(css_editor.getValue()==codeTypes.css.defaultContent) setEditorContent("css", "");
     })
     $(css_editor.container).on("keydown", (e) => {
         if(e.ctrlKey && e.key=="s") {
@@ -212,7 +213,7 @@ function initEditors() {
         lastRequest = waitForIdle("text");
     });
     text_editor.on("focus", () => {
-        if(text_editor.getValue()==defaultText) text_editor.setValue("");
+        if(text_editor.getValue()==codeTypes.text.defaultContent) setEditorContent("text", "");
     })
     $(text_editor.container).on("keydown", (e) => {
         if(e.ctrlKey && e.key=="s") {
@@ -223,22 +224,26 @@ function initEditors() {
 
 }
 
-
+// Extract the user's settings from local storage and update UI. Don't import code content here since it is now using Indexed DB.
 function loadLocalSettings() {
-    // Extract the user's settings from local storage and update UI. Don't import code here since it is now using Indexed DB.
-    // TODO: Use destructuring of localStorage object to tidy this up
-    if(localStorage.th_cj_lowContrast){
-        localStorage.cj_uitheme = localStorage.th_cj_lowContrast && (localStorage.th_cj_lowContrast == "true") ? "low-contrast" : "dark";
+    
+    // Migrate from old schema with only 2 UI themes
+    if(getLocal("th_cj_lowContrast")){
+        writeLocal("cj_uitheme", getLocal("th_cj_lowContrast") == "true" ? "low-contrast" : "dark");
         localStorage.removeItem("th_cj_lowContrast");
     }
 
-    const { cj_uitheme, th_cj_colorpicker,
+    // Migrate from old schema where popout layout was stored on th_cj_vertical
+    if(getLocal("th_cj_vertical") == "popout") writeLocal("th_cj_vertical", "horizontal");
+
+    let { cj_uitheme, th_cj_colorpicker,
         th_cj_mode, th_cj_theme,
         th_cj_vertical, th_cj_gutter,
         th_cj_htmlpanel, th_cj_csspanel,
         th_cj_textpanel, th_cj_bigtext,
         th_cj_auto, th_cj_mobile,
-        th_cj_autocomplete, th_cj_lastUpdate
+        th_cj_autocomplete, th_cj_lastUpdate,
+        th_cj_popout
     } = localStorage;
 
     if(cj_uitheme) {
@@ -259,10 +264,7 @@ function loadLocalSettings() {
         sessionSettings.activeTheme = th_cj_theme;
     }
     
-    if(th_cj_vertical) {
-        $("#vertical").prop("checked", th_cj_vertical == "true");
-        toggleVertical();
-    }
+    toggleLayout( th_cj_popout == "true", th_cj_vertical );
     
     if(th_cj_gutter) {
         $("#gutter").prop("checked", th_cj_gutter == "true");
@@ -271,17 +273,17 @@ function loadLocalSettings() {
     
     if(th_cj_htmlpanel) {
         $("#html-panel").prop("checked", th_cj_htmlpanel == "true");
-        toggleHTMLPanel();
+        togglePanel("html");
     }
     
     if(th_cj_csspanel) {
         $("#css-panel").prop("checked", th_cj_csspanel == "true");
-        toggleCSSPanel();
+        togglePanel("css");
     }
     
     if(th_cj_textpanel) {
         $("#text-panel").prop("checked", th_cj_textpanel == "true");
-        toggleTextPanel();
+        togglePanel("text");
     }
     
     if(th_cj_bigtext) {
@@ -306,39 +308,37 @@ function loadLocalSettings() {
     if(+th_cj_lastUpdate != lastUpdate && location.pathname.indexOf("/unstable") == -1) {
         $("#info").removeClass("d-none");
         $("#info-back").removeClass("d-none");
-        localStorage.th_cj_lastUpdate = lastUpdate;
+        writeLocal("th_cj_lastUpdate", lastUpdate);
     }
 }
 
 
+// Update the date element to display a human-readable date
 function updateDate() {
-    // Update the date element.
     // TODO: Do this in the backend?
-    let year = Math.floor(lastUpdate / 10000);
-    let month = months[Math.floor( (lastUpdate % 10000) / 100 ) - 1];
-    let day = lastUpdate % 100;
+    const year = lastUpdate.substr(0, 4);
+    const monthNumber = +lastUpdate.substr(4, 2);
+    const day = lastUpdate.substr(6, 2);
+    let month = months[monthNumber - 1];
     $("#notes #latest").text("Latest update: "+day+" "+month+" "+year);
 }
 
 
 /*******************************************
-    vvv  Code load & store functions  vvv
+ Indexed DB loading & storing
 *******************************************/
 
 function loadFromDB(panel) {
     const transaction = DB.transaction(["codes"], "readonly");
     const store = transaction.objectStore("codes");
     request = store.get(panel);
-    request.onsuccess = function(event) {
-        const data = event.target.result;
-        if(data.code === "" || data.code === codeTypes[panel].defaultContent) {
-            $("#clear-"+panel).addClass("d-none");
-            $("#restore-"+panel).removeClass("d-none");
+    const promise = new Promise( function(resolve, reject) {
+        request.onsuccess = function(event) {
+            const data = event.target.result;
+            resolve(data);
         }
-        window[ codeTypes[panel].aceEditor ].setValue(
-            data.code ? data.code : codeTypes[panel].defaultContent
-        );
-    }
+    } );
+    return promise;
 }
 
 function requestFromDB(panel) {
@@ -347,7 +347,72 @@ function requestFromDB(panel) {
     return store.get(panel);
 }
 
-function updateHTML(buttonTriggered=false){
+/******************************
+ * Local storage
+ ******************************/
+
+function getLocal(key) {
+    return localStorage[key];
+}
+
+function writeLocal(key, value) {
+    localStorage[key] = value;
+    return value;
+}
+
+/**************************************
+ Code update
+**************************************/
+
+function waitForIdle(panel) {
+    const { aceEditor } = codeTypes[ panel ];
+    const wait = setTimeout( () => {checkForChanges(panel)}, 400 );
+    window[aceEditor].session.on("change", () => {
+        clearTimeout(wait);
+    })
+    return wait;
+}
+
+// Check if any content needs updating, called when panels reach idle threshold
+function checkForChanges(panel) {
+    if(panel == "html") {
+        if(editor.getValue().indexOf("Please reset!") !== -1) {
+            setEditorContent(editor.getValue().replace("Please reset!", ""));
+            hardReset();
+            return false;
+        } else {
+            updateHTMLPreview();
+        }
+    }
+    if(panel == "css") updateCSSPreview();
+    if(panel == "text") updateText();
+}
+
+// Update the content of an editor without input
+function setEditorContent(panel, content) {
+    const { aceEditor, defaultContent } = codeTypes[ panel ];
+    window[aceEditor].setValue( content );
+    refreshBackupButton(panel);
+}
+
+function refreshBackupButton(panel) {
+    const request = checkBackup(panel);
+    request.onsuccess = function(event) {
+        const { aceEditor, defaultContent } = codeTypes[panel];
+        const backup = event.target.result.backup;
+        const hasBackup = backup && backup !== defaultContent;
+        if(window[aceEditor].getValue() && window[aceEditor].getValue() !== defaultContent && hasBackup) {
+            $("#clear-"+panel).removeClass("d-none");
+            $("#restore-"+panel).addClass("d-none");
+        } else {
+            $("#clear-"+panel).addClass("d-none");
+            $("#restore-"+panel).removeClass("d-none");
+        }
+    }
+}
+
+// Update the stored HTML values in DB; update preview if needed
+function updateHTMLPreview(buttonTriggered=false){
     let raw_html = editor.getValue();
     let updateEditor;
 
@@ -372,13 +437,16 @@ function updateHTML(buttonTriggered=false){
         updateEditor = "ace-code-container";
     }
 
-    if($("#auto").prop("checked") || buttonTriggered) {
-        raw_html = raw_html.replace(/(<\/*)(script|style|head)(.*>)/g, "$1div$3");
-        frame.contentWindow.updateHTML(raw_html, updateEditor);
-    }
+    // If update is not required, do not render CSS in preview
+    if( !$("#auto").prop("checked") && !buttonTriggered ) return;
+    
+    raw_html = raw_html.replace(/(<\/*)(script|style|head)(.*>)/g, "$1div$3");
+    
+    callInChild( "updateHTML", [raw_html, updateEditor] );
 };
 
-function updateCSS(buttonTriggered=false) {
+// Update the stored CSS values in DB; update preview if needed
+function updateCSSPreview(buttonTriggered=false) {
     var raw_css = css_editor.getValue();
 
     const transaction = DB.transaction(["codes"], "readwrite");
@@ -389,20 +457,22 @@ function updateCSS(buttonTriggered=false) {
         data.code = css_editor.getValue();
         const update = store.put(data);
     }
+
+    // If update not required, do not render CSS in preview
+    if( !$("#auto").prop("checked") && !buttonTriggered ) return;
     
-    if($("#auto").prop("checked") || buttonTriggered) {
-        if(raw_css) {
-            sass.compile(raw_css, (result) => {
-                let css = result.text;
-                if(css) frame.contentWindow.updateCSS(css);
-                else frame.contentWindow.updateCSS(raw_css);
-            });
-        } else {
-            frame.contentWindow.updateCSS("");
-        }
+    if(raw_css) {
+        sass.compile(raw_css, (result) => {
+            let css = result.text;
+            const resolvedCss = css || raw_css;
+            callInChild( "updateCSS", [resolvedCss] );
+        });
+    } else {
+        callInChild( "updateCSS", [""] );
     }
 }
 
+// Update the stored scratchpad values in DB
 function updateText() {
     const transaction = DB.transaction(["codes"], "readwrite");
     const store = transaction.objectStore("codes");
@@ -416,64 +486,23 @@ function updateText() {
 
 function beautifyHTML() {
     var beautifiedText = html_beautify(editor.getValue(), beautify_HTML_Options);
-    editor.setValue(beautifiedText);
+    setEditorContent(beautifiedText);
     editor.clearSelection();
 }
 
 function beautifyCSS() {
     var beautifiedText = css_beautify(css_editor.getValue(), beautify_CSS_Options);
-    css_editor.setValue(beautifiedText);
+    setEditorContent(beautifiedText);
     css_editor.clearSelection();
 }
 
 
 /**************************************
-    vvv  Code update functions  vvv
+ UI resizing functions
 **************************************/
 
-function waitForIdle(panel) {
-    const { aceEditor, defaultContent } = codeTypes[panel];
-    const request = checkBackup(panel);
-    request.onsuccess = function(event) {
-        const backup = event.target.result.backup;
-        const hasBackup = backup !== "" && backup !== defaultContent;
-        if(window[aceEditor].getValue() && window[aceEditor].getValue() !== defaultContent && hasBackup) {
-            $("#clear-"+panel).removeClass("d-none");
-            $("#restore-"+panel).addClass("d-none");
-        } else {
-            $("#clear-"+panel).addClass("d-none");
-            $("#restore-"+panel).removeClass("d-none");
-        }
-    }
-
-    const wait = setTimeout( () => {checkForChanges(panel)}, 400 );
-    window[aceEditor].session.on("change", () => {
-        clearTimeout(wait);
-    })
-    return wait;
-}
-
-function checkForChanges(panel) {
-    if(panel == "html") {
-        if(editor.getValue().indexOf("Please reset!") !== -1) {
-            editor.setValue( editor.getValue().replace("Please reset!", "") );
-            hardReset();
-            return false;
-        } else {
-            updateHTML();
-        }
-    }
-    if(panel == "css") updateCSS();
-    if(panel == "text") updateText();
-}
-
-
-/**************************************
-      vvv  Sizing functions  vvv
-**************************************/
-
+// Resize the #main element (where preview window and Ace panels are located) after screen size changes e.g. rotating device.
 function resizeScreen() {
-    // This function resizes the main element (where preview window and Ace panels are located) after screen size changes e.g. rotating device.
     if(screen.width < 576) {
         if(!$("#main").hasClass("mobile-display")) {
             $("#main").addClass("mobile-display");
@@ -483,8 +512,8 @@ function resizeScreen() {
     }
 }
 
+// Resize the frame element, usually after the drag bar has been moved or when switching layouts
 function resizeFrame(newheight, newwidth) {
-    // This function resizes the frame element, usually after the drag bar has been moved.
     if(!newheight) {
         newheight = window.innerHeight*0.55;
     }
@@ -499,8 +528,9 @@ function resizeFrame(newheight, newwidth) {
     if(editor) resizeEditors();
 }
 
+// Resize the Ace editors to fill the space left by the preview window, e.g. after preview window has changed size.
+// On Safari, which handles flex differently, this forcibly sets the width/height of the editors.
 function resizeEditors() {
-    // This function resizes the Ace editors to fill the space left by the preview window, useful after preview window has changed size. On Safari, which handles flex differently, this includes forcibly setting the width/height of the editors.
     if(isSafari && !isMobile) {
         if(! $("#vertical").prop("checked")) {
             $(".ace_editor").css("height", window.innerHeight - $("#frame").height() - $("#adjustbar").height() - $("#footer").height() - $("#titles").height());
@@ -514,27 +544,55 @@ function resizeEditors() {
     text_editor.resize();
 }
 
-function dragHandler(e) {
+let writeSizeTimeout;
+
+function handleDrag(e) {
     e.stopPropagation();
     
-    if(!$("#vertical").prop("checked")) {
+    let newHeight, newWidth;
+    const direction = $(".stacking:checked").val();
+    // Horizontal drag
+    if(direction == "horizontal") {
         if(e.clientY) {
             newHeight = e.clientY-4;
         } else if(e.originalEvent.targetTouches) {
             newHeight = e.originalEvent.targetTouches[0].clientY-4;
         }
-        $("#frame").css("height", newHeight);
-        localStorage.th_cj_height = newHeight;
-    } else {
+    } else if(direction == "vertical") {
         if(e.clientX) {
             newWidth = e.clientX-4;
         } else if(e.originalEvent.targetTouches) {
             newWidth = e.originalEvent.targetTouches[0].clientX-4;
         }
-        $("#frame").css("width", newWidth);
-        localStorage.th_cj_width = newWidth;
+    } else if(direction == "vertical_left") {
+        let x;
+        if(e.clientX) {
+            x = e.clientX;
+        } else if(e.originalEvent.targetTouches) {
+            x = e.originalEvent.targetTouches[0].clientX;
+        }
+        // +editor's width if mouse is inside iframe, as clientX is not the same for parent and iframe in this case
+        if($(e.target.closest("body")).hasClass("frame")) x += $("#editor").width();
+        newWidth = innerWidth-x+4;
     }
     
+    if(newHeight) {
+        $("#frame").css("height", newHeight);
+        clearTimeout(writeSizeTimeout);
+        writeSizeTimeout = setTimeout( ()=>{
+            writeLocal("th_cj_height", newHeight);
+        }, 400 );
+        
+    }
+
+    if(newWidth) {
+        $("#frame").css("width", newWidth);
+        clearTimeout(writeSizeTimeout);
+        writeSizeTimeout = setTimeout( ()=>{
+            writeLocal("th_cj_width", newWidth);
+        }, 400 );
+    }
+
     resizeEditors();
 }
 
@@ -552,8 +610,8 @@ function cancelDrag(e) {
     $(frame.contentWindow).off("touchend");
 }
 
-function mobileSwitch() {
-    event.stopPropagation();
+function togglePanelVisibility(e) {
+    e.stopPropagation();
     if(!$("#editor").hasClass("d-none")) {
         $("#editor").addClass("d-none");
         $("#footer").addClass("d-none");
@@ -569,7 +627,7 @@ function mobileSwitch() {
 
 
 /******************************************
-    vvv  Backup functions  vvv
+ Backup functions
  ******************************************/
 
 function updateBackup() {
@@ -586,7 +644,7 @@ function updateBackup() {
         const request = store.get(panel);
         request.onsuccess = function(event) {
             const data = event.target.result;
-            if(data.code && data.code !== defaultContent) {
+            if(data.code.replace(/\s+/, "") && data.code !== defaultContent) {
                 data.backup = data.code;
                 store.put(data);
                 console.log(panel+" backed up.");
@@ -600,14 +658,13 @@ function updateBackup() {
 function restoreBackup(panel) {
     if(editor.isBlurb && panel == "html") panel = "blurb";
     const { aceEditor, defaultContent } = codeTypes[panel];
-    const useEditor = window[aceEditor];
     const transaction = DB.transaction(["codes"], "readonly");
     const store = transaction.objectStore("codes");
     const request = store.get(panel);
     request.onsuccess = function(event) {
         const backup = event.target.result.backup;
         if(backup && backup !== defaultContent) {
-            useEditor.setValue(backup);
+            setEditorContent(panel, backup);
         }
     }
 }
@@ -621,7 +678,7 @@ function checkBackup(panel) {
 
 
 /*************************************************
-    vvv  Local file upload/download functions  vvv
+ Local file upload/download
  *************************************************/
 
 function downloadFile(panel) {
@@ -637,9 +694,9 @@ function downloadFile(panel) {
         const filesuffix = " " + panel.toUpperCase()+" "+datestring+".txt"
             .replace(/\:|\//g, "-");
 
-        const projectname = prompt("Downloading "+panel+", project name:", localStorage.th_cj_projectname);
+        const projectname = prompt("Downloading "+panel+", project name:", getLocal("th_cj_projectname"));
         if(!projectname) return false;
-        localStorage.th_cj_projectname = projectname || "";
+        writeLocal("th_cj_projectname", projectname || "");
         
         if (window.navigator.msSaveOrOpenBlob)
             window.navigator.msSaveOrOpenBlob(file, (projectname || "THeditor") + filesuffix);
@@ -657,8 +714,8 @@ function downloadFile(panel) {
     }
 }
 
+// This function uses a dummy file input element #fileupload to open upload dialogues for all 3 panels.
 function uploadFileDialogue(panel) {
-    // This function uses a dummy file input element #fileupload to open upload dialogues for all 3 panels.
     $("#fileupload").data("target-panel", panel)
     $("#fileupload").click()
 }
@@ -674,60 +731,17 @@ function uploadFile(){
         }
         filereader.readAsText(this.files[0]);
         filereader.onload = () => {
-            window[aceEditor].setValue(filereader.result)
+            setEditorContent(panel, filereader.result);
         }
     });
 }
-
-/**************************************
-    vvv  TH import functions  vvv
-**************************************/
-
-function startImport(importType){
-    frame.contentWindow.importProfile($("#char-id").val(), importType);
-}
-
-function renderProfileCode(data) {
-        let customCSS;
-
-        if(data.indexOf("<style>") !== -1) {
-            customCSS = data.split("<style>")[1].split("</style>")[0].replace("<![CDATA[", "").replace("]]>", "").trim();
-        }
-
-        if(editor.isBlurb) toggleBlurb();
-        editor.setValue(
-            $(data).find(".user-content:not(.blurb)").html()
-        );
-        
-        if(customCSS) css_editor.setValue(customCSS);
-}
-
-function renderProfileMeta(data) {
-        
-        let profileHeader = $(data).find(".profile-header").html();
-        frame.contentWindow.$(".profile-header").html(profileHeader);
-        frame.contentWindow.$(".profile-header a").prop("href", "#");
-        
-        let worldHeader = $(data).find(".profile-name-section").html();
-        frame.contentWindow.$(".profile-name-section").html(worldHeader);
-        frame.contentWindow.$(".profile-name-section a").prop("href", "#");
-        
-        let profileSidebar = $(data).find("#sidebar").html();
-        frame.contentWindow.$("#sidebar").html(profileSidebar);
-        frame.contentWindow.$("#sidebar a").prop("href", "#");
-        
-        frame.contentWindow.$(".blurb").addClass("ace-code-container-2");
-        if(editor.isBlurb) editor.setValue($(data).find(".blurb").html() || "");
-
-}
-
 
 /**************************************
  UI functionality
 **************************************/
 
 function showInfo() {
-    localStorage.th_cj_hidenotif2 = "true";
+    writeLocal("th_cj_hidenotif2", "true");
     $("#info").toggleClass("d-none");
 }
 
@@ -739,145 +753,132 @@ function hardReset() {
 }
 
 /**************************************
- UI toggles
+ Editor UI toggles
 **************************************/
 
-function toggleTheme(theme) {
-    sessionSettings.activeTheme = theme;
-    localStorage.th_cj_theme = theme;
-    if(frame){
-        frame.contentWindow.toggleTheme(theme);
-    }
-}
-
-function switchTo(mode) {
-    sessionSettings.activeMode = mode;
-    localStorage.th_cj_mode = mode;
-    frame.contentWindow.switchTo(mode);
-}
-
-function toggleBlurb(toMode) {
-    clearTimeout(lastRequest);
-    const currentMode = editor.isBlurb ? "blurb" : "html";
-    if(toMode == currentMode) return;
-    if( $("#wysiwyg").prop("checked") ) return;
-
-    if(toMode == "html") {
-        $("#wysiwyg").prop("disabled", false);
-        const request = requestFromDB("html");
-        request.onsuccess = (e) => {
-            $("#html-tab").removeClass("text-dark");
-            $("#blurb-tab").addClass("text-dark");
-            editor.setValue(e.target.result.code);
-            editor.isBlurb = false;
+function swapFrame(toPopout) {
+    if(toPopout) {
+        try {
+            popoutWindow = window.open("./build_"+latestBuild+"/popout-frame.php", "mozillaWindow", "popup");
+        } catch (error) {
+            showError("Please allow popups on this page in order to display the preview window.");
         }
     } else {
-        $("#wysiwyg").prop("disabled", true);
-        const request = requestFromDB("blurb");
-        request.onsuccess = (e) => {
-            $("#blurb-tab").removeClass("text-dark");
-            $("#html-tab").addClass("text-dark");
-            editor.setValue(e.target.result.code);
-            editor.isBlurb = true;
+        if(popoutWindow) {
+            popoutWindow.close();
+            setTimeout(()=>{popoutWindow = null});
         }
+        frame = $('#frame')[0];
+        setTimeout( refreshDisplay );
     }
 }
 
-function toggleHTMLPanel() {
-    htmlPanel = $("#html-panel").prop("checked");
-    if(htmlPanel){
-        $(".html-visible").removeClass("d-none");
-    } else $(".html-visible").addClass("d-none");
-    localStorage.th_cj_htmlpanel = htmlPanel;
-    resizeEditors();
-}
-
-function toggleCSSPanel() {
-    if( $("#css-panel").prop("checked") ){
-        $(".css-visible").removeClass("d-none");
-    } else $(".css-visible").addClass("d-none");
-    localStorage.th_cj_csspanel = $("#css-panel").prop("checked");
-    resizeEditors();
-}
-
-function toggleTextPanel() {
-    if( $("#text-panel").prop("checked") ){
-        $(".text-visible").removeClass("d-none");
-    } else {
-        $(".text-visible").addClass("d-none");
-    }
-    localStorage.th_cj_textpanel = $("#text-panel").prop("checked");
+function togglePanel(panel) {
+    const panelOpen = $("#"+panel+"-panel").prop("checked");
+    const panelElement = $("."+panel+"-visible");
+    panelElement.toggleClass("d-none", !panelOpen);
+    
+    writeLocal("th_cj_"+panel+"panel", panelOpen);
     resizeEditors();
 }
  
 function toggleAuto() {
-    localStorage.th_cj_auto = $("#auto").prop("checked");
+    writeLocal("th_cj_auto", $("#auto").prop("checked"));
     if($("#auto").prop("checked")) {
-        updateHTML();
-        updateCSS();
+        updateHTMLPreview();
+        updateCSSPreview();
     }
 }
 
-function toggleVertical() {
-    localStorage.th_cj_vertical = $("#vertical").prop("checked");
-    var codeheight, codewidth;
+function toggleLayout( popout = null, toLayout = null ) {
+    let codeheight, codewidth, stacking;
     
-    if($("#vertical").prop("checked")) {
-        
-        $("#fields").append($(".html-visible"));
-        $("#fields").append($(".css-visible"));
-        $("#fields").append($(".text-visible"));
-        
-        // TODO: Tidy this up!  Too many things having the same classname toggled. Consider styling based on parent (body element?) with vertical class
-        $(document.body).addClass("vertical");
-        $("#main").addClass("vertical");
-        $("#frame").addClass("vertical");
-        $("#adjustbar").addClass("vertical");
-        $("#editor").addClass("vertical");
-        $("#titles").addClass("vertical");
-        $("#fields").addClass("vertical");
-        $("#mobile-switch").addClass("vertical")
-        
+    popout ??= $("#popout").prop("checked");
+    writeLocal("th_cj_popout", popout);
+    
+    // If popout is set / selected, toggle to popout view
+    if(popout) {
+        stacking = "popout";
+        $("#popout").prop("checked", true);
+    }
+    // Else process as vertical or horizontal layout
+    else {
+        toLayout ??= $(".stacking:checked").val();
+        $("#"+toLayout).prop("checked", true);
+        stacking = writeLocal("th_cj_vertical", toLayout);
+    }
+    
+    if(stacking == "vertical") {
+        swapFrame(false);
+
+        $("#adjustbar").removeClass("vanish");
+        $("#fields").append([ $(".html-visible"), $(".css-visible"), $(".text-visible") ]);
+        $(".stackable").addClass("vertical");
+        $("#main").removeClass("reverse-order");
         $(document.body).append($("#footer"));
     
         codewidth = localStorage.th_cj_width;
         codeheight = "100%";
         
-    } else {
-        
-        $("#titles").append($(".field-title"));
+    } else if(stacking == "vertical_left") {
+        swapFrame(false);
 
-        $(document.body).removeClass("vertical");
-        $("#main").removeClass("vertical");
-        $("#frame").removeClass("vertical");
-        $("#adjustbar").removeClass("vertical");
-        $("#editor").removeClass("vertical");
-        $("#titles").removeClass("vertical");
-        $("#fields").removeClass("vertical");
-        $("#mobile-switch").removeClass("vertical")
-        
-        $("#main").append($("#footer"));
+        $("#adjustbar").removeClass("vanish");
+        $("#fields").append([ $(".html-visible"), $(".css-visible"), $(".text-visible") ]);
+        $(".stackable").addClass("vertical");
+        $("#main").addClass("reverse-order");
+        $(document.body).append($("#footer"));
     
-        codeheight = localStorage.th_cj_height;
+        codewidth = localStorage.th_cj_width;
+        codeheight = "100%";
+        
+    } else if(stacking == "horizontal") {
+        swapFrame(false);
+
+        $("#adjustbar").removeClass("vanish");
+        $("#titles").append($(".field-title"));
+        $(".stackable").removeClass("vertical");
+        $("#main").removeClass("reverse-order").append($("#footer"));
+    
+        codeheight = getLocal("th_cj_height");
         codewidth = "100%";
+    } else {
+        swapFrame(true);
+
+        $("#adjustbar").addClass("vanish");
+        $("#titles").append($(".field-title"));
+        $(".stackable").removeClass("vertical");
+        $("#main").removeClass("reverse-order").append($("#footer"));
+        codeheight = "0";
+        codewidth = "0";
     }
     
     resizeFrame(codeheight, codewidth);
 }
 
 function toggleMobilePreview() {
-    localStorage.th_cj_mobile = $("#mobile").prop("checked");
-    if($("#mobile").prop("checked")) $("#frame").addClass("mobile-preview");
-    else $("#frame").removeClass("mobile-preview");
+    const toMobile = $("#mobile").prop("checked");
+    writeLocal("th_cj_mobile", toMobile);
+    
+    if(toMobile) {
+        $("#frame").addClass("mobile-preview");
+    } else {
+        $("#frame").removeClass("mobile-preview");
+    }
+    
+    if(popoutWindow) {
+        popoutWindow.postMessage(['toggleMobilePreview', toMobile]);
+    }
+    
     resizeEditors();
 }
 
-function toggleUITheme(){
-    localStorage.cj_uitheme = $("#ui-theme input:checked").attr("id");
+function toggleUITheme() {
+    writeLocal("cj_uitheme", $("#ui-theme input:checked").attr("id"));
     $(document.body).removeClass("low-contrast light dark");
-    $(document.body).addClass(localStorage.cj_uitheme);
+    $(document.body).addClass(getLocal("cj_uitheme"));
 
-    switch(localStorage.cj_uitheme) {
+    switch(getLocal("cj_uitheme")) {
         case "light":
             $("#night-css").removeAttr("href");
             $("#footer").removeClass("bg-dark").addClass("bg-light");
@@ -903,13 +904,13 @@ function toggleUITheme(){
 }
 
 function toggleBigText() {
-    localStorage.th_cj_bigtext = $("#big-text").prop("checked");
+    writeLocal("th_cj_bigtext", $("#big-text").prop("checked"));
     if($("#big-text").prop("checked")) $(".ace_editor").addClass("big-text");
     else  $(".ace_editor").removeClass("big-text");
 }
 
 function toggleGutter() {
-    localStorage.th_cj_gutter = $("#gutter").prop("checked");
+    writeLocal("th_cj_gutter", $("#gutter").prop("checked"));
 
     if($("#gutter").prop("checked")) { 
         editor.renderer.setShowGutter(true);
@@ -923,7 +924,7 @@ function toggleGutter() {
 }
 
 function toggleAutocomplete() {
-    localStorage.th_cj_autocomplete = $("#autocomplete").prop("checked");
+    writeLocal("th_cj_autocomplete", $("#autocomplete").prop("checked"));
     if($("#autocomplete").prop("checked")) {
         editor.setOptions({behavioursEnabled: true});
         css_editor.setOptions({behavioursEnabled: true});
@@ -934,7 +935,7 @@ function toggleAutocomplete() {
 }
 
 function toggleColorpicker() {
-    localStorage.th_cj_colorpicker = $("#colorpicker").prop("checked");
+    writeLocal("th_cj_colorpicker", $("#colorpicker").prop("checked"));
 
     if( !$("#colorpicker").prop("checked") ) {
         [editor.session, css_editor.session].forEach((session) => {
@@ -965,23 +966,96 @@ function toggleColorpicker() {
 }
 
 function toggleWYSIWYG(toState) {
+    if(toState) startWYSIWYG();
+    else {
+        callInChild( 'toggleWYSIWYG', [ toState ]);
+    }
+}
+
+function startWYSIWYG() {
     // Don't allow WYSIWYG if currently on blurb
     if( editor.isBlurb ) return;
 
-    frame.contentWindow.toggleWYSIWYG(toState);
-    if(toState === true) {
-        editor.setReadOnly(true);
-        $("#html-editor").addClass("disabled");
-        $("#html-editor").on("click", null, function() {
-            $("#html-editor").off("click");
-            toggleWYSIWYG(false);
-        });
+    callInChild('toggleWYSIWYG', [ true ]);
+
+    editor.setReadOnly(true);
+    $("#html-editor").addClass("disabled");
+    $("#html-editor").on("click", null, function() {
+        $("#html-editor").off("click");
+        toggleWYSIWYG(false);
+    });
+    $("#wysiwyg").prop("checked", true);
+}
+
+function endWYSIWYG( html ) {
+
+    setEditorContent("html", html);
+    
+    editor.setReadOnly(false);
+    editor.clearSelection();
+    $("#html-editor").removeClass("disabled");
+    $("#wysiwyg").prop("checked", false);
+}
+
+
+/**************************************
+ Preview frame UI toggles
+**************************************/
+
+function toggleTheme(theme) {
+    sessionSettings.activeTheme = writeLocal("th_cj_theme", theme);
+    callInChild("toggleTheme", [theme]);
+}
+
+function switchTo(mode) {
+    sessionSettings.activeMode = writeLocal("th_cj_mode", mode);
+    callInChild("switchTo", [mode])
+}
+
+// Reload theme and layout with the same content, usually called on init or after changing vertical/horizontal/popout display
+function refreshDisplay() {
+    toggleTheme( sessionSettings.activeTheme );
+    switchTo( sessionSettings.activeMode );
+}
+
+function toggleBlurb(toMode) {
+    clearTimeout(lastRequest);
+    const currentMode = editor.isBlurb ? "blurb" : "html";
+    if(toMode == currentMode) return;
+    if( $("#wysiwyg").prop("checked") ) return;
+
+    if(toMode == "html") {
+        $("#wysiwyg").prop("disabled", false);
+        const request = requestFromDB("html");
+        request.onsuccess = (e) => {
+            $("#html-tab").removeClass("text-dark");
+            $("#blurb-tab").addClass("text-dark");
+            setEditorContent("html", e.target.result.code);
+            editor.isBlurb = false;
+        }
     } else {
-        editor.setValue(frame.contentWindow.getWYSIWYG());
-        editor.setReadOnly(false);
-        editor.clearSelection();
-        $("#html-editor").removeClass("disabled");
+        $("#wysiwyg").prop("disabled", true);
+        const request = requestFromDB("blurb");
+        request.onsuccess = (e) => {
+            $("#blurb-tab").removeClass("text-dark");
+            $("#html-tab").addClass("text-dark");
+            setEditorContent("html", e.target.result.code);
+            editor.isBlurb = true;
+        }
     }
-    if(toState) $("#wysiwyg").attr("checked", true);
-    else  $("#wysiwyg").removeAttr("checked");
+}
+
+function toggleSidebar() {
+    callInChild("toggleSidebar");
+}
+
+function showError(error) {
+    $("#error-wrapper").removeClass("d-none");
+    $("#error-message").text(error);
+    console.error(error);
+}
+
+function callInChild( functionName, parameters=[] ) {
+    if(popoutWindow) popoutWindow.postMessage([ functionName, ...parameters ]);
+    else frame.contentWindow[functionName]( ...parameters );
 }

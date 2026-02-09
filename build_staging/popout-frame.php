@@ -1,3 +1,5 @@
+<?php require(__DIR__.'/../parseIni.php'); ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,10 +19,11 @@
     <!-- FONT AWESOME -->
 	<script src="https://kit.fontawesome.com/0ddae54ad8.js" crossorigin="anonymous"></script>
     
+    <script src="popout.js?v=<?php echo filemtime("popout.js"); ?>"></script>
     <script src="frame.js?v=<?php echo filemtime("frame.js"); ?>"></script>
 	<style id="custom-css" type="text/css"></style>
 </head>
-<body class="frame">
+<body data-last-update="<?php echo $lastUpdate ?>" data-latest-build="<?php echo $latestBuild ?>">
     <div id="noconflict-main">
         <div id="noconflict-show">
             <nav class="navbar navbar-toggleable-sm navbar-inverse header" data-topbar="" role="navigation" id="header">
