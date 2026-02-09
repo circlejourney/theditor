@@ -808,9 +808,6 @@ function swapFrame(toPopout) {
     if(toPopout) {
         try {
             popoutWindow = window.open("./build_"+latestBuild+"/popout-frame.php", "mozillaWindow", "popup");
-            popoutWindow.addEventListener("load", ()=>{
-                setTimeout( refreshDisplay );
-            }, false);
         } catch (error) {
             showError("Please allow popups on this page in order to display the preview window.");
         }

@@ -1,11 +1,6 @@
 let lastUpdate = $('html').data('last-update'), latestBuild = $('html').data('latest-build');
 
-$(document).ready(function(){
-    switchTo(localStorage.th_cj_mode);
-    toggleTheme(localStorage.th_cj_theme);
-    if(localStorage.th_cj_mobile == "true") toggleMobilePreview(true);
-});
-
+// Handlers
 window.addEventListener("message", (e) => {
     if(!e.data || !Array.isArray(e.data)) return;
     const [updateFunction, payload, className] = e.data;

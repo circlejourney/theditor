@@ -9,9 +9,9 @@ styles = {
 
 $(document).ready(function(){
     $("body").tooltip({ selector: '[data-toggle=tooltip]' });
-    $(".ace-code-container").on("change", function(){
-        getWYSIWYG();
-    });
+    switchTo(localStorage.th_cj_mode);
+    toggleTheme(localStorage.th_cj_theme);
+    if(localStorage.th_cj_mobile == "true") toggleMobilePreview(true);
 });
  
 function switchTo(mode) {
