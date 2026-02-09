@@ -443,10 +443,7 @@ function updateHTMLPreview(buttonTriggered=false){
     
     raw_html = raw_html.replace(/(<\/*)(script|style|head)(.*>)/g, "$1div$3");
     
-    // If using popout window, trigger update with postMessage
-    if(popoutWindow) popoutWindow.postMessage(["updateHTML", raw_html, updateEditor]);
-    // If using iframe, call the child function
-    else frame.contentWindow.updateHTML(raw_html, updateEditor);
+    callInChild( "updateHTML", [raw_html, updateEditor] );
 };
 
 // Update the stored CSS values in DB; update preview if needed
@@ -469,13 +466,10 @@ function updateCSSPreview(buttonTriggered=false) {
         sass.compile(raw_css, (result) => {
             let css = result.text;
             const resolvedCss = css || raw_css;
-            // If using popout, post message
-            if(popoutWindow) popoutWindow.postMessage(["updateCSS", resolvedCss]);
-            else frame.contentWindow.updateCSS(resolvedCss);
+            callInChild( "updateCSS", [resolvedCss] );
         });
     } else {
-        if(popoutWindow) popoutWindow.postMessage(["updateCSS", ""]);
-        else frame.contentWindow.updateCSS("");
+        callInChild( "updateCSS", [""] );
     }
 }
 
@@ -748,7 +742,7 @@ function uploadFile(){
 **************************************/
 
 function startImport(importType){
-    frame.contentWindow.importProfile($("#char-id").val(), importType);
+    callInChild("importProfile", [$("#char-id").val(), importType]);
 }
 
 function renderProfileCode(data) {
@@ -1017,8 +1011,7 @@ function toggleColorpicker() {
 function toggleWYSIWYG(toState) {
     if(toState) startWYSIWYG();
     else {
-        if(popoutWindow) popoutWindow.postMessage([ 'toggleWYSIWYG', toState ]);
-        else frame.contentWindow.toggleWYSIWYG( toState ); 
+        callInChild( 'toggleWYSIWYG', [ toState ]);
     }
 }
 
@@ -1026,8 +1019,7 @@ function startWYSIWYG() {
     // Don't allow WYSIWYG if currently on blurb
     if( editor.isBlurb ) return;
 
-    if(!popoutWindow) frame.contentWindow.toggleWYSIWYG(true);
-    else popoutWindow.postMessage([ 'toggleWYSIWYG', true ]);
+    callInChild('toggleWYSIWYG', [ true ]);
 
     editor.setReadOnly(true);
     $("#html-editor").addClass("disabled");
@@ -1055,14 +1047,12 @@ function endWYSIWYG( html ) {
 
 function toggleTheme(theme) {
     sessionSettings.activeTheme = writeLocal("th_cj_theme", theme);
-    if(popoutWindow) popoutWindow.postMessage(['toggleTheme', theme]);
-    else frame.contentWindow.toggleTheme(theme);
+    callInChild("toggleTheme", [theme]);
 }
 
 function switchTo(mode) {
     sessionSettings.activeMode = writeLocal("th_cj_mode", mode);
-    if(popoutWindow) popoutWindow.postMessage(['switchTo', mode]);
-    else frame.contentWindow.switchTo(mode);
+    callInChild("switchTo", [mode])
 }
 
 // Reload theme and layout with the same content, usually called on init or after changing vertical/horizontal/popout display
@@ -1099,12 +1089,16 @@ function toggleBlurb(toMode) {
 }
 
 function toggleSidebar() {
-    if(popoutWindow) popoutWindow.postMessage(['toggleSidebar']);
-    else frame.contentWindow.toggleSidebar();
+    callInChild("toggleSidebar");
 }
 
 function showError(error) {
     $("#error-wrapper").removeClass("d-none");
     $("#error-message").text(error);
     console.error(error);
+}
+
+function callInChild( functionName, parameters=[] ) {
+    if(popoutWindow) popoutWindow.postMessage([ functionName, ...parameters ]);
+    else frame.contentWindow[functionName]( ...parameters );
 }
