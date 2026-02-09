@@ -36,16 +36,6 @@ function switchTo(mode) {
         requestCSS.onsuccess = function(e) {
             updateCSS(e.target.result.code);
         }
-
-        if(localStorage.th_cj_importedmeta) {
-            parent.renderProfileMeta(localStorage.th_cj_importedmeta);
-        }
-        
-        if(mode == "world" || mode.indexOf("profile") != -1 || mode == "warning") {
-            parent.$("#import-meta").prop("disabled", false);
-        } else {
-            parent.$("#import-meta").prop("disabled", true);
-        }
         
         if(localStorage.thcj_hideUI == "true") {
             $("#main").addClass("collapsed-sidebar").removeClass("full-sidebar");
@@ -73,19 +63,6 @@ function updateHTML(newHTML, className) {
     $(".fr-spoiler").on("click", function(e){
         e.pageY - $(this).offset().top < 32 && $(this).toggleClass("fr-spoiler-show");
     });
-}
-
-function importProfile(profilePath, importType){
-    if(confirm("Import from Toyhouse? This will overwrite existing "+importType+".")) {
-        $.post("get.php", { "profilePath": profilePath, "getMeta": importType=="meta" }, function(data){ 
-            switchTo(parent.sessionSettings.activeMode);
-            
-            localStorage["th_cj_imported"+importType] = data;
-            
-            if(importType=="meta") parent.renderProfileMeta(data);
-            else if (importType=="code") parent.renderProfileCode(data);
-        });
-    }
 }
 
 // Page interactivity functions

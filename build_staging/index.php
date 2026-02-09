@@ -190,29 +190,6 @@
                     </div>
                 </div>
                 
-    
-                <!-- <div id="import" class="dropdown d-sm-inline">
-                  <a class="btn btn-secondary dropdown-toggle" id="dropdownbutton2" data-toggle="dropdown" data-trigger="focus" aria-haspopup="true" aria-expanded="false">
-                    Import from TH
-                  </a>
-                
-                  <div class="dropdown-menu px-2" aria-labelledby="dropdownbutton2" onclick="event.stopPropagation()">
-                      <div class="d-flex flex-column">
-                          <div class="d-flex mb-1">
-                            <input type="text" id="char-id" class="form-control mr-1 import-button" placeholder="Enter ID"></input>
-                             <abbr class="d-inline-block" title="The numerical ID (for a character profile, e.g. 1776660) or username (for a user profile). Profile must be public and contain the string allow-thcj-import. You can also set all profiles on your account to be importable by adding allow-thcj-import-<b>all</b> to your user profile." data-toggle="tooltip" data-html="true">
-                                 <i class="fa fa-question-circle"></i>
-                             </abbr>
-                         </div>
-                         <div class="d-flex">
-                        <button class="btn btn-primary mr-1 import-button" id="import-meta" onclick="startImport('meta')">Import meta</button>
-                        <button class="btn btn-primary mr-1 import-button" id="import-html" onclick="startImport('code')">Import HTML</button>
-                        <button class="btn btn-primary" onclick="importedmeta=null; importedcode=null; localStorage.removeItem('th_cj_importedmeta'); localStorage.removeItem('th_cj_importedcode'); switchTo(activeMode);">Reset</button>
-                        </div>
-                    </div>
-                  </div>
-                </div> -->
-                
                 <a id="toggle-sidebar" class="btn btn-secondary" onclick="toggleSidebar()">
                      <i id='sidebar-toggle-icon' class="fa fa-chevron-left"></i> Sidebar
                 </a>

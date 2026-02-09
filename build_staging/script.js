@@ -737,47 +737,6 @@ function uploadFile(){
 }
 
 /**************************************
- Import from TH (deprecated)
-**************************************/
-
-function startImport(importType){
-    callInChild("importProfile", [$("#char-id").val(), importType]);
-}
-
-function renderProfileCode(data) {
-        let customCSS;
-
-        if(data.indexOf("<style>") !== -1) {
-            customCSS = data.split("<style>")[1].split("</style>")[0].replace("<![CDATA[", "").replace("]]>", "").trim();
-        }
-
-        if(editor.isBlurb) toggleBlurb();
-        setEditorContent("html", $(data).find(".user-content:not(.blurb)").html());
-        
-        if(customCSS) setEditorContent("css", customCSS);
-}
-
-function renderProfileMeta(data) {
-        
-        let profileHeader = $(data).find(".profile-header").html();
-        frame.contentWindow.$(".profile-header").html(profileHeader);
-        frame.contentWindow.$(".profile-header a").prop("href", "#");
-        
-        let worldHeader = $(data).find(".profile-name-section").html();
-        frame.contentWindow.$(".profile-name-section").html(worldHeader);
-        frame.contentWindow.$(".profile-name-section a").prop("href", "#");
-        
-        let profileSidebar = $(data).find("#sidebar").html();
-        frame.contentWindow.$("#sidebar").html(profileSidebar);
-        frame.contentWindow.$("#sidebar a").prop("href", "#");
-        
-        frame.contentWindow.$(".blurb").addClass("ace-code-container-2");
-        if(editor.isBlurb) setEditorContent($(data).find(".blurb").html() || "");
-
-}
-
-
-/**************************************
  UI functionality
 **************************************/
 
