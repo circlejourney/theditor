@@ -19,7 +19,7 @@ $(document).ready(function(){
  
 function switchTo(mode) {
 
-    $.get("../templates/"+mode+".html", {"v": lastUpdate }, function(data) {
+    $.get("../templates/"+mode+".html", {"v": $("html").data("last-update") }, function(data) {
         $("#display-area").html(data);
         let requestHTML, requestBlurb, requestCSS;
         
@@ -38,7 +38,7 @@ function switchTo(mode) {
         }
 
         if(localStorage.th_cj_importedmeta) {
-            renderProfileMeta(localStorage.th_cj_importedmeta);
+            parent.renderProfileMeta(localStorage.th_cj_importedmeta);
         }
         
         if(mode == "world" || mode.indexOf("profile") != -1 || mode == "warning") {
@@ -82,8 +82,8 @@ function importProfile(profilePath, importType){
             
             localStorage["th_cj_imported"+importType] = data;
             
-            if(importType=="meta") renderProfileMeta(data);
-            else if (importType=="code") renderProfileCode(data);
+            if(importType=="meta") parent.renderProfileMeta(data);
+            else if (importType=="code") parent.renderProfileCode(data);
         });
     }
 }
