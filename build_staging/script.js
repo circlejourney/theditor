@@ -17,7 +17,6 @@ const loremipsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Dui
 const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const beautify_HTML_Options = { "indent_size": "1", "indent_char": "\t", "max_preserve_newlines": "-1", "preserve_newlines": false, "keep_array_indentation": false, "break_chained_methods": false, "indent_scripts": "normal", "brace_style": "expand", "space_before_conditional": true, "unescape_strings": false, "jslint_happy": false, "end_with_newline": false, "wrap_line_length": "0", "indent_inner_html": false, "comma_first": false, "e4x": false, "indent_empty_lines": false }
 const beautify_CSS_Options = { "indent_size": "2", "indent_char": " ", "max_preserve_newlines": "-1", "preserve_newlines": false, "keep_array_indentation": false, "break_chained_methods": false, "indent_scripts": "normal", "brace_style": "collapse", "space_before_conditional": true, "unescape_strings": false, "jslint_happy": false, "end_with_newline": false, "wrap_line_length": "0", "indent_inner_html": false, "comma_first": false, "e4x": false, "indent_empty_lines": false };
-const storages = ["th_cj", "th_cj_mode", "th_cj_theme", "th_cj_css", "th_cj_text", "th_cj_vertical", "th_cj_htmlpanel", "th_cj_csspanel", "th_cj_textpanel", "th_cj_auto", "th_cj_mobile", "th_cj_gutter", "th_cj_lastUpdate", "th_cj_hidenotif", "th_cj_hidenotif2", "th_cj_projectname", "th_cj_popout"];
 const codeTypes = {
     "html": {
         aceEditor: "editor",
@@ -377,9 +376,9 @@ function waitForIdle(panel) {
 function checkForChanges(panel) {
     if(panel == "html") {
         if(editor.getValue().indexOf("Please reset!") !== -1) {
-            setEditorContent(editor.getValue().replace("Please reset!", ""));
+            setEditorContent("html", editor.getValue().replace("Please reset!", ""));
             hardReset();
-            return false;
+            return;
         } else {
             updateHTMLPreview();
         }
@@ -688,30 +687,35 @@ function downloadFile(panel) {
     const transaction = DB.transaction(["codes"], "readonly");
     const store = transaction.objectStore("codes");
     const request = store.get(panel);
-    request.onsuccess = function(event) {
-        const { code } = event.target.result;
-        let file = new Blob([ code ], {type: "text/plain"});
-        const filesuffix = " " + panel.toUpperCase()+" "+datestring+".txt"
-            .replace(/\:|\//g, "-");
+    return new Promise( function(resolve) {
+        request.onsuccess = function(event) {
+            const { code } = event.target.result;
+            let file = new Blob([ code ], {type: "text/plain"});
+            const filesuffix = " " + panel.toUpperCase()+" "+datestring+".txt"
+                .replace(/\:|\//g, "-");
 
-        const projectname = prompt("Downloading "+panel+", project name:", getLocal("th_cj_projectname"));
-        if(!projectname) return false;
-        writeLocal("th_cj_projectname", projectname || "");
-        
-        if (window.navigator.msSaveOrOpenBlob)
-            window.navigator.msSaveOrOpenBlob(file, (projectname || "THeditor") + filesuffix);
-        else {
-            var a = document.createElement("a")
-            var url = URL.createObjectURL(file);
-            a.href = url;
-            a.download = (projectname || "THeditor") + filesuffix;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);  
+            const projectname = prompt("Downloading "+panel+", project name:", getLocal("th_cj_projectname"));
+            if(!projectname) {
+                resolve();
+                return false;
+            }
+            writeLocal("th_cj_projectname", projectname || "");
+            
+            if (window.navigator.msSaveOrOpenBlob)
+                window.navigator.msSaveOrOpenBlob(file, (projectname || "THeditor") + filesuffix);
+            else {
+                var a = document.createElement("a")
+                var url = URL.createObjectURL(file);
+                a.href = url;
+                a.download = (projectname || "THeditor") + filesuffix;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);  
+            }
+            resolve();
         }
-    
-    }
+    } );
 }
 
 // This function uses a dummy file input element #fileupload to open upload dialogues for all 3 panels.
@@ -747,9 +751,21 @@ function showInfo() {
 
 function hardReset() {
     if(!confirm("Download all code as text files and reset?")) return false;
-    ["html", "css", "text"].forEach((i) => { downloadFile(i); });
-    storages.forEach((storageKey) => { localStorage.removeItem(storageKey); });
-    location.reload();
+    let promises = [];
+    ["html", "css", "text"].forEach((i) => {
+        promises.push(downloadFile(i));
+    });
+    Promise.all(promises).then( function() {
+        ["html", "css", "text"].forEach((panel) => {
+            setEditorContent(panel, "");
+        });
+
+        for([key] of Object.entries(localStorage)) {
+            if(key.indexOf("th_cj") == -1) continue;
+            localStorage.removeItem(key);
+        }
+        alert("Ready, please refresh the page.")
+    } )
 }
 
 /**************************************
