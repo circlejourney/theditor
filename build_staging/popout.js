@@ -1,3 +1,5 @@
+let isPopout = true;
+
 let lastUpdate = $('html').data('last-update'), latestBuild = $('html').data('latest-build');
 
 // Handlers
@@ -9,6 +11,7 @@ window.addEventListener("message", (e) => {
 
 window.addEventListener("beforeunload", toggleParentLayout);
 
+// Popout functions
 function toggleParentLayout() {
     window.opener.toggleLayout( false, localStorage.th_cj_vertical );
     window.opener.refreshDisplay();

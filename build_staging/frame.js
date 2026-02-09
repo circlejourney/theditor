@@ -1,3 +1,6 @@
+isPopout = typeof isPopout != "undefined";
+if(isPopout) parent = window.opener;
+
 styles = {
     "Default": "../src/site_bootstrap.css",
     "Night": "../src/site_night.css",
@@ -20,15 +23,9 @@ function switchTo(mode) {
         $("#display-area").html(data);
         let requestHTML, requestBlurb, requestCSS;
         
-        if(window.opener) {
-            requestHTML = window.opener.requestFromDB("html");
-            requestBlurb = window.opener.requestFromDB("blurb");
-            requestCSS = window.opener.requestFromDB("css");
-        } else {
-            requestHTML = requestFromDB("html");
-            requestBlurb = requestFromDB("blurb");
-            requestCSS = requestFromDB("css");
-        }
+        requestHTML = parent.requestFromDB("html");
+        requestBlurb = parent.requestFromDB("blurb");
+        requestCSS = parent.requestFromDB("css");
         
         requestHTML.onsuccess = function(e) {
             updateHTML(e.target.result.code, "ace-code-container");
@@ -132,6 +129,8 @@ function toggleLitSize(delta) {
 function toggleWYSIWYG(toState) {
     if(toState === false) {
         $(".ace-code-container").removeAttr("contenteditable").remove(".wysiwyg-placeholder");
+        // Handle updating parent editor content
+        endWYSIWYG();
     }
     else {
         $(".ace-code-container").attr("contenteditable", true);
@@ -147,6 +146,8 @@ function toggleWYSIWYG(toState) {
     }
 }
 
-function getWYSIWYG() {
-    return $(".ace-code-container").html();
+// Handle updating parent editor content
+function endWYSIWYG() {
+    const html = $(".ace-code-container").html();
+    parent.endWYSIWYG( html );
 }

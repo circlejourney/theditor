@@ -849,15 +849,12 @@ function toggleLayout( popout = null, toLayout = null ) {
     if(popout) {
         stacking = "popout";
         $("#popout").prop("checked", true);
-        if( $("#wysiwyg").prop("checked") ) toggleWYSIWYG( false );
-        $("#wysiwyg").prop("disabled", true);
     }
     // Else process as vertical or horizontal layout
     else {
         toLayout ??= $(".stacking:checked").val();
         $("#"+toLayout).prop("checked", true);
         stacking = writeLocal("th_cj_vertical", toLayout);
-        $("#wysiwyg").prop("disabled", false);
     }
     
     if(stacking == "vertical") {
@@ -1018,27 +1015,37 @@ function toggleColorpicker() {
 }
 
 function toggleWYSIWYG(toState) {
+    if(toState) startWYSIWYG();
+    else {
+        if(popoutWindow) popoutWindow.postMessage([ 'toggleWYSIWYG', toState ]);
+        else frame.contentWindow.toggleWYSIWYG( toState ); 
+    }
+}
+
+function startWYSIWYG() {
     // Don't allow WYSIWYG if currently on blurb
     if( editor.isBlurb ) return;
-    // Don't allow WYSIWYG if using popout window mode
-    if(popoutWindow || toState) return;
-    frame.contentWindow.toggleWYSIWYG(toState);
 
-    if(toState === true) {
-        editor.setReadOnly(true);
-        $("#html-editor").addClass("disabled");
-        $("#html-editor").on("click", null, function() {
-            $("#html-editor").off("click");
-            toggleWYSIWYG(false);
-        });
-    } else {
-        setEditorContent("html", frame.contentWindow.getWYSIWYG());
-        editor.setReadOnly(false);
-        editor.clearSelection();
-        $("#html-editor").removeClass("disabled");
-    }
-    if(toState) $("#wysiwyg").prop("checked", true);
-    else  $("#wysiwyg").prop("checked", false);
+    if(!popoutWindow) frame.contentWindow.toggleWYSIWYG(true);
+    else popoutWindow.postMessage([ 'toggleWYSIWYG', true ]);
+
+    editor.setReadOnly(true);
+    $("#html-editor").addClass("disabled");
+    $("#html-editor").on("click", null, function() {
+        $("#html-editor").off("click");
+        toggleWYSIWYG(false);
+    });
+    $("#wysiwyg").prop("checked", true);
+}
+
+function endWYSIWYG( html ) {
+
+    setEditorContent("html", html);
+    
+    editor.setReadOnly(false);
+    editor.clearSelection();
+    $("#html-editor").removeClass("disabled");
+    $("#wysiwyg").prop("checked", false);
 }
 
 
