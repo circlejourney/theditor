@@ -485,13 +485,13 @@ function updateText() {
 
 function beautifyHTML() {
     var beautifiedText = html_beautify(editor.getValue(), beautify_HTML_Options);
-    setEditorContent(beautifiedText);
+    setEditorContent("html", beautifiedText);
     editor.clearSelection();
 }
 
 function beautifyCSS() {
     var beautifiedText = css_beautify(css_editor.getValue(), beautify_CSS_Options);
-    setEditorContent(beautifiedText);
+    setEditorContent("css", beautifiedText);
     css_editor.clearSelection();
 }
 
