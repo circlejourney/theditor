@@ -824,7 +824,16 @@ function toggleLayout( popout = null, toLayout = null ) {
         stacking = writeLocal("th_cj_vertical", toLayout);
     }
     
-    if(stacking == "vertical") {
+    if(popout) {
+        swapFrame(true);
+
+        $("#adjustbar").addClass("vanish");
+        $("#titles").append($(".field-title"));
+        $(".stackable").removeClass("vertical");
+        $("#main").removeClass("reverse-order").append($("#footer"));
+        codeheight = "0";
+        codewidth = "0";
+    } else if(stacking == "vertical") {
         swapFrame(false);
 
         $("#adjustbar").removeClass("vanish");
@@ -858,15 +867,6 @@ function toggleLayout( popout = null, toLayout = null ) {
     
         codeheight = getLocal("th_cj_height");
         codewidth = "100%";
-    } else {
-        swapFrame(true);
-
-        $("#adjustbar").addClass("vanish");
-        $("#titles").append($(".field-title"));
-        $(".stackable").removeClass("vertical");
-        $("#main").removeClass("reverse-order").append($("#footer"));
-        codeheight = "0";
-        codewidth = "0";
     }
     
     resizeFrame(codeheight, codewidth);
