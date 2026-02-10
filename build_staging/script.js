@@ -44,13 +44,11 @@ const codeTypes = {
 
 $(window).on("load", function() {
     // Web app is initialised here; code should only start running after all DOM elements are loaded.
-    // TODO: Make this promise-based, i.e. upon loading all required files
 
-    // Get frame and pass parent functions to frame
     lastUpdate = ""+$("html").data("last-update");
     latestBuild = $("html").data("latest-build");
     
-    // Update notes update date
+    // Update notes badge with human-readable update date
     updateDate();
 
     // Initialise database and retrieve stored code
@@ -764,7 +762,7 @@ function hardReset() {
             if(key.indexOf("th_cj") == -1) continue;
             localStorage.removeItem(key);
         }
-        alert("Ready, please refresh the page.")
+        if(confirm("Ready, click OK to reload the page.")) location.reload()
     } )
 }
 
