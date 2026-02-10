@@ -283,7 +283,7 @@
                         </span>
                     </div>
                 </div>
-                <a class="btn btn-primary update-btn d-inline-block" id="update-preview" onclick="updateHTMLPreview(true); updateCSS(true);" href="#">Update preview</a>
+                <a class="btn btn-primary update-btn d-inline-block" id="update-preview" onclick="updateHTMLPreview(true); updateCSSPreview(true);" href="#">Update preview</a>
             </div>
             
             <input type="file" class="d-none" id="fileupload" onclick="uploadFile">
