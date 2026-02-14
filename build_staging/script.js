@@ -443,7 +443,10 @@ function updateHTMLPreview(buttonTriggered=false){
     
     raw_html = raw_html.replace(/(<\/*)(script|style|head)(.*>)/g, "$1div$3");
     
-    callInChild( "updateHTML", [raw_html, updateEditor] );
+    // If using popout window, trigger update with postMessage
+    if(popoutWindow) popoutWindow.postMessage(["updateHTML", raw_html, updateEditor]);
+    // If using iframe, call the child function
+    else frame.contentWindow.updateHTML(raw_html, updateEditor);
 };
 
 // Update the stored CSS values in DB; update preview if needed
@@ -466,10 +469,13 @@ function updateCSSPreview(buttonTriggered=false) {
         sass.compile(raw_css, (result) => {
             let css = result.text;
             const resolvedCss = css || raw_css;
-            callInChild( "updateCSS", [resolvedCss] );
+            // If using popout, post message
+            if(popoutWindow) popoutWindow.postMessage(["updateCSS", resolvedCss]);
+            else frame.contentWindow.updateCSS(resolvedCss);
         });
     } else {
-        callInChild( "updateCSS", [""] );
+        if(popoutWindow) popoutWindow.postMessage(["updateCSS", ""]);
+        else frame.contentWindow.updateCSS("");
     }
 }
 
@@ -986,7 +992,8 @@ function toggleColorpicker() {
 function toggleWYSIWYG(toState) {
     if(toState) startWYSIWYG();
     else {
-        callInChild( 'toggleWYSIWYG', [ toState ]);
+        if(popoutWindow) popoutWindow.postMessage([ 'toggleWYSIWYG', toState ]);
+        else frame.contentWindow.toggleWYSIWYG( toState ); 
     }
 }
 
@@ -994,7 +1001,8 @@ function startWYSIWYG() {
     // Don't allow WYSIWYG if currently on blurb
     if( editor.isBlurb ) return;
 
-    callInChild('toggleWYSIWYG', [ true ]);
+    if(!popoutWindow) frame.contentWindow.toggleWYSIWYG(true);
+    else popoutWindow.postMessage([ 'toggleWYSIWYG', true ]);
 
     editor.setReadOnly(true);
     $("#html-editor").addClass("disabled");
@@ -1064,7 +1072,8 @@ function toggleBlurb(toMode) {
 }
 
 function toggleSidebar() {
-    callInChild("toggleSidebar");
+    if(popoutWindow) popoutWindow.postMessage(['toggleSidebar']);
+    else frame.contentWindow.toggleSidebar();
 }
 
 function showError(error) {
