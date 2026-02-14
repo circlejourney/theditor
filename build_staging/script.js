@@ -1071,5 +1071,6 @@ function showError(error) {
 
 function callInChild( functionName, parameters=[] ) {
     if(popoutWindow) popoutWindow.postMessage([ functionName, ...parameters ]);
-    else frame.contentWindow[functionName]( ...parameters );
+    else if(frame) frame.contentWindow[functionName]( ...parameters );
+    else showError("Preview frame not loaded yet.");
 }
