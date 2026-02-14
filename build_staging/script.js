@@ -47,6 +47,8 @@ $(window).on("load", function() {
 
     lastUpdate = ""+$("html").data("last-update");
     latestBuild = $("html").data("latest-build");
+    // Init frame to avoid errors
+    frame = $('#frame')[0];
     
     // Update notes badge with human-readable update date
     updateDate();
@@ -443,10 +445,7 @@ function updateHTMLPreview(buttonTriggered=false){
     
     raw_html = raw_html.replace(/(<\/*)(script|style|head)(.*>)/g, "$1div$3");
     
-    // If using popout window, trigger update with postMessage
-    if(popoutWindow) popoutWindow.postMessage(["updateHTML", raw_html, updateEditor]);
-    // If using iframe, call the child function
-    else frame.contentWindow.updateHTML(raw_html, updateEditor);
+    callInChild( "updateHTML", [raw_html, updateEditor] );
 };
 
 // Update the stored CSS values in DB; update preview if needed
@@ -469,13 +468,10 @@ function updateCSSPreview(buttonTriggered=false) {
         sass.compile(raw_css, (result) => {
             let css = result.text;
             const resolvedCss = css || raw_css;
-            // If using popout, post message
-            if(popoutWindow) popoutWindow.postMessage(["updateCSS", resolvedCss]);
-            else frame.contentWindow.updateCSS(resolvedCss);
+            callInChild( "updateCSS", [resolvedCss] );
         });
     } else {
-        if(popoutWindow) popoutWindow.postMessage(["updateCSS", ""]);
-        else frame.contentWindow.updateCSS("");
+        callInChild( "updateCSS", [""] );
     }
 }
 
@@ -992,8 +988,7 @@ function toggleColorpicker() {
 function toggleWYSIWYG(toState) {
     if(toState) startWYSIWYG();
     else {
-        if(popoutWindow) popoutWindow.postMessage([ 'toggleWYSIWYG', toState ]);
-        else frame.contentWindow.toggleWYSIWYG( toState ); 
+        callInChild( 'toggleWYSIWYG', [ toState ]);
     }
 }
 
@@ -1001,8 +996,7 @@ function startWYSIWYG() {
     // Don't allow WYSIWYG if currently on blurb
     if( editor.isBlurb ) return;
 
-    if(!popoutWindow) frame.contentWindow.toggleWYSIWYG(true);
-    else popoutWindow.postMessage([ 'toggleWYSIWYG', true ]);
+    callInChild('toggleWYSIWYG', [ true ]);
 
     editor.setReadOnly(true);
     $("#html-editor").addClass("disabled");
@@ -1072,8 +1066,7 @@ function toggleBlurb(toMode) {
 }
 
 function toggleSidebar() {
-    if(popoutWindow) popoutWindow.postMessage(['toggleSidebar']);
-    else frame.contentWindow.toggleSidebar();
+    callInChild("toggleSidebar");
 }
 
 function showError(error) {
