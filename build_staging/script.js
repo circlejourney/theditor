@@ -65,24 +65,28 @@ $(window).on("load", function() {
             
             // Load code from database, then update code panels and previews
             Promise.all([loadFromDB("html"), loadFromDB("css"), loadFromDB("text")]).then( function(data) {
-                loadLocalSettings();
-                const panels = ["html", "css", "text"];
+                try {
+                    loadLocalSettings();
+                    const panels = ["html", "css", "text"];
 
-                for(let i in panels) {
-                    const panel = panels[i];
-                    const {code} = data[i];
-                    setEditorContent( panel, code || codeTypes[panel].defaultContent );
+                    for(let i in panels) {
+                        const panel = panels[i];
+                        const {code} = data[i];
+                        setEditorContent( panel, code || codeTypes[panel].defaultContent );
+                    }
+
+                    updateHTMLPreview();
+                    updateCSSPreview();
+
+                    // Start backup cycle
+                    setInterval(updateBackup, 300000);
+
+                    resizeScreen();
+                    resizeEditors();
+                    $("#loader").addClass("invisible");
+                } catch (err) {
+                    showError(err);
                 }
-
-                updateHTMLPreview();
-                updateCSSPreview();
-
-                // Start backup cycle
-                setInterval(updateBackup, 300000);
-
-                resizeScreen();
-                resizeEditors();
-                $("#loader").addClass("invisible");
             } );
         }
     }
@@ -1064,8 +1068,7 @@ function toggleSidebar() {
 }
 
 function showError(error) {
-    $("#error-wrapper").removeClass("d-none");
-    $("#error-message").text(error);
+    $("#error-wrapper").removeClass("d-none").text(error);
     console.error(error);
 }
 
